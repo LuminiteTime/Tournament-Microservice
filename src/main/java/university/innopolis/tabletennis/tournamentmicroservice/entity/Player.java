@@ -4,7 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jdk.jfr.Name;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,10 +11,8 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-
+@NoArgsConstructor
 public class Player {
-    public Player() {
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +20,11 @@ public class Player {
 
     private String name;
 
-    public Player(String ivan) {
-        this.name = ivan;
+    private Integer rating;
+
+    public Player(String name, Integer rating)
+    {
+        this.name = name;
+        this.rating = rating;
     }
 }
