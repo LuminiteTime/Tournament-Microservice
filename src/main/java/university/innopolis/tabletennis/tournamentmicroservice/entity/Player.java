@@ -19,8 +19,9 @@ public class Player {
     private Long id;
 
     private String name;
-
     private Integer rating;
+    private Integer indexInTable;
+    private Integer tableIndex;
 
     public Player(String name, Integer rating)
     {

@@ -12,6 +12,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.repository.GameTa
 import university.innopolis.tabletennis.tournamentmicroservice.repository.RoundRepository;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @SpringBootApplication
@@ -41,26 +42,27 @@ public class TournamentMicroserviceApplication {
                 new Player("Benjamin Miller", 163),
                 new Player("Ava Wilson", 36)
         );
-        Integer numberOfPlayers = playersList.size();
-
         playerRepository.saveAll(playersList);
 
+        // TODO: Move logic to Tournament Service
         // TODO: START
 
         List<GameTable> tablesOfTournament = new ArrayList<>();
         GameTable gameTableEight = new GameTable();
-//        playersList.sort(Comparator.comparing(Player::getRating));
-        for (int i = playersList.size() - 1; i >= 0; i--) {
-            Player player = playersList.get(i);
-            gameTableEight.addPlayer(player);
-        }
-        gameTableEight.fillRounds();
-        matchRepository.saveAll(gameTableEight.getMatchesOfTable());
-        roundRepository.saveAll(gameTableEight.getRoundsOfTable());
+
+        // TODO: Fixe sorting players
+        // playersList.sort(Comparator.comparing(Player::getRating));
+
+//        for (int i = playersList.size() - 1; i >= 0; i--) {
+//            Player player = playersList.get(i);
+//            gameTableEight.addPlayer(player);
+//        }
+//        gameTableEight.fillRounds();
+//        matchRepository.saveAll(gameTableEight.getMatchesOfTable());
+//        roundRepository.saveAll(gameTableEight.getRoundsOfTable());
 //        tablesOfTournament.add(gameTableEight);
-//
+
 //        gameTableRepository.saveAll(tablesOfTournament);
-//        tableRepository.save(tableEight);
 
         // TODO: END
     }
