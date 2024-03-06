@@ -8,7 +8,6 @@ import university.innopolis.tabletennis.tournamentmicroservice.exception.Invalid
 import university.innopolis.tabletennis.tournamentmicroservice.repository.*;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.TournamentRequest;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service

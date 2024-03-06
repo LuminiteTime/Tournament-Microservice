@@ -5,14 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.GameTable;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.MatchRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.PlayerRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.GameTableRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.RoundRepository;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @SpringBootApplication
@@ -30,7 +27,6 @@ public class TournamentMicroserviceApplication {
 
     @PostConstruct
     private void init() {
-//        Player player9 = new Player("Daniel Anderson", 122);
 
         List<Player> playersList = List.of(
                 new Player("John Smith", 135),
@@ -44,26 +40,6 @@ public class TournamentMicroserviceApplication {
         );
         playerRepository.saveAll(playersList);
 
-        // TODO: Move logic to Tournament Service
-        // TODO: START
 
-        List<GameTable> tablesOfTournament = new ArrayList<>();
-        GameTable gameTableEight = new GameTable();
-
-        // TODO: Fixe sorting players
-        // playersList.sort(Comparator.comparing(Player::getRating));
-
-//        for (int i = playersList.size() - 1; i >= 0; i--) {
-//            Player player = playersList.get(i);
-//            gameTableEight.addPlayer(player);
-//        }
-//        gameTableEight.fillRounds();
-//        matchRepository.saveAll(gameTableEight.getMatchesOfTable());
-//        roundRepository.saveAll(gameTableEight.getRoundsOfTable());
-//        tablesOfTournament.add(gameTableEight);
-
-//        gameTableRepository.saveAll(tablesOfTournament);
-
-        // TODO: END
     }
 }

@@ -27,10 +27,6 @@ public class Match {
 
     private boolean isBeingPlayed;
 
-//    @ManyToOne
-//    @JoinColumn(name = "tournament", nullable = false)
-//    private Tournament tournament;
-
     public Match(Player firstPlayer, Player secondPlayer) {
         this.firstPlayer = firstPlayer;
         this.secondPlayer = secondPlayer;
