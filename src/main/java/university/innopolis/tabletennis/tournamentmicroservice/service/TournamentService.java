@@ -9,6 +9,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.requestbody.Playe
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.TournamentRequest;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TournamentService {
@@ -74,5 +75,56 @@ public class TournamentService {
     public List<Player> addPlayers(PlayersListRequest playersList) {
         playerRepository.saveAll(playersList.getPlayersList());
         return playersList.getPlayersList();
+    }
+
+    public List<Match> retrieveAvailableMatches() {
+        return matchRepository.findAvailableMatches();
+    }
+
+//    public Player patchPlayingStatus(Long id) {
+//        Optional<Player> player = playerRepository.findById(id);
+//        if (player.isPresent()) {
+//            player.get().setIsPlaying(true);
+//            playerRepository.save(player.get());
+//            return player.get();
+//        }
+//        throw new IllegalArgumentException("Player with id " + id + " does not exist.");
+//    }
+
+    public Match setMatchIsBeingPlayed(Long id) {
+        Optional<Match> match = matchRepository.findById(id);
+        if (match.isEmpty()) throw new IllegalArgumentException("Match with id " + id + " does not exist.");
+        match.get().setIsBeingPlayed(true);
+
+        Player firstPlayer = match.get().getFirstPlayer();
+        Player secondPlayer = match.get().getSecondPlayer();
+        firstPlayer.setIsPlaying(true);
+        secondPlayer.setIsPlaying(true);
+        playerRepository.save(firstPlayer);
+        playerRepository.save(secondPlayer);
+
+        matchRepository.save(match.get());
+        return match.get();
+    }
+
+    public Match setMatchIsCompleted(Long id) {
+        Optional<Match> match = matchRepository.findById(id);
+        if (match.isEmpty()) throw new IllegalArgumentException("Match with id " + id + " does not exist.");
+        if (match.get().getIsBeingPlayed()) {
+            match.get().setIsCompleted(true);
+            match.get().setIsBeingPlayed(false);
+
+            Player firstPlayer = match.get().getFirstPlayer();
+            Player secondPlayer = match.get().getSecondPlayer();
+            firstPlayer.setIsPlaying(false);
+            secondPlayer.setIsPlaying(false);
+            playerRepository.save(firstPlayer);
+            playerRepository.save(secondPlayer);
+
+            matchRepository.save(match.get());
+            return match.get();
+        } else {
+            throw new IllegalArgumentException("Match with id " + id + " haven't started yet.");
+        }
     }
 }

@@ -6,5 +6,5 @@ import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
 import java.util.Optional;
 
 public interface PlayerRepository extends JpaRepository<Player, Long> {
-    Optional<Player> findByName(String name);
+//    Optional<Player> findByName(String name);
 }

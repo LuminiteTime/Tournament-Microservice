@@ -47,6 +47,7 @@ public class Tournament {
             GameTable table = new GameTable();
             table.setSize(numberOfPlayers);
             tableList.add(table);
+            table.setIndexInTournament(0);
         } else {
             int sizeOfGameTable1 = 0;
             int sizeOfGameTable2 = 0;
@@ -63,6 +64,9 @@ public class Tournament {
             }
             table1.setSize(sizeOfGameTable1);
             table2.setSize(sizeOfGameTable2);
+
+            table1.setIndexInTournament(0);
+            table2.setIndexInTournament(1);
 
             tableList.add(table1);
             tableList.add(table2);
@@ -278,13 +282,16 @@ public class Tournament {
     }
 
     public void fillRounds(GameTable table, List<List<List<Integer>>> playersIndexes) {
-        for (List<List<Integer>> roundIndexes: playersIndexes) {
+        for (int i = 0; i < playersIndexes.size(); i++) {
             Round roundToAdd = new Round();
+            List<List<Integer>> roundIndexes = playersIndexes.get(i);
             for (List<Integer> match: roundIndexes) {
                 Match matchToAdd = new Match(
                         table.getPlayersOfTable().get(match.get(0)),
                         table.getPlayersOfTable().get(match.get(1))
                 );
+                matchToAdd.setRoundIndex(i);
+                matchToAdd.setGameTableIndex(table.getIndexInTournament());
                 this.matchesOfTournament.add(matchToAdd);
                 roundToAdd.addMatch(matchToAdd);
                 table.addMatch(matchToAdd);

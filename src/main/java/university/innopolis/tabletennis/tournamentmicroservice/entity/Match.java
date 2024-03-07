@@ -25,7 +25,13 @@ public class Match {
 
     private Integer secondPlayerScore;
 
-    private boolean isBeingPlayed;
+    private Boolean isBeingPlayed;
+
+    private Integer roundIndex;
+
+    private Integer gameTableIndex;
+
+    private Boolean isCompleted;
 
     public Match(Player firstPlayer, Player secondPlayer) {
         this.firstPlayer = firstPlayer;
@@ -33,5 +39,6 @@ public class Match {
         this.firstPlayerScore = 0;
         this.secondPlayerScore = 0;
         this.isBeingPlayed = false;
+        this.isCompleted = false;
     }
 }

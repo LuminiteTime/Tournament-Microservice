@@ -11,7 +11,6 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 public class Player {
 
     @Id
@@ -23,6 +22,10 @@ public class Player {
     private Integer indexInTable;
     private Integer tableIndex;
     private Boolean isPlaying;
+
+    public Player() {
+        this.isPlaying = false;
+    }
 
     public Player(String name, Integer rating)
     {
