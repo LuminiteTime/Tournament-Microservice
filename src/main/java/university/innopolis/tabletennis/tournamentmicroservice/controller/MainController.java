@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
+import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PlayersListRequest;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.TournamentRequest;
 import university.innopolis.tabletennis.tournamentmicroservice.service.TournamentService;
 
@@ -19,39 +20,45 @@ public class MainController {
     public MainController() {
     }
 
-    @GetMapping("/get_players")
+    @GetMapping("/players")
     public List<Player> getPlayers() {
         return service.retrievePlayers();
     }
 
-    @PostMapping("/post_tournament")
+    @PostMapping("/add_players")
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<Player> postPlayers(@RequestBody PlayersListRequest playersList) {
+        return service.addPlayers(playersList);
+    }
+
+    @PostMapping("/create_tournament")
     @ResponseStatus(HttpStatus.CREATED)
     public Tournament postTournament(@RequestBody TournamentRequest tournamentToAdd) {
         return service.addTournament(tournamentToAdd);
     }
 
-    @PostMapping("/post_player")
+    @PostMapping("/add_player")
     @ResponseStatus(HttpStatus.CREATED)
     public Player postPlayer(@RequestBody Player playerToAdd) {
         return service.addPlayer(playerToAdd);
     }
 
-    @GetMapping("/get_tournaments")
+    @GetMapping("/tournaments")
     public List<Tournament> getTournaments() {
         return service.retrieveTournaments();
     }
 
-    @GetMapping("/get_matches")
+    @GetMapping("/matches")
     public List<Match> getAllMatches() {
         return service.retrieveMatches();
     }
 
-    @GetMapping("/get_tables")
+    @GetMapping("/tables")
     public List<GameTable> getAllTables() {
         return service.retrieveGameTables();
     }
 
-    @GetMapping("/get_rounds")
+    @GetMapping("/rounds")
     public List<Round> getAllRounds() {
         return service.retrieveRound();
     }

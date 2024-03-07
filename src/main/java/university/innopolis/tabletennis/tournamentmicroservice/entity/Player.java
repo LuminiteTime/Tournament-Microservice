@@ -22,10 +22,12 @@ public class Player {
     private Integer rating;
     private Integer indexInTable;
     private Integer tableIndex;
+    private Boolean isPlaying;
 
     public Player(String name, Integer rating)
     {
         this.name = name;
         this.rating = rating;
+        this.isPlaying = false;
     }
 }

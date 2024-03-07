@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
-import university.innopolis.tabletennis.tournamentmicroservice.exception.InvalidNumberOfPlayersException;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.*;
+import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PlayersListRequest;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.TournamentRequest;
 
 import java.util.List;
@@ -69,5 +69,10 @@ public class TournamentService {
         }
         playerRepository.save(playerToAdd);
         return playerToAdd;
+    }
+
+    public List<Player> addPlayers(PlayersListRequest playersList) {
+        playerRepository.saveAll(playersList.getPlayersList());
+        return playersList.getPlayersList();
     }
 }
