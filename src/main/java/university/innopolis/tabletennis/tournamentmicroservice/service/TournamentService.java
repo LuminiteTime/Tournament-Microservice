@@ -38,19 +38,19 @@ public class TournamentService {
     }
 
     public List<Tournament> retrieveTournaments() {
-        return tournamentRepository.findAll();
+        return tournamentRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
     public List<Match> retrieveMatches() {
-        return matchRepository.findAll();
+        return matchRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
     public List<GameTable> retrieveGameTables() {
-        return gameTableRepository.findAll();
+        return gameTableRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
-    public List<Round> retrieveRound() {
-        return roundRepository.findAll();
+    public List<Round> retrieveRounds() {
+        return roundRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
     public Tournament addTournament(TournamentRequest tournamentRequest) {
@@ -81,16 +81,6 @@ public class TournamentService {
         return matchRepository.findAvailableMatches();
     }
 
-//    public Player patchPlayingStatus(Long id) {
-//        Optional<Player> player = playerRepository.findById(id);
-//        if (player.isPresent()) {
-//            player.get().setIsPlaying(true);
-//            playerRepository.save(player.get());
-//            return player.get();
-//        }
-//        throw new IllegalArgumentException("Player with id " + id + " does not exist.");
-//    }
-
     public Match setMatchIsBeingPlayed(Long id) {
         Optional<Match> match = matchRepository.findById(id);
         if (match.isEmpty()) throw new IllegalArgumentException("Match with id " + id + " does not exist.");
@@ -107,7 +97,7 @@ public class TournamentService {
         return match.get();
     }
 
-    public Match setMatchIsCompleted(Long id) {
+    public Match setMatchIsCompleted(Long id, Integer firstPlayerScore, Integer secondPlayerScore) {
         Optional<Match> match = matchRepository.findById(id);
         if (match.isEmpty()) throw new IllegalArgumentException("Match with id " + id + " does not exist.");
         if (match.get().getIsBeingPlayed()) {
@@ -120,6 +110,9 @@ public class TournamentService {
             secondPlayer.setIsPlaying(false);
             playerRepository.save(firstPlayer);
             playerRepository.save(secondPlayer);
+
+            match.get().setFirstPlayerScore(firstPlayerScore);
+            match.get().setSecondPlayerScore(secondPlayerScore);
 
             matchRepository.save(match.get());
             return match.get();

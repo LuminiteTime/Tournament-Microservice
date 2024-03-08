@@ -31,6 +31,7 @@ public class MainController {
         return service.retrievePlayers();
     }
 
+    // TODO: Maybe not needed
     @PostMapping("/add_players")
     @ResponseStatus(HttpStatus.CREATED)
     public List<Player> postPlayers(@RequestBody PlayersListRequest playersList) {
@@ -64,24 +65,22 @@ public class MainController {
         return service.retrieveGameTables();
     }
 
+    // TODO: Maybe not needed
     @GetMapping("/rounds")
     public List<Round> getAllRounds() {
-        return service.retrieveRound();
+        return service.retrieveRounds();
     }
 
-//    @PatchMapping("/player/set_playing/{id}")
-//    public Player patchPlayerIsPlaying(@PathVariable Long id) {
-//        return service.patchPlayingStatus(id);
-//    }
-//
-    @PatchMapping("/match/is_playing/{id}")
-    public Match patchMatchIsBeingPlayed(@PathVariable Long id) {
+    @PatchMapping("/match/is_playing")
+    public Match patchMatchIsBeingPlayed(@RequestParam("id") Long id) {
         return service.setMatchIsBeingPlayed(id);
     }
 
-    @PatchMapping("/match/is_completed/{id}")
-    public Match patchMatchIsCompleted(@PathVariable Long id) {
-        return service.setMatchIsCompleted(id);
+    @PatchMapping("/match/is_completed")
+    public Match patchMatchIsCompleted(@RequestParam("id") Long id,
+                                       @RequestParam("firstPlayerScore") Integer firstPlayerScore,
+                                       @RequestParam("secondPlayerScore") Integer secondPlayerScore) {
+        return service.setMatchIsCompleted(id, firstPlayerScore, secondPlayerScore);
     }
 
     @GetMapping("/matches_available")
