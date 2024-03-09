@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PatchMatchRequestBody;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PostPlayersListRequestBody;
-import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PostTournamentRequestBody;
 import university.innopolis.tabletennis.tournamentmicroservice.service.TournamentService;
 
 import java.util.List;
@@ -40,8 +39,8 @@ public class MainController {
 
     @PostMapping("/create_tournament")
     @ResponseStatus(HttpStatus.CREATED)
-    public Tournament postTournament(@RequestBody PostTournamentRequestBody tournamentToAdd) {
-        return service.addTournament(tournamentToAdd);
+    public Tournament postTournament() {
+        return service.addTournament();
     }
 
     @PostMapping("/add_player")
@@ -55,22 +54,28 @@ public class MainController {
         return service.retrieveTournaments();
     }
 
-    @GetMapping("/matches")
-    public List<Match> getAllMatches() {
-        return service.retrieveMatches();
+    @GetMapping("/tournament/{id}")
+    public Tournament getTournament(@PathVariable Long id) {
+        return service.retrieveTournament(id);
     }
 
-    @GetMapping("/tables")
-    public List<GameTable> getAllTables() {
-        return service.retrieveGameTables();
+    @GetMapping("/matches/{tournamentId}")
+    public List<Match> getAllMatches(@PathVariable Long tournamentId) {
+        return service.retrieveMatches(tournamentId);
+    }
+
+    @GetMapping("/tables/{tournamentId}")
+    public List<GameTable> getAllTables(@PathVariable Long tournamentId) {
+        return service.retrieveGameTables(tournamentId);
     }
 
     // TODO: Maybe not needed
-    @GetMapping("/rounds")
-    public List<Round> getAllRounds() {
-        return service.retrieveRounds();
+    @GetMapping("/rounds/{tournamentId}")
+    public List<Round> getAllRounds(@PathVariable Long tournamentId) {
+        return service.retrieveRounds(tournamentId);
     }
 
+    // TODO: Change path to tournament/{tournamentId}/match/is_playing/{id} ?
     @PatchMapping("/match/is_playing/{id}")
     public Match patchMatchIsBeingPlayed(@PathVariable Long id) {
         return service.setMatchIsBeingPlayed(id);
@@ -82,8 +87,8 @@ public class MainController {
         return service.setMatchIsCompleted(id, matchToPatch);
     }
 
-    @GetMapping("/matches_available")
-    public List<Match> getAvailableMatches() {
-        return service.retrieveAvailableMatches();
+    @GetMapping("/matches_available/{tournamentId}")
+    public List<Match> getAvailableMatches(@PathVariable Long tournamentId) {
+        return service.retrieveAvailableMatches(tournamentId);
     }
 }

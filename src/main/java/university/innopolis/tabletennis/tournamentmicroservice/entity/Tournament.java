@@ -28,14 +28,22 @@ public class Tournament {
     @OneToMany
     private List<Match> matchesOfTournament;
 
+    @OneToMany
+    private List<Player> playersOfTournament;
+
     public Tournament(List<Player> players) {
         this.tablesOfTournament = chooseGameTables(players.size());
         this.roundsOfTournament = new ArrayList<>();
         this.matchesOfTournament = new ArrayList<>();
+        this.playersOfTournament = players;
         this.fillTables(players);
         for (GameTable gameTable: this.tablesOfTournament) {
             this.fillRounds(gameTable, setTypeOfGameTable(gameTable, gameTable.getSize()));
         }
+    }
+
+    public void addPlayer(Player player) {
+        this.playersOfTournament.add(player);
     }
 
     private static List<GameTable> chooseGameTables(int numberOfPlayers) {

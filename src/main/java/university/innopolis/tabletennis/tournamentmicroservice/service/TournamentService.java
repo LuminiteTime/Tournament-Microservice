@@ -7,8 +7,9 @@ import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.*;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PatchMatchRequestBody;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PostPlayersListRequestBody;
-import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PostTournamentRequestBody;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,31 +36,38 @@ public class TournamentService {
     }
 
     public List<Player> retrievePlayers() {
-        return playerRepository.findAll(Sort.by(Sort.Direction.DESC, "rating"));
+        return playerRepository.findAll();
     }
 
     public List<Tournament> retrieveTournaments() {
         return tournamentRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
-    public List<Match> retrieveMatches() {
-        return matchRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+    public List<Match> retrieveMatches(Long tournamentId) {
+        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
+        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
+        return tournament.get()
+                .getMatchesOfTournament();
     }
 
-    public List<GameTable> retrieveGameTables() {
-        return gameTableRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+    public List<GameTable> retrieveGameTables(Long tournamentId) {
+        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
+        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
+        return tournament.get()
+                .getTablesOfTournament();
     }
 
-    public List<Round> retrieveRounds() {
-        return roundRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+    public List<Round> retrieveRounds(Long tournamentId) {
+        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
+        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
+        return tournament.get()
+                .getRoundsOfTournament();
     }
 
     // TODO: Decide what to do with RequestBody
-    public Tournament addTournament(PostTournamentRequestBody postTournamentRequestBody) {
-//        List<Player> playersToAdd = postTournamentRequestBody.getPlayersList();
+    public Tournament addTournament() {
         List<Player> playersToAdd = playerRepository.findAll();
         Tournament tournament = this.createTournament(playersToAdd);
-        playerRepository.saveAll(postTournamentRequestBody.getPlayersList());
         matchRepository.saveAll(tournament.getMatchesOfTournament());
         roundRepository.saveAll(tournament.getRoundsOfTournament());
         gameTableRepository.saveAll(tournament.getTablesOfTournament());
@@ -68,9 +76,9 @@ public class TournamentService {
     }
 
     public Player addPlayer(Player playerToAdd) {
-        List<Player> playersNowInTournament = playerRepository.findAll();
-        for (Player player: playersNowInTournament) {
-            if (player.equals(playerToAdd)) return playerToAdd;
+        for (Player player: playerRepository.findAll()) {
+            if (player.getName().equals(playerToAdd.getName())) throw new IllegalArgumentException(
+                    "Player with name " + playerToAdd.getName() + " already exists.");
         }
         playerRepository.save(playerToAdd);
         return playerToAdd;
@@ -81,13 +89,33 @@ public class TournamentService {
         return playersList.getPlayersList();
     }
 
-    public List<Match> retrieveAvailableMatches() {
-        return matchRepository.findAvailableMatches();
+    public List<Match> retrieveAvailableMatches(Long tournamentId) {
+        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
+        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
+
+        List<Match> allMatches = tournament.get()
+                .getMatchesOfTournament()
+                .stream()
+                .sorted(Comparator.comparingInt(Match::getGameTableIndex))
+                .sorted(Comparator.comparingInt(Match::getRoundIndex))
+                .toList();
+        List<Match> availableMatches = new ArrayList<>();
+        for (Match match: allMatches) {
+            if (match.getFirstPlayer().getIsPlaying() || match.getSecondPlayer().getIsPlaying()
+                    || match.getIsCompleted() || match.getIsBeingPlayed()) {
+                continue;
+            }
+            availableMatches.add(match);
+        }
+        return availableMatches;
     }
 
     public Match setMatchIsBeingPlayed(Long id) {
         Optional<Match> match = matchRepository.findById(id);
         if (match.isEmpty()) throw new IllegalArgumentException("Match with id " + id + " does not exist.");
+        if (match.get().getIsBeingPlayed()) throw new IllegalArgumentException("Match with id " + id + " is already being played.");
+        if (match.get().getIsCompleted()) throw new IllegalArgumentException("Match with id " + id + " is completed.");
+
         match.get().setIsBeingPlayed(true);
 
         Player firstPlayer = match.get().getFirstPlayer();
@@ -104,24 +132,29 @@ public class TournamentService {
     public Match setMatchIsCompleted(Long id, PatchMatchRequestBody matchToPatch) {
         Optional<Match> match = matchRepository.findById(id);
         if (match.isEmpty()) throw new IllegalArgumentException("Match with id " + id + " does not exist.");
-        if (match.get().getIsBeingPlayed()) {
-            match.get().setIsCompleted(true);
-            match.get().setIsBeingPlayed(false);
+        if (match.get().getIsCompleted()) throw new IllegalArgumentException("Match with id " + id + " is completed.");
+        if (!match.get().getIsBeingPlayed()) throw new IllegalArgumentException("Match with id " + id + " haven't started yet.");
 
-            Player firstPlayer = match.get().getFirstPlayer();
-            Player secondPlayer = match.get().getSecondPlayer();
-            firstPlayer.setIsPlaying(false);
-            secondPlayer.setIsPlaying(false);
-            playerRepository.save(firstPlayer);
-            playerRepository.save(secondPlayer);
+        match.get().setIsCompleted(true);
+        match.get().setIsBeingPlayed(false);
 
-            match.get().setFirstPlayerScore(matchToPatch.getFirstPlayerScore());
-            match.get().setSecondPlayerScore(matchToPatch.getSecondPlayerScore());
+        Player firstPlayer = match.get().getFirstPlayer();
+        Player secondPlayer = match.get().getSecondPlayer();
+        firstPlayer.setIsPlaying(false);
+        secondPlayer.setIsPlaying(false);
+        playerRepository.save(firstPlayer);
+        playerRepository.save(secondPlayer);
 
-            matchRepository.save(match.get());
-            return match.get();
-        } else {
-            throw new IllegalArgumentException("Match with id " + id + " haven't started yet.");
-        }
+        match.get().setFirstPlayerScore(matchToPatch.getFirstPlayerScore());
+        match.get().setSecondPlayerScore(matchToPatch.getSecondPlayerScore());
+
+        matchRepository.save(match.get());
+        return match.get();
+    }
+
+    public Tournament retrieveTournament(Long id) {
+        Optional<Tournament> tournament = tournamentRepository.findById(id);
+        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + id + " does not exist.");
+        return tournament.get();
     }
 }
