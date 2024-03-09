@@ -7,12 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
-import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PlayersListRequest;
-import university.innopolis.tabletennis.tournamentmicroservice.requestbody.TournamentRequest;
+import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PatchMatchRequestBody;
+import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PostPlayersListRequestBody;
+import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PostTournamentRequestBody;
 import university.innopolis.tabletennis.tournamentmicroservice.service.TournamentService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @NoArgsConstructor
@@ -34,13 +34,13 @@ public class MainController {
     // TODO: Maybe not needed
     @PostMapping("/add_players")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<Player> postPlayers(@RequestBody PlayersListRequest playersList) {
+    public List<Player> postPlayers(@RequestBody PostPlayersListRequestBody playersList) {
         return service.addPlayers(playersList);
     }
 
     @PostMapping("/create_tournament")
     @ResponseStatus(HttpStatus.CREATED)
-    public Tournament postTournament(@RequestBody TournamentRequest tournamentToAdd) {
+    public Tournament postTournament(@RequestBody PostTournamentRequestBody tournamentToAdd) {
         return service.addTournament(tournamentToAdd);
     }
 
@@ -71,16 +71,15 @@ public class MainController {
         return service.retrieveRounds();
     }
 
-    @PatchMapping("/match/is_playing")
-    public Match patchMatchIsBeingPlayed(@RequestParam("id") Long id) {
+    @PatchMapping("/match/is_playing/{id}")
+    public Match patchMatchIsBeingPlayed(@PathVariable Long id) {
         return service.setMatchIsBeingPlayed(id);
     }
 
-    @PatchMapping("/match/is_completed")
-    public Match patchMatchIsCompleted(@RequestParam("id") Long id,
-                                       @RequestParam("firstPlayerScore") Integer firstPlayerScore,
-                                       @RequestParam("secondPlayerScore") Integer secondPlayerScore) {
-        return service.setMatchIsCompleted(id, firstPlayerScore, secondPlayerScore);
+    @PatchMapping("/match/is_completed/{id}")
+    public Match patchMatchIsCompleted(@PathVariable Long id,
+                                       @RequestBody PatchMatchRequestBody matchToPatch) {
+        return service.setMatchIsCompleted(id, matchToPatch);
     }
 
     @GetMapping("/matches_available")

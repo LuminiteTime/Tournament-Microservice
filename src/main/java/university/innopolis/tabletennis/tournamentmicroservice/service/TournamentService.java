@@ -5,8 +5,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.*;
-import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PlayersListRequest;
-import university.innopolis.tabletennis.tournamentmicroservice.requestbody.TournamentRequest;
+import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PatchMatchRequestBody;
+import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PostPlayersListRequestBody;
+import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PostTournamentRequestBody;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,9 +54,12 @@ public class TournamentService {
         return roundRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
-    public Tournament addTournament(TournamentRequest tournamentRequest) {
-        Tournament tournament = this.createTournament(tournamentRequest.getPlayersList());
-        playerRepository.saveAll(tournamentRequest.getPlayersList());
+    // TODO: Decide what to do with RequestBody
+    public Tournament addTournament(PostTournamentRequestBody postTournamentRequestBody) {
+//        List<Player> playersToAdd = postTournamentRequestBody.getPlayersList();
+        List<Player> playersToAdd = playerRepository.findAll();
+        Tournament tournament = this.createTournament(playersToAdd);
+        playerRepository.saveAll(postTournamentRequestBody.getPlayersList());
         matchRepository.saveAll(tournament.getMatchesOfTournament());
         roundRepository.saveAll(tournament.getRoundsOfTournament());
         gameTableRepository.saveAll(tournament.getTablesOfTournament());
@@ -72,7 +76,7 @@ public class TournamentService {
         return playerToAdd;
     }
 
-    public List<Player> addPlayers(PlayersListRequest playersList) {
+    public List<Player> addPlayers(PostPlayersListRequestBody playersList) {
         playerRepository.saveAll(playersList.getPlayersList());
         return playersList.getPlayersList();
     }
@@ -97,7 +101,7 @@ public class TournamentService {
         return match.get();
     }
 
-    public Match setMatchIsCompleted(Long id, Integer firstPlayerScore, Integer secondPlayerScore) {
+    public Match setMatchIsCompleted(Long id, PatchMatchRequestBody matchToPatch) {
         Optional<Match> match = matchRepository.findById(id);
         if (match.isEmpty()) throw new IllegalArgumentException("Match with id " + id + " does not exist.");
         if (match.get().getIsBeingPlayed()) {
@@ -111,8 +115,8 @@ public class TournamentService {
             playerRepository.save(firstPlayer);
             playerRepository.save(secondPlayer);
 
-            match.get().setFirstPlayerScore(firstPlayerScore);
-            match.get().setSecondPlayerScore(secondPlayerScore);
+            match.get().setFirstPlayerScore(matchToPatch.getFirstPlayerScore());
+            match.get().setSecondPlayerScore(matchToPatch.getSecondPlayerScore());
 
             matchRepository.save(match.get());
             return match.get();

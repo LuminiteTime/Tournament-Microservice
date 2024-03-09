@@ -9,10 +9,10 @@ import java.util.List;
 
 @Getter
 @Setter
-public class TournamentRequest {
+public class PostPlayersListRequestBody {
     private List<Player> playersList;
 
-    public TournamentRequest() {
+    public PostPlayersListRequestBody() {
         this.playersList = new ArrayList<>();
     }
 }
