@@ -54,40 +54,41 @@ public class MainController {
         return service.retrieveTournaments();
     }
 
-    @GetMapping("/tournament/{id}")
+    @GetMapping("/tournaments/{id}")
     public Tournament getTournament(@PathVariable Long id) {
         return service.retrieveTournament(id);
     }
 
-    @GetMapping("/matches/{tournamentId}")
+    @GetMapping("/tournaments/{tournamentId}/matches")
     public List<Match> getAllMatches(@PathVariable Long tournamentId) {
         return service.retrieveMatches(tournamentId);
     }
 
-    @GetMapping("/tables/{tournamentId}")
+    @GetMapping("/tournaments/{tournamentId}/tables")
     public List<GameTable> getAllTables(@PathVariable Long tournamentId) {
         return service.retrieveGameTables(tournamentId);
     }
 
     // TODO: Maybe not needed
-    @GetMapping("/rounds/{tournamentId}")
+    @GetMapping("/tournaments/{tournamentId}/rounds")
     public List<Round> getAllRounds(@PathVariable Long tournamentId) {
         return service.retrieveRounds(tournamentId);
     }
 
-    // TODO: Change path to tournament/{tournamentId}/match/is_playing/{id} ?
-    @PatchMapping("/match/is_playing/{id}")
-    public Match patchMatchIsBeingPlayed(@PathVariable Long id) {
-        return service.setMatchIsBeingPlayed(id);
+    @PatchMapping("/tournaments/{tournamentId}/match/is_playing/{matchId}")
+    public Match patchMatchIsBeingPlayed(@PathVariable Long matchId,
+                                         @PathVariable Long tournamentId) {
+        return service.setMatchIsBeingPlayed(tournamentId, matchId);
     }
 
-    @PatchMapping("/match/is_completed/{id}")
-    public Match patchMatchIsCompleted(@PathVariable Long id,
+    @PatchMapping("/tournaments/{tournamentId}/match/is_completed/{matchId}")
+    public Match patchMatchIsCompleted(@PathVariable Long matchId,
+                                       @PathVariable Long tournamentId,
                                        @RequestBody PatchMatchRequestBody matchToPatch) {
-        return service.setMatchIsCompleted(id, matchToPatch);
+        return service.setMatchIsCompleted(tournamentId, matchId, matchToPatch);
     }
 
-    @GetMapping("/matches_available/{tournamentId}")
+    @GetMapping("/tournaments/{tournamentId}/matches_available")
     public List<Match> getAvailableMatches(@PathVariable Long tournamentId) {
         return service.retrieveAvailableMatches(tournamentId);
     }

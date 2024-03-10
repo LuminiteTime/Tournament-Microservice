@@ -110,11 +110,12 @@ public class TournamentService {
         return availableMatches;
     }
 
-    public Match setMatchIsBeingPlayed(Long id) {
-        Optional<Match> match = matchRepository.findById(id);
-        if (match.isEmpty()) throw new IllegalArgumentException("Match with id " + id + " does not exist.");
-        if (match.get().getIsBeingPlayed()) throw new IllegalArgumentException("Match with id " + id + " is already being played.");
-        if (match.get().getIsCompleted()) throw new IllegalArgumentException("Match with id " + id + " is completed.");
+    public Match setMatchIsBeingPlayed(Long tournamentId, Long matchId) {
+        // TODO: Do we need to find match in the specific tournament or do we operate with only one tournament?
+        Optional<Match> match = matchRepository.findById(matchId);
+        if (match.isEmpty()) throw new IllegalArgumentException("Match with id " + matchId + " does not exist.");
+        if (match.get().getIsBeingPlayed()) throw new IllegalArgumentException("Match with id " + matchId + " is already being played.");
+        if (match.get().getIsCompleted()) throw new IllegalArgumentException("Match with id " + matchId + " is completed.");
 
         match.get().setIsBeingPlayed(true);
 
@@ -129,11 +130,12 @@ public class TournamentService {
         return match.get();
     }
 
-    public Match setMatchIsCompleted(Long id, PatchMatchRequestBody matchToPatch) {
-        Optional<Match> match = matchRepository.findById(id);
-        if (match.isEmpty()) throw new IllegalArgumentException("Match with id " + id + " does not exist.");
-        if (match.get().getIsCompleted()) throw new IllegalArgumentException("Match with id " + id + " is completed.");
-        if (!match.get().getIsBeingPlayed()) throw new IllegalArgumentException("Match with id " + id + " haven't started yet.");
+    public Match setMatchIsCompleted(Long tournamentId, Long matchId, PatchMatchRequestBody matchToPatch) {
+        // TODO: Do we need to find match in the specific tournament or do we operate with only one tournament?
+        Optional<Match> match = matchRepository.findById(matchId);
+        if (match.isEmpty()) throw new IllegalArgumentException("Match with id " + matchId + " does not exist.");
+        if (match.get().getIsCompleted()) throw new IllegalArgumentException("Match with id " + matchId + " is completed.");
+        if (!match.get().getIsBeingPlayed()) throw new IllegalArgumentException("Match with id " + matchId + " haven't started yet.");
 
         match.get().setIsCompleted(true);
         match.get().setIsBeingPlayed(false);
