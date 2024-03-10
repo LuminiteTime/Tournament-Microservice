@@ -154,9 +154,16 @@ public class TournamentService {
         return match.get();
     }
 
-    public Tournament retrieveTournament(Long id) {
-        Optional<Tournament> tournament = tournamentRepository.findById(id);
-        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + id + " does not exist.");
+    public Tournament retrieveTournament(Long tournamentId) {
+        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
+        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
         return tournament.get();
+    }
+
+    public Player deletePlayer(Long playerId) {
+        Optional<Player> player = playerRepository.findById(playerId);
+        if (player.isEmpty()) throw new IllegalArgumentException("Player with id " + playerId + " does not exist.");
+        playerRepository.deleteById(playerId);
+        return player.get();
     }
 }

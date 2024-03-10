@@ -49,6 +49,11 @@ public class MainController {
         return service.addPlayer(playerToAdd);
     }
 
+    @DeleteMapping("/delete_player/{playerId}")
+    public Player deletePlayer(@PathVariable Long playerId) {
+        return service.deletePlayer(playerId);
+    }
+
     @GetMapping("/tournaments")
     public List<Tournament> getTournaments() {
         return service.retrieveTournaments();
