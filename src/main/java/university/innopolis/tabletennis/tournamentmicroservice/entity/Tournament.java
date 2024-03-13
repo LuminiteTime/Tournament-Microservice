@@ -23,18 +23,10 @@ public class Tournament {
     private List<GameTable> tablesOfTournament;
 
     @OneToMany
-    private List<Round> roundsOfTournament;
-
-    @OneToMany
-    private List<Match> matchesOfTournament;
-
-    @OneToMany
     private List<Player> playersOfTournament;
 
     public Tournament(List<Player> players) {
         this.tablesOfTournament = chooseGameTables(players.size());
-        this.roundsOfTournament = new ArrayList<>();
-        this.matchesOfTournament = new ArrayList<>();
         this.playersOfTournament = players;
         this.fillTables(players);
         for (GameTable gameTable: this.tablesOfTournament) {
@@ -42,20 +34,12 @@ public class Tournament {
         }
     }
 
-    public void addPlayer(Player player) {
-        this.playersOfTournament.add(player);
-    }
-
     private static List<GameTable> chooseGameTables(int numberOfPlayers) {
-//        if (numberOfPlayers < 4 || numberOfPlayers > 16) {
-//            throw new InvalidNumberOfPlayersException();
-//        }
         List<GameTable> tableList = new ArrayList<>();
         if (numberOfPlayers < 8) {
             GameTable table = new GameTable();
             table.setSize(numberOfPlayers);
             tableList.add(table);
-            table.setIndexInTournament(0);
         } else {
             int sizeOfGameTable1 = 0;
             int sizeOfGameTable2 = 0;
@@ -72,9 +56,6 @@ public class Tournament {
             }
             table1.setSize(sizeOfGameTable1);
             table2.setSize(sizeOfGameTable2);
-
-            table1.setIndexInTournament(0);
-            table2.setIndexInTournament(1);
 
             tableList.add(table1);
             tableList.add(table2);
@@ -279,32 +260,19 @@ public class Tournament {
             this.tablesOfTournament.get(tableIndex).addPlayer(player);
             tableIndex = (tableIndex + 1) % this.tablesOfTournament.size();
         }
-        for (int j = 0; j < this.tablesOfTournament.size(); j++) {
-            GameTable table = this.tablesOfTournament.get(j);
-            for (int i = 0; i < table.getPlayersOfTable().size(); i++) {
-                Player player = table.getPlayersOfTable().get(i);
-                player.setIndexInTable(i + 1);
-                player.setTableIndex(j + 1);
-            }
-        }
     }
 
     public void fillRounds(GameTable table, List<List<List<Integer>>> playersIndexes) {
-        for (int i = 0; i < playersIndexes.size(); i++) {
+        for (List<List<Integer>> playersIndex: playersIndexes) {
             Round roundToAdd = new Round();
-            List<List<Integer>> roundIndexes = playersIndexes.get(i);
-            for (List<Integer> match: roundIndexes) {
+            for (List<Integer> match: playersIndex) {
                 Match matchToAdd = new Match(
                         table.getPlayersOfTable().get(match.get(0)),
                         table.getPlayersOfTable().get(match.get(1))
                 );
-                matchToAdd.setRoundIndex(i);
-                matchToAdd.setGameTableIndex(table.getIndexInTournament());
-                this.matchesOfTournament.add(matchToAdd);
                 roundToAdd.addMatch(matchToAdd);
                 table.addMatch(matchToAdd);
             }
-            this.roundsOfTournament.add(roundToAdd);
             table.addRound(roundToAdd);
         }
     }

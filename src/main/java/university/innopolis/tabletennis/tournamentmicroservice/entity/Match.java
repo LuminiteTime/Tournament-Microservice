@@ -27,10 +27,6 @@ public class Match {
 
     private Boolean isBeingPlayed;
 
-    private Integer roundIndex;
-
-    private Integer gameTableIndex;
-
     private Boolean isCompleted;
 
     public Match(Player firstPlayer, Player secondPlayer) {

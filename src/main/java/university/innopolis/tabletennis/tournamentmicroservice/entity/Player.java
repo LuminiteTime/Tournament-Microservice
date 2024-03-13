@@ -19,8 +19,6 @@ public class Player {
 
     private String name;
     private Integer rating;
-    private Integer indexInTable;
-    private Integer tableIndex;
     private Boolean isPlaying;
 
     public Player() {

@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
+import university.innopolis.tabletennis.tournamentmicroservice.requestbody.IdListRequestBody;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PatchMatchRequestBody;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PostPlayersListRequestBody;
 import university.innopolis.tabletennis.tournamentmicroservice.service.TournamentService;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @RestController
 @NoArgsConstructor
+@RequestMapping("/tournaments")
 public class MainController {
 
     @Autowired
@@ -25,75 +27,65 @@ public class MainController {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping("/players")
-    public List<Player> getPlayers() {
-        return service.retrievePlayers();
-    }
-
-    // TODO: Maybe not needed
-    @PostMapping("/add_players")
-    @ResponseStatus(HttpStatus.CREATED)
-    public List<Player> postPlayers(@RequestBody PostPlayersListRequestBody playersList) {
-        return service.addPlayers(playersList);
-    }
-
-    @PostMapping("/create_tournament")
+    @PostMapping("/tournament")
     @ResponseStatus(HttpStatus.CREATED)
     public Tournament postTournament() {
         return service.addTournament();
     }
 
-    @PostMapping("/add_player")
+    @GetMapping("/")
+    public List<Tournament> getTournaments(@RequestBody IdListRequestBody tournamentsList) {
+        return service.retrieveTournaments(tournamentsList);
+    }
+
+    @GetMapping("/{tournamentId}/players")
+    public List<Player> getPlayers(@PathVariable Long tournamentId) {
+        return service.retrievePlayers(tournamentId);
+    }
+
+    @PostMapping("/{tournamentId}/players")
     @ResponseStatus(HttpStatus.CREATED)
-    public Player postPlayer(@RequestBody Player playerToAdd) {
-        return service.addPlayer(playerToAdd);
+    public List<Player> postPlayers(@RequestBody PostPlayersListRequestBody playersList,
+                                    @PathVariable Long tournamentId) {
+        return service.addPlayers(tournamentId, playersList);
     }
 
-    @DeleteMapping("/delete_player/{playerId}")
-    public Player deletePlayer(@PathVariable Long playerId) {
-        return service.deletePlayer(playerId);
+    @DeleteMapping("/{tournamentId}/players/{playerId}")
+    public Player deletePlayer(@PathVariable Long tournamentId,
+                               @PathVariable Long playerId) {
+        return service.deletePlayer(tournamentId, playerId);
     }
 
-    @GetMapping("/tournaments")
-    public List<Tournament> getTournaments() {
-        return service.retrieveTournaments();
-    }
-
-    @GetMapping("/tournaments/{id}")
-    public Tournament getTournament(@PathVariable Long id) {
-        return service.retrieveTournament(id);
-    }
-
-    @GetMapping("/tournaments/{tournamentId}/matches")
+    @GetMapping("{tournamentId}/matches")
     public List<Match> getAllMatches(@PathVariable Long tournamentId) {
         return service.retrieveMatches(tournamentId);
     }
 
-    @GetMapping("/tournaments/{tournamentId}/tables")
+    @GetMapping("{tournamentId}/tables")
     public List<GameTable> getAllTables(@PathVariable Long tournamentId) {
         return service.retrieveGameTables(tournamentId);
     }
 
     // TODO: Maybe not needed
-    @GetMapping("/tournaments/{tournamentId}/rounds")
+    @GetMapping("/{tournamentId}/rounds")
     public List<Round> getAllRounds(@PathVariable Long tournamentId) {
         return service.retrieveRounds(tournamentId);
     }
 
-    @PatchMapping("/tournaments/{tournamentId}/match/is_playing/{matchId}")
+    @PatchMapping("/{tournamentId}/match/is_playing/{matchId}")
     public Match patchMatchIsBeingPlayed(@PathVariable Long matchId,
                                          @PathVariable Long tournamentId) {
         return service.setMatchIsBeingPlayed(tournamentId, matchId);
     }
 
-    @PatchMapping("/tournaments/{tournamentId}/match/is_completed/{matchId}")
+    @PatchMapping("/{tournamentId}/match/is_completed/{matchId}")
     public Match patchMatchIsCompleted(@PathVariable Long matchId,
                                        @PathVariable Long tournamentId,
                                        @RequestBody PatchMatchRequestBody matchToPatch) {
         return service.setMatchIsCompleted(tournamentId, matchId, matchToPatch);
     }
 
-    @GetMapping("/tournaments/{tournamentId}/matches_available")
+    @GetMapping("{tournamentId}/matches_available")
     public List<Match> getAvailableMatches(@PathVariable Long tournamentId) {
         return service.retrieveAvailableMatches(tournamentId);
     }

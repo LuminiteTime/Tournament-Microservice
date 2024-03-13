@@ -26,8 +26,6 @@ public class GameTable {
 
     private Integer size;
 
-    private Integer indexInTournament;
-
     public GameTable() {
         this.playersOfTable = new ArrayList<>();
         this.roundsOfTable = new ArrayList<>();

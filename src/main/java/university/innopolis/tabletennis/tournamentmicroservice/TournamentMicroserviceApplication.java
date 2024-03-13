@@ -20,26 +20,7 @@ public class TournamentMicroserviceApplication {
         SpringApplication.run(TournamentMicroserviceApplication.class, args);
     }
 
-    private final PlayerRepository playerRepository;
-    private final MatchRepository matchRepository;
-    private final GameTableRepository gameTableRepository;
-    private final RoundRepository roundRepository;
-
     @PostConstruct
     private void init() {
-
-//        List<Player> playersList = List.of(
-//                new Player("John Smith", 135),
-//                new Player("Emily Davis", 72),
-//                new Player("Michael Johnson", 189),
-//                new Player("Olivia White", 47),
-//                new Player("David Brown", 104),
-//                new Player("Sophia Taylor", 81),
-//                new Player("Benjamin Miller", 163),
-//                new Player("Ava Wilson", 36)
-//        );
-//        playerRepository.saveAll(playersList);
-
-
     }
 }
