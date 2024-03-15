@@ -110,12 +110,23 @@ public class TournamentService {
     public List<Match> retrieveAvailableMatches(Long tournamentId) {
         List<Match> allMatches = retrieveMatches(tournamentId);
         List<Match> availableMatches = new ArrayList<>();
+        Map<Player, Boolean> tempBusy = new HashMap<>();
+
+        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
+        if (tournament.isEmpty()) return availableMatches;
+        for (Player player: tournament.get().getPlayersOfTournament()) {
+            tempBusy.put(player, false);
+        }
+
         for (Match match: allMatches) {
             if (match.getFirstPlayer().getIsPlaying() || match.getSecondPlayer().getIsPlaying()
-                    || match.getIsCompleted() || match.getIsBeingPlayed()) {
+                    || match.getIsCompleted() || match.getIsBeingPlayed() || tempBusy.get(match.getFirstPlayer())
+                    || tempBusy.get(match.getSecondPlayer())) {
                 continue;
             }
             availableMatches.add(match);
+            tempBusy.put(match.getFirstPlayer(), true);
+            tempBusy.put(match.getSecondPlayer(), true);
         }
         return availableMatches;
     }
