@@ -131,50 +131,6 @@ public class TournamentService {
         return availableMatches;
     }
 
-    public Match setMatchIsBeingPlayed(Long tournamentId, Long matchId) {
-        // TODO: Do we need to find match in the specific tournament or do we operate with only one tournament?
-        Optional<Match> match = matchRepository.findById(matchId);
-        if (match.isEmpty()) throw new IllegalArgumentException("Match with id " + matchId + " does not exist.");
-        if (match.get().getIsBeingPlayed()) throw new IllegalArgumentException("Match with id " + matchId + " is already being played.");
-        if (match.get().getIsCompleted()) throw new IllegalArgumentException("Match with id " + matchId + " is completed.");
-
-        match.get().setIsBeingPlayed(true);
-
-        Player firstPlayer = match.get().getFirstPlayer();
-        Player secondPlayer = match.get().getSecondPlayer();
-        firstPlayer.setIsPlaying(true);
-        secondPlayer.setIsPlaying(true);
-        playerRepository.save(firstPlayer);
-        playerRepository.save(secondPlayer);
-
-        matchRepository.save(match.get());
-        return match.get();
-    }
-
-    public Match setMatchIsCompleted(Long tournamentId, Long matchId, PatchMatchRequestBody matchToPatch) {
-        // TODO: Do we need to find match in the specific tournament or do we operate with only one tournament?
-        Optional<Match> match = matchRepository.findById(matchId);
-        if (match.isEmpty()) throw new IllegalArgumentException("Match with id " + matchId + " does not exist.");
-        if (match.get().getIsCompleted()) throw new IllegalArgumentException("Match with id " + matchId + " is completed.");
-        if (!match.get().getIsBeingPlayed()) throw new IllegalArgumentException("Match with id " + matchId + " haven't started yet.");
-
-        match.get().setIsCompleted(true);
-        match.get().setIsBeingPlayed(false);
-
-        Player firstPlayer = match.get().getFirstPlayer();
-        Player secondPlayer = match.get().getSecondPlayer();
-        firstPlayer.setIsPlaying(false);
-        secondPlayer.setIsPlaying(false);
-        playerRepository.save(firstPlayer);
-        playerRepository.save(secondPlayer);
-
-        match.get().setFirstPlayerScore(matchToPatch.getFirstPlayerScore());
-        match.get().setSecondPlayerScore(matchToPatch.getSecondPlayerScore());
-
-        matchRepository.save(match.get());
-        return match.get();
-    }
-
     public Tournament retrieveTournament(Long tournamentId) {
         Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
         if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
@@ -187,4 +143,5 @@ public class TournamentService {
         playerRepository.deleteById(playerId);
         return player.get();
     }
+
 }
