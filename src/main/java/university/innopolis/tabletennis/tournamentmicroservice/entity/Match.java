@@ -26,8 +26,11 @@ public class Match {
     private Integer secondPlayerScore;
 
     private Boolean isBeingPlayed;
-
     private Boolean isCompleted;
+
+    private enum state {
+        NOT_PLAYING, PLAYING, COMPLETED
+    }
 
     public Match(Player firstPlayer, Player secondPlayer) {
         this.firstPlayer = firstPlayer;

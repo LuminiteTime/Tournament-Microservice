@@ -4,15 +4,18 @@ import lombok.Getter;
 import lombok.Setter;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
-public class PostPlayersListRequestBody {
-    private List<Player> playersList;
+public class TournamentInfo {
+    private String title;
+    private LocalDate date;
+    private List<Player> players;
 
-    public PostPlayersListRequestBody() {
-        this.playersList = new ArrayList<>();
+    public TournamentInfo() {
+        this.players = new ArrayList<>();
     }
 }

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import university.innopolis.tabletennis.tournamentmicroservice.exception.InvalidNumberOfPlayersException;
+import university.innopolis.tabletennis.tournamentmicroservice.requestbody.TournamentInfo;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -22,13 +23,15 @@ public class Tournament {
     @OneToMany
     private List<GameTable> tablesOfTournament;
 
-    @OneToMany
+    @OneToMany()
     private List<Player> playersOfTournament;
 
-    public Tournament(List<Player> players) {
-        this.tablesOfTournament = chooseGameTables(players.size());
-        this.playersOfTournament = players;
-        this.fillTables(players);
+    // TODO: Мапа Игрок - Играет или нет, убрать isPlaying player.
+
+    public Tournament(TournamentInfo info) {
+        this.playersOfTournament = info.getPlayers();
+        this.tablesOfTournament = chooseGameTables(this.playersOfTournament.size());
+        this.fillTables(this.playersOfTournament);
         for (GameTable gameTable: this.tablesOfTournament) {
             this.fillRounds(gameTable, setTypeOfGameTable(gameTable, gameTable.getSize()));
         }

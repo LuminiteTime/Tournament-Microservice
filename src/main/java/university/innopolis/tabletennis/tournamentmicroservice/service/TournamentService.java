@@ -5,8 +5,7 @@ import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.*;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.IdListRequestBody;
-import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PatchMatchRequestBody;
-import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PostPlayersListRequestBody;
+import university.innopolis.tabletennis.tournamentmicroservice.requestbody.TournamentInfo;
 
 import java.util.*;
 
@@ -28,14 +27,8 @@ public class TournamentService {
     @Autowired
     private TournamentRepository tournamentRepository;
 
-    public Tournament createTournament(List<Player> players) {
-        return new Tournament(players);
-    }
-
-    public List<Player> retrievePlayers(Long tournamentId) {
-        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
-        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
-        return tournament.get().getPlayersOfTournament();
+    public Tournament createTournament(TournamentInfo tournamentInfo) {
+        return new Tournament(tournamentInfo);
     }
 
     public List<Tournament> retrieveTournaments(IdListRequestBody tournamentsList) {
@@ -68,20 +61,11 @@ public class TournamentService {
                 .getTablesOfTournament();
     }
 
-    public List<Round> retrieveRounds(Long tournamentId) {
-        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
-        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
-        List<Round> rounds = new ArrayList<>();
-        for (GameTable table: tournament.get().getTablesOfTournament()) {
-            rounds.addAll(table.getRoundsOfTable());
-        }
-        return rounds;
-    }
+    public Tournament addTournament(TournamentInfo tournamentInfo) {
+        List<Player> playersToAdd = tournamentInfo.getPlayers();
+        playerRepository.saveAll(playersToAdd);
 
-    // TODO: Decide what to do with RequestBody
-    public Tournament addTournament() {
-        List<Player> playersToAdd = playerRepository.findAll();
-        Tournament tournament = this.createTournament(playersToAdd);
+        Tournament tournament = this.createTournament(tournamentInfo);
         List<GameTable> tablesOfTournament = tournament.getTablesOfTournament();
 
         // Saving matches.
@@ -100,11 +84,6 @@ public class TournamentService {
         // Saving tournament.
         tournamentRepository.save(tournament);
         return tournament;
-    }
-
-    public List<Player> addPlayers(Long tournamentId, PostPlayersListRequestBody playersList) {
-        playerRepository.saveAll(playersList.getPlayersList());
-        return playersList.getPlayersList();
     }
 
     public List<Match> retrieveAvailableMatches(Long tournamentId) {
@@ -130,18 +109,4 @@ public class TournamentService {
         }
         return availableMatches;
     }
-
-    public Tournament retrieveTournament(Long tournamentId) {
-        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
-        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
-        return tournament.get();
-    }
-
-    public Player deletePlayer(Long tournamentId, Long playerId) {
-        Optional<Player> player = playerRepository.findById(playerId);
-        if (player.isEmpty()) throw new IllegalArgumentException("Player with id " + playerId + " does not exist.");
-        playerRepository.deleteById(playerId);
-        return player.get();
-    }
-
 }
