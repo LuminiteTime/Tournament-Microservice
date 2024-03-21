@@ -43,7 +43,12 @@ public class MainController {
         return ResponseEntity.ok(tournamentService.retrieveTournaments(tournamentsList));
     }
 
-    @GetMapping("{tournamentId}/tables")
+    @PatchMapping("/{tournamentId}")
+    public ResponseEntity<Tournament> patchTournament(@PathVariable Long tournamentId) {
+        return ResponseEntity.ok(tournamentService.patchTournamentState(tournamentId));
+    }
+
+    @GetMapping("/{tournamentId}/tables")
     public ResponseEntity<List<GameTable>> getAllTables(@PathVariable Long tournamentId) {
         return ResponseEntity.ok(tournamentService.retrieveGameTables(tournamentId));
     }
@@ -55,7 +60,7 @@ public class MainController {
         return ResponseEntity.ok(matchService.patchMatchState(tournamentId, matchId, matchInfo));
     }
 
-    @GetMapping("{tournamentId}/matches_available")
+    @GetMapping("/{tournamentId}/matches_available")
     public ResponseEntity<List<Match>> getAvailableMatches(@PathVariable Long tournamentId) {
         return ResponseEntity.ok(tournamentService.retrieveAvailableMatches(tournamentId));
     }

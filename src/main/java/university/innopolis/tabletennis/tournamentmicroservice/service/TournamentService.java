@@ -8,6 +8,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.requestbody.IdLis
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.TournamentInfo;
 import university.innopolis.tabletennis.tournamentmicroservice.utils.MatchState;
 import university.innopolis.tabletennis.tournamentmicroservice.utils.PlayerState;
+import university.innopolis.tabletennis.tournamentmicroservice.utils.TournamentState;
 
 import java.util.*;
 
@@ -110,5 +111,13 @@ public class TournamentService {
             tempBusy.put(match.getSecondPlayer(), PlayerState.PLAYING);
         }
         return availableMatches;
+    }
+
+    public Tournament patchTournamentState(Long tournamentId) {
+        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
+        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
+        tournament.get().setState(TournamentState.FINISHED);
+        tournamentRepository.save(tournament.get());
+        return tournament.get();
     }
 }
