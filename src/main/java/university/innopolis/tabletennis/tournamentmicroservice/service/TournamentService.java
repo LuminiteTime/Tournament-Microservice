@@ -6,6 +6,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.*;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.IdListRequestBody;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.TournamentInfo;
+import university.innopolis.tabletennis.tournamentmicroservice.utils.MatchState;
 import university.innopolis.tabletennis.tournamentmicroservice.utils.PlayerState;
 
 import java.util.*;
@@ -99,8 +100,7 @@ public class TournamentService {
         }
 
         for (Match match: allMatches) {
-            if (match.getIsBeingPlayed() ||
-                    match.getIsCompleted() ||
+            if (!match.getState().equals(MatchState.NOT_PLAYING) ||
                     tempBusy.get(match.getFirstPlayer()).isBusy() ||
                     tempBusy.get(match.getSecondPlayer()).isBusy())
                 continue;

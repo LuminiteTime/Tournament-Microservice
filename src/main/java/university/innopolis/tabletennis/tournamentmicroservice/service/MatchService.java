@@ -9,6 +9,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.repository.MatchR
 import university.innopolis.tabletennis.tournamentmicroservice.repository.PlayerRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.TournamentRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PatchMatchRequestBody;
+import university.innopolis.tabletennis.tournamentmicroservice.utils.MatchState;
 
 import java.util.Optional;
 
@@ -25,20 +26,28 @@ public class MatchService {
 
     public Match patchMatchState(Long tournamentId, Long matchId, Optional<PatchMatchRequestBody> matchInfo) {
         Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
-        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
+        if (tournament.isEmpty())
+            throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
 
         Optional<Match> matchToPatch = matchRepository.findById(matchId);
-        if (matchToPatch.isEmpty()) throw new IllegalArgumentException("Match with id " + matchId + " does not exist.");
+        if (matchToPatch.isEmpty())
+            throw new IllegalArgumentException("Match with id " + matchId + " does not exist.");
 
         Match match = matchToPatch.get();
-        if (match.getIsCompleted()) return match;
 
-        if (match.getIsBeingPlayed() && matchInfo.isEmpty()) throw new IllegalArgumentException("Match score is not provided.");
+        // Match is already completed, no changes in state needed.
+        if (match.getState().equals(MatchState.COMPLETED))
+            return match;
 
-        if (!match.getIsBeingPlayed()) {
-            setMatchIsBeingPlayed(match);
-        } else {
+        // Match is about to start but an empty request body provided.
+        if (match.getState().equals(MatchState.PLAYING) && matchInfo.isEmpty())
+            throw new IllegalArgumentException("Match score is not provided.");
+
+        // Switching the state of the match.
+        if (match.getState().equals(MatchState.PLAYING)) {
             setMatchIsCompleted(match, matchInfo.get());
+        } else {
+            setMatchIsBeingPlayed(match);
         }
         matchRepository.save(match);
 
@@ -46,13 +55,11 @@ public class MatchService {
     }
 
     private void setMatchIsCompleted(Match match, PatchMatchRequestBody matchInfo) {
-        match.setIsCompleted(true);
-        match.setIsBeingPlayed(false);
+        match.setState(MatchState.COMPLETED);
 
         Player firstPlayer = match.getFirstPlayer();
         Player secondPlayer = match.getSecondPlayer();
-//        firstPlayer.setIsPlaying(false);
-//        secondPlayer.setIsPlaying(false);
+
         playerRepository.save(firstPlayer);
         playerRepository.save(secondPlayer);
 
@@ -61,12 +68,11 @@ public class MatchService {
     }
 
     private void setMatchIsBeingPlayed(Match match) {
-        match.setIsBeingPlayed(true);
+        match.setState(MatchState.PLAYING);
 
         Player firstPlayer = match.getFirstPlayer();
         Player secondPlayer = match.getSecondPlayer();
-//        firstPlayer.setIsPlaying(true);
-//        secondPlayer.setIsPlaying(true);
+
         playerRepository.save(firstPlayer);
         playerRepository.save(secondPlayer);
     }

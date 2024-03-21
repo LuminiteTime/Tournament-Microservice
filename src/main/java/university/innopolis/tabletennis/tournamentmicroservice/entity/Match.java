@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import university.innopolis.tabletennis.tournamentmicroservice.utils.MatchState;
 
 @Entity
 @Getter
@@ -25,19 +26,13 @@ public class Match {
 
     private Integer secondPlayerScore;
 
-    private Boolean isBeingPlayed;
-    private Boolean isCompleted;
-
-    private enum state {
-        NOT_PLAYING, PLAYING, COMPLETED
-    }
+    private MatchState state;
 
     public Match(Player firstPlayer, Player secondPlayer) {
         this.firstPlayer = firstPlayer;
         this.secondPlayer = secondPlayer;
         this.firstPlayerScore = 0;
         this.secondPlayerScore = 0;
-        this.isBeingPlayed = false;
-        this.isCompleted = false;
+        this.state = MatchState.NOT_PLAYING;
     }
 }
