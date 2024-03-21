@@ -6,6 +6,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.*;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.IdListRequestBody;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.TournamentInfo;
+import university.innopolis.tabletennis.tournamentmicroservice.utils.PlayerState;
 
 import java.util.*;
 
@@ -89,23 +90,24 @@ public class TournamentService {
     public List<Match> retrieveAvailableMatches(Long tournamentId) {
         List<Match> allMatches = retrieveMatches(tournamentId);
         List<Match> availableMatches = new ArrayList<>();
-        Map<Player, Boolean> tempBusy = new HashMap<>();
+        Map<Player, PlayerState> tempBusy = new HashMap<>();
 
         Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
         if (tournament.isEmpty()) return availableMatches;
         for (Player player: tournament.get().getPlayersOfTournament()) {
-            tempBusy.put(player, false);
+            tempBusy.put(player, PlayerState.FREE);
         }
 
         for (Match match: allMatches) {
-            if (match.getFirstPlayer().getIsPlaying() || match.getSecondPlayer().getIsPlaying()
-                    || match.getIsCompleted() || match.getIsBeingPlayed() || tempBusy.get(match.getFirstPlayer())
-                    || tempBusy.get(match.getSecondPlayer())) {
+            if (match.getIsBeingPlayed() ||
+                    match.getIsCompleted() ||
+                    tempBusy.get(match.getFirstPlayer()).isBusy() ||
+                    tempBusy.get(match.getSecondPlayer()).isBusy())
                 continue;
-            }
+
             availableMatches.add(match);
-            tempBusy.put(match.getFirstPlayer(), true);
-            tempBusy.put(match.getSecondPlayer(), true);
+            tempBusy.put(match.getFirstPlayer(), PlayerState.PLAYING);
+            tempBusy.put(match.getSecondPlayer(), PlayerState.PLAYING);
         }
         return availableMatches;
     }

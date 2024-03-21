@@ -51,8 +51,8 @@ public class MatchService {
 
         Player firstPlayer = match.getFirstPlayer();
         Player secondPlayer = match.getSecondPlayer();
-        firstPlayer.setIsPlaying(false);
-        secondPlayer.setIsPlaying(false);
+//        firstPlayer.setIsPlaying(false);
+//        secondPlayer.setIsPlaying(false);
         playerRepository.save(firstPlayer);
         playerRepository.save(secondPlayer);
 
@@ -65,8 +65,8 @@ public class MatchService {
 
         Player firstPlayer = match.getFirstPlayer();
         Player secondPlayer = match.getSecondPlayer();
-        firstPlayer.setIsPlaying(true);
-        secondPlayer.setIsPlaying(true);
+//        firstPlayer.setIsPlaying(true);
+//        secondPlayer.setIsPlaying(true);
         playerRepository.save(firstPlayer);
         playerRepository.save(secondPlayer);
     }

@@ -32,36 +32,31 @@ public class MainController {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    // TODO
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Tournament postTournament(@RequestBody TournamentInfo tournamentInfo) {
-        return tournamentService.addTournament(tournamentInfo);
+    public ResponseEntity<Tournament> postTournament(@RequestBody TournamentInfo tournamentInfo) {
+        return new ResponseEntity<>(tournamentService.addTournament(tournamentInfo), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public List<Tournament> getTournaments(@RequestBody IdListRequestBody tournamentsList) {
-        return tournamentService.retrieveTournaments(tournamentsList);
+    public ResponseEntity<List<Tournament>> getTournaments(@RequestBody IdListRequestBody tournamentsList) {
+        return ResponseEntity.ok(tournamentService.retrieveTournaments(tournamentsList));
     }
 
-//    public ResponseEntity<List<Tournament>> getTournaments2(@RequestBody IdListRequestBody tournamentsList) {
-//        return ResponseEntity.ok(tournamentService.retrieveTournaments(tournamentsList));
-//    }
-
     @GetMapping("{tournamentId}/tables")
-    public List<GameTable> getAllTables(@PathVariable Long tournamentId) {
-        return tournamentService.retrieveGameTables(tournamentId);
+    public ResponseEntity<List<GameTable>> getAllTables(@PathVariable Long tournamentId) {
+        return ResponseEntity.ok(tournamentService.retrieveGameTables(tournamentId));
     }
 
     @PatchMapping("/{tournamentId}/match/{matchId}")
-    public Match patchMatchState(@PathVariable Long tournamentId,
+    public ResponseEntity<Match> patchMatchState(@PathVariable Long tournamentId,
                                  @PathVariable Long matchId,
                                  @RequestBody Optional<PatchMatchRequestBody> matchInfo) {
-        return matchService.patchMatchState(tournamentId, matchId, matchInfo);
+        return ResponseEntity.ok(matchService.patchMatchState(tournamentId, matchId, matchInfo));
     }
 
     @GetMapping("{tournamentId}/matches_available")
-    public List<Match> getAvailableMatches(@PathVariable Long tournamentId) {
-        return tournamentService.retrieveAvailableMatches(tournamentId);
+    public ResponseEntity<List<Match>> getAvailableMatches(@PathVariable Long tournamentId) {
+        return ResponseEntity.ok(tournamentService.retrieveAvailableMatches(tournamentId));
     }
 }
