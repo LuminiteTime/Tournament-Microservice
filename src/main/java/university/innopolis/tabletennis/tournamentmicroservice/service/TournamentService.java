@@ -40,28 +40,38 @@ public class TournamentService {
             return tournamentRepository.findAll();
         }
         for (Long id: tournamentsList.getIdList()) {
-            Optional<Tournament> tournament = tournamentRepository.findById(id);
-            if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + id + " does not exist.");
-            tournaments.add(tournament.get());
+            Tournament tournament = tournamentRepository.findById(id).orElseThrow(() ->
+                    new IllegalArgumentException(
+                            "Tournament with id " + id + " does not exist."
+                    )
+            );
+            tournaments.add(tournament);
         }
         return tournaments;
     }
 
     public List<Match> retrieveMatches(Long tournamentId) {
-        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
-        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
+        Tournament tournament = tournamentRepository.findById(tournamentId).orElseThrow(() ->
+                new IllegalArgumentException(
+                        "Tournament with id " + tournamentId + " does not exist."
+                )
+        );
         List<Match> matches = new ArrayList<>();
-        for (GameTable table: tournament.get().getTablesOfTournament()) {
+        for (GameTable table: tournament.getTablesOfTournament()) {
             matches.addAll(table.getMatchesOfTable());
         }
         return matches;
     }
 
     public List<GameTable> retrieveGameTables(Long tournamentId) {
-        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
-        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
-        return tournament.get()
-                .getTablesOfTournament();
+        Tournament tournament = tournamentRepository
+                .findById(tournamentId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Tournament with id " + tournamentId + " does not exist."
+                        )
+                );
+        return tournament.getTablesOfTournament();
     }
 
     public Tournament addTournament(TournamentInfo tournamentInfo) {
@@ -94,9 +104,14 @@ public class TournamentService {
         List<Match> availableMatches = new ArrayList<>();
         Map<Player, PlayerState> tempBusy = new HashMap<>();
 
-        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
-        if (tournament.isEmpty()) return availableMatches;
-        for (Player player: tournament.get().getPlayersOfTournament()) {
+        Tournament tournament = tournamentRepository
+                .findById(tournamentId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Tournament with id " + tournamentId + " does not exist."
+                        )
+                );
+        for (Player player: tournament.getPlayersOfTournament()) {
             tempBusy.put(player, PlayerState.FREE);
         }
 
@@ -114,10 +129,15 @@ public class TournamentService {
     }
 
     public Tournament patchTournamentState(Long tournamentId) {
-        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
-        if (tournament.isEmpty()) throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
-        tournament.get().setState(TournamentState.FINISHED);
-        tournamentRepository.save(tournament.get());
-        return tournament.get();
+        Tournament tournament = tournamentRepository
+                .findById(tournamentId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Tournament with id " + tournamentId + " does not exist."
+                        )
+                );
+        tournament.setState(TournamentState.FINISHED);
+        tournamentRepository.save(tournament);
+        return tournament;
     }
 }

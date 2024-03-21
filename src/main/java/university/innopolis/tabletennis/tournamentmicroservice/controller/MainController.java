@@ -57,7 +57,7 @@ public class MainController {
     public ResponseEntity<Match> patchMatchState(@PathVariable Long tournamentId,
                                  @PathVariable Long matchId,
                                  @RequestBody Optional<PatchMatchRequestBody> matchInfo) {
-        return ResponseEntity.ok(matchService.patchMatchState(tournamentId, matchId, matchInfo));
+        return ResponseEntity.ok(matchService.patchMatchState(matchId, matchInfo));
     }
 
     @GetMapping("/{tournamentId}/matches_available")

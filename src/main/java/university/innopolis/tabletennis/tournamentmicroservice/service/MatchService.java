@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Match;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.Tournament;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.MatchRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.PlayerRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.TournamentRepository;
@@ -24,16 +23,13 @@ public class MatchService {
     @Autowired
     private TournamentRepository tournamentRepository;
 
-    public Match patchMatchState(Long tournamentId, Long matchId, Optional<PatchMatchRequestBody> matchInfo) {
-        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
-        if (tournament.isEmpty())
-            throw new IllegalArgumentException("Tournament with id " + tournamentId + " does not exist.");
-
-        Optional<Match> matchToPatch = matchRepository.findById(matchId);
-        if (matchToPatch.isEmpty())
-            throw new IllegalArgumentException("Match with id " + matchId + " does not exist.");
-
-        Match match = matchToPatch.get();
+    public Match patchMatchState(Long matchId, Optional<PatchMatchRequestBody> matchInfo) {
+        Match match = matchRepository
+                .findById(matchId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Match with id " + matchId + " does not exist."
+                    )
+                );
 
         // Match is already completed, no changes in state needed.
         if (match.getState().equals(MatchState.COMPLETED))
