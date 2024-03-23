@@ -76,6 +76,7 @@ public class TournamentService {
 
     public Tournament addTournament(TournamentInfo tournamentInfo) {
         List<Player> playersToAdd = tournamentInfo.getPlayers();
+
         playerRepository.saveAll(playersToAdd);
 
         Tournament tournament = this.createTournament(tournamentInfo);
