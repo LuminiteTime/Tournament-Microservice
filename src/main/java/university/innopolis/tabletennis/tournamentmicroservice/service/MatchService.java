@@ -2,13 +2,15 @@ package university.innopolis.tabletennis.tournamentmicroservice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import university.innopolis.tabletennis.tournamentmicroservice.dto.MatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Match;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.MatchRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.PlayerRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.TournamentRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PatchMatchRequestBody;
-import university.innopolis.tabletennis.tournamentmicroservice.utils.MatchState;
+import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
+import university.innopolis.tabletennis.tournamentmicroservice.utils.MappingUtils;
 
 import java.util.Optional;
 
@@ -23,7 +25,7 @@ public class MatchService {
     @Autowired
     private TournamentRepository tournamentRepository;
 
-    public Match patchMatchState(Long matchId, Optional<PatchMatchRequestBody> matchInfo) {
+    public MatchDTO patchMatchState(Long matchId, Optional<PatchMatchRequestBody> matchInfo) {
         Match match = matchRepository
                 .findById(matchId)
                 .orElseThrow(() ->
@@ -33,7 +35,7 @@ public class MatchService {
 
         // Match is already completed, no changes in state needed.
         if (match.getState().equals(MatchState.COMPLETED))
-            return match;
+            return MappingUtils.mapToMatchDTO(match);
 
         // Match is about to start but an empty request body provided.
         if (match.getState().equals(MatchState.PLAYING) && matchInfo.isEmpty())
@@ -47,7 +49,7 @@ public class MatchService {
         }
         matchRepository.save(match);
 
-        return match;
+        return MappingUtils.mapToMatchDTO(match);
     }
 
     private void setMatchIsCompleted(Match match, PatchMatchRequestBody matchInfo) {

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import university.innopolis.tabletennis.tournamentmicroservice.utils.MatchState;
+import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
 
 @Entity
 @Getter

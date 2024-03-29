@@ -1,4 +1,4 @@
-package university.innopolis.tabletennis.tournamentmicroservice.utils;
+package university.innopolis.tabletennis.tournamentmicroservice.states;
 
 public enum MatchState {
     NOT_PLAYING,

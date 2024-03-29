@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
-import university.innopolis.tabletennis.tournamentmicroservice.requestbody.IdListRequestBody;
+import university.innopolis.tabletennis.tournamentmicroservice.dto.GameTableDTO;
+import university.innopolis.tabletennis.tournamentmicroservice.dto.MatchDTO;
+import university.innopolis.tabletennis.tournamentmicroservice.dto.TournamentDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PatchMatchRequestBody;
-import university.innopolis.tabletennis.tournamentmicroservice.requestbody.TournamentInfo;
 import university.innopolis.tabletennis.tournamentmicroservice.service.MatchService;
 import university.innopolis.tabletennis.tournamentmicroservice.service.TournamentService;
 
@@ -35,39 +35,39 @@ public class MainController {
     // TODO: Builder ResponseEntity
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Tournament> postTournament(@RequestBody TournamentInfo tournamentInfo) {
-        return new ResponseEntity<>(tournamentService.addTournament(tournamentInfo), HttpStatus.CREATED);
+    public ResponseEntity<TournamentDTO> postTournament(@RequestBody TournamentDTO tournamentDTO) {
+        return new ResponseEntity<>(tournamentService.addTournament(tournamentDTO), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<Tournament>> getTournaments() {
+    public ResponseEntity<List<TournamentDTO>> getTournaments() {
         return ResponseEntity.ok(tournamentService.retrieveAllTournaments()); // Builder
     }
 
     @GetMapping("/{tournamentId}")
-    public ResponseEntity<Tournament> getTournament(@PathVariable Long tournamentId) {
+    public ResponseEntity<TournamentDTO> getTournament(@PathVariable Long tournamentId) {
         return ResponseEntity.ok(tournamentService.retrieveTournament(tournamentId));
     }
 
     @PatchMapping("/{tournamentId}")
-    public ResponseEntity<Tournament> patchTournament(@PathVariable Long tournamentId) {
+    public ResponseEntity<TournamentDTO> patchTournament(@PathVariable Long tournamentId) {
         return ResponseEntity.ok(tournamentService.patchTournamentState(tournamentId));
     }
 
     @GetMapping("/{tournamentId}/tables")
-    public ResponseEntity<List<GameTable>> getAllTables(@PathVariable Long tournamentId) {
+    public ResponseEntity<List<GameTableDTO>> getAllTables(@PathVariable Long tournamentId) {
         return ResponseEntity.ok(tournamentService.retrieveGameTables(tournamentId));
     }
 
     @PatchMapping("/{tournamentId}/match/{matchId}")
-    public ResponseEntity<Match> patchMatchState(@PathVariable Long tournamentId,
-                                 @PathVariable Long matchId,
-                                 @RequestBody Optional<PatchMatchRequestBody> matchInfo) {
+    public ResponseEntity<MatchDTO> patchMatchState(@PathVariable Long tournamentId,
+                                                    @PathVariable Long matchId,
+                                                    @RequestBody Optional<PatchMatchRequestBody> matchInfo) {
         return ResponseEntity.ok(matchService.patchMatchState(matchId, matchInfo));
     }
 
     @GetMapping("/{tournamentId}/matches_available")
-    public ResponseEntity<List<Match>> getAvailableMatches(@PathVariable Long tournamentId) {
+    public ResponseEntity<List<MatchDTO>> getAvailableMatches(@PathVariable Long tournamentId) {
         return ResponseEntity.ok(tournamentService.retrieveAvailableMatches(tournamentId));
     }
 }

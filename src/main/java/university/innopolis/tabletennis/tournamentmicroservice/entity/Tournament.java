@@ -4,12 +4,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import university.innopolis.tabletennis.tournamentmicroservice.exception.InvalidNumberOfPlayersException;
-import university.innopolis.tabletennis.tournamentmicroservice.requestbody.TournamentInfo;
-import university.innopolis.tabletennis.tournamentmicroservice.utils.TournamentState;
+import university.innopolis.tabletennis.tournamentmicroservice.builderinterface.ITournamentBuilder;
+import university.innopolis.tabletennis.tournamentmicroservice.states.TournamentState;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Entity
@@ -21,21 +20,59 @@ public class Tournament {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String title;
+
     @OneToMany
     private List<GameTable> tablesOfTournament;
 
     @OneToMany()
-    private List<Player> playersOfTournament;
+    private List<Player> players;
 
     private TournamentState state;
 
-    public Tournament(TournamentInfo info) {
+    private LocalDate date;
+
+    private Tournament(TournamentBuilder builder) {
+        this.title = builder.title;
+        this.date = builder.date;
         this.state = TournamentState.PLAYING;
-        this.playersOfTournament = info.getPlayers();
-        this.tablesOfTournament = chooseGameTables(this.playersOfTournament.size());
-        this.fillTables(this.playersOfTournament);
+        this.players = builder.players;
+
+        this.tablesOfTournament = chooseGameTables(this.players.size());
+        this.fillTables(this.players);
         for (GameTable gameTable: this.tablesOfTournament) {
             this.fillRounds(gameTable, setTypeOfGameTable(gameTable, gameTable.getSize()));
+        }
+    }
+
+    @NoArgsConstructor
+    public static class TournamentBuilder implements ITournamentBuilder {
+
+        private String title;
+        private List<Player> players;
+        private LocalDate date;
+
+        @Override
+        public Tournament.TournamentBuilder title(String title) {
+            this.title = title;
+            return this;
+        }
+
+        @Override
+        public Tournament.TournamentBuilder date(LocalDate date) {
+            this.date = date;
+            return this;
+        }
+
+        @Override
+        public Tournament.TournamentBuilder players(List<Player> players) {
+            this.players = players;
+            return this;
+        }
+
+        @Override
+        public Tournament build() {
+            return new Tournament(this);
         }
     }
 
@@ -272,8 +309,8 @@ public class Tournament {
             Round roundToAdd = new Round();
             for (List<Integer> match: playersIndex) {
                 Match matchToAdd = new Match(
-                        table.getPlayersOfTable().get(match.get(0)),
-                        table.getPlayersOfTable().get(match.get(1))
+                        table.getPlayers().get(match.get(0)),
+                        table.getPlayers().get(match.get(1))
                 );
                 roundToAdd.addMatch(matchToAdd);
                 table.addMatch(matchToAdd);
