@@ -1,5 +1,6 @@
 package university.innopolis.tabletennis.tournamentmicroservice.service;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.MatchDTO;
@@ -37,7 +38,7 @@ public class MatchService {
                 .findById(matchId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Match with id " + matchId + " does not exist."
-                    )
+                        )
                 );
 
         // Match is already completed, no changes in state needed.
@@ -45,8 +46,15 @@ public class MatchService {
             return MappingUtils.mapToMatchDTO(match);
 
         // Match is about to start but an empty request body provided.
-        if (match.getState().equals(MatchState.PLAYING) && matchInfo.isEmpty())
-            throw new IllegalArgumentException("Match score is not provided.");
+        if (match.getState().equals(MatchState.PLAYING)) {
+            if (matchInfo.isEmpty()) {
+                throw new IllegalArgumentException("Match score is not provided.");
+            } else if (matchInfo.get().getFirstPlayerScore() == null) {
+                throw new IllegalArgumentException("First player score is not provided.");
+            } else if (matchInfo.get().getSecondPlayerScore() == null) {
+                throw new IllegalArgumentException("Second player score is not provided.");
+            }
+        }
 
         // Switching the state of the match.
         if (match.getState().equals(MatchState.PLAYING)) {

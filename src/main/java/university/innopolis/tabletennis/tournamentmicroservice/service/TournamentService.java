@@ -3,12 +3,9 @@ package university.innopolis.tabletennis.tournamentmicroservice.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.GameTableDTO;
-import university.innopolis.tabletennis.tournamentmicroservice.dto.MatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.TournamentDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.*;
-import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
-import university.innopolis.tabletennis.tournamentmicroservice.states.PlayerState;
 import university.innopolis.tabletennis.tournamentmicroservice.states.TournamentState;
 import university.innopolis.tabletennis.tournamentmicroservice.utils.MappingUtils;
 
@@ -61,6 +58,12 @@ public class TournamentService {
     }
 
     public TournamentDTO addTournament(TournamentDTO tournamentDTO) {
+        if (tournamentRepository.findAll().stream()
+                .map(Tournament::getTitle)
+                .toList()
+                .contains(tournamentDTO.getTitle()))
+            throw new IllegalArgumentException("Title must be unique.");
+
         List<Player> playersToAdd = tournamentDTO.getPlayers().stream()
                 .map(MappingUtils::mapToPlayerEntity)
                 .toList();

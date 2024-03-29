@@ -1,5 +1,7 @@
 package university.innopolis.tabletennis.tournamentmicroservice.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import university.innopolis.tabletennis.tournamentmicroservice.builderinterface.ITournamentDTOBuilder;
@@ -10,8 +12,14 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class TournamentDTO {
+
+    @NotBlank(message = "Title is not provided.")
     private String title;
+
+    @NotNull(message = "Date is not provided.")
     private LocalDate date;
+
+    @NotNull(message = "Players are not provided.")
     private List<PlayerDTO> players;
 
     private TournamentDTO(TournamentDTOBuilder builder) {
