@@ -31,8 +31,6 @@ public class Match {
     public Match(Player firstPlayer, Player secondPlayer) {
         this.firstPlayer = firstPlayer;
         this.secondPlayer = secondPlayer;
-        this.firstPlayerScore = 0;
-        this.secondPlayerScore = 0;
         this.state = MatchState.NOT_PLAYING;
     }
 }

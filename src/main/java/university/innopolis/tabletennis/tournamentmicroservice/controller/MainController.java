@@ -32,6 +32,7 @@ public class MainController {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    // TODO: Builder ResponseEntity
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Tournament> postTournament(@RequestBody TournamentInfo tournamentInfo) {
@@ -39,8 +40,13 @@ public class MainController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Tournament>> getTournaments(@RequestBody IdListRequestBody tournamentsList) {
-        return ResponseEntity.ok(tournamentService.retrieveTournaments(tournamentsList));
+    public ResponseEntity<List<Tournament>> getTournaments() {
+        return ResponseEntity.ok(tournamentService.retrieveAllTournaments()); // Builder
+    }
+
+    @GetMapping("/{tournamentId}")
+    public ResponseEntity<Tournament> getTournament(@PathVariable Long tournamentId) {
+        return ResponseEntity.ok(tournamentService.retrieveTournament(tournamentId));
     }
 
     @PatchMapping("/{tournamentId}")

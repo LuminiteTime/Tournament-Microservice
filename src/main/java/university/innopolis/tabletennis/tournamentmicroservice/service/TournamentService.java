@@ -34,20 +34,16 @@ public class TournamentService {
         return new Tournament(tournamentInfo);
     }
 
-    public List<Tournament> retrieveTournaments(IdListRequestBody tournamentsList) {
-        List<Tournament> tournaments = new ArrayList<>();
-        if (tournamentsList.getIdList().isEmpty()) {
-            return tournamentRepository.findAll();
-        }
-        for (Long id: tournamentsList.getIdList()) {
-            Tournament tournament = tournamentRepository.findById(id).orElseThrow(() ->
-                    new IllegalArgumentException(
-                            "Tournament with id " + id + " does not exist."
-                    )
-            );
-            tournaments.add(tournament);
-        }
-        return tournaments;
+    public List<Tournament> retrieveAllTournaments() {
+        return tournamentRepository.findAll();
+    }
+
+    public Tournament retrieveTournament(Long id) {
+        return tournamentRepository.findById(id).orElseThrow(() ->
+                new IllegalArgumentException(
+                        "Tournament with id " + id + " does not exist."
+                )
+        );
     }
 
     public List<Match> retrieveMatches(Long tournamentId) {
