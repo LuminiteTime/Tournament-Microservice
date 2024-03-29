@@ -66,8 +66,9 @@ public class MainController {
         return ResponseEntity.ok(matchService.patchMatchState(matchId, matchInfo));
     }
 
-    @GetMapping("/{tournamentId}/matches_available")
-    public ResponseEntity<List<MatchDTO>> getAvailableMatches(@PathVariable Long tournamentId) {
-        return ResponseEntity.ok(tournamentService.retrieveAvailableMatches(tournamentId));
+    @GetMapping("/{tournamentId}/tables/{tableId}/matches_available")
+    public ResponseEntity<List<MatchDTO>> getAvailableMatches(@PathVariable Long tournamentId,
+                                                              @PathVariable Long tableId) {
+        return ResponseEntity.ok(matchService.retrieveAvailableMatches(tableId));
     }
 }

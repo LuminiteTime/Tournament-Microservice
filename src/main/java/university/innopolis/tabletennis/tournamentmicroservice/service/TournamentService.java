@@ -47,19 +47,6 @@ public class TournamentService {
         return MappingUtils.mapToTournamentDTO(tournament);
     }
 
-    public List<Match> retrieveMatches(Long tournamentId) {
-        Tournament tournament = tournamentRepository.findById(tournamentId).orElseThrow(() ->
-                new IllegalArgumentException(
-                        "Tournament with id " + tournamentId + " does not exist."
-                )
-        );
-        List<Match> matches = new ArrayList<>();
-        for (GameTable table: tournament.getTablesOfTournament()) {
-            matches.addAll(table.getMatches());
-        }
-        return matches;
-    }
-
     public List<GameTableDTO> retrieveGameTables(Long tournamentId) {
         Tournament tournament = tournamentRepository
                 .findById(tournamentId)
@@ -103,37 +90,6 @@ public class TournamentService {
         // Saving tournament.
         tournamentRepository.save(tournament);
         return MappingUtils.mapToTournamentDTO(tournament);
-    }
-
-    public List<MatchDTO> retrieveAvailableMatches(Long tournamentId) {
-        List<Match> allMatches = retrieveMatches(tournamentId);
-        List<Match> availableMatches = new ArrayList<>();
-        Map<Player, PlayerState> tempBusy = new HashMap<>();
-
-        Tournament tournament = tournamentRepository
-                .findById(tournamentId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Tournament with id " + tournamentId + " does not exist."
-                        )
-                );
-        for (Player player: tournament.getPlayers()) {
-            tempBusy.put(player, PlayerState.FREE);
-        }
-
-        for (Match match: allMatches) {
-            if (!match.getState().equals(MatchState.NOT_PLAYING) ||
-                    tempBusy.get(match.getFirstPlayer()).isBusy() ||
-                    tempBusy.get(match.getSecondPlayer()).isBusy())
-                continue;
-
-            availableMatches.add(match);
-            tempBusy.put(match.getFirstPlayer(), PlayerState.PLAYING);
-            tempBusy.put(match.getSecondPlayer(), PlayerState.PLAYING);
-        }
-        return availableMatches.stream()
-                .map(MappingUtils::mapToMatchDTO)
-                .toList();
     }
 
     public TournamentDTO patchTournamentState(Long tournamentId) {

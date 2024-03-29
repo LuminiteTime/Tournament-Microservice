@@ -3,16 +3,20 @@ package university.innopolis.tabletennis.tournamentmicroservice.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.MatchDTO;
+import university.innopolis.tabletennis.tournamentmicroservice.entity.GameTable;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Match;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
+import university.innopolis.tabletennis.tournamentmicroservice.entity.Tournament;
+import university.innopolis.tabletennis.tournamentmicroservice.repository.GameTableRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.MatchRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.PlayerRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.TournamentRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.requestbody.PatchMatchRequestBody;
 import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
+import university.innopolis.tabletennis.tournamentmicroservice.states.PlayerState;
 import university.innopolis.tabletennis.tournamentmicroservice.utils.MappingUtils;
 
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class MatchService {
@@ -24,6 +28,9 @@ public class MatchService {
 
     @Autowired
     private TournamentRepository tournamentRepository;
+
+    @Autowired
+    private GameTableRepository gameTableRepository;
 
     public MatchDTO patchMatchState(Long matchId, Optional<PatchMatchRequestBody> matchInfo) {
         Match match = matchRepository
@@ -73,5 +80,35 @@ public class MatchService {
 
         playerRepository.save(firstPlayer);
         playerRepository.save(secondPlayer);
+    }
+
+    public List<MatchDTO> retrieveAvailableMatches(Long tableId) {
+        GameTable gameTable = gameTableRepository
+                .findById(tableId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Game table with id " + tableId + " does not exist."
+                        )
+                );
+
+        List<Match> availableMatches = new ArrayList<>();
+        Map<Player, PlayerState> tempBusy = new HashMap<>();
+
+        for (Player player: gameTable.getPlayers()) {
+            tempBusy.put(player, PlayerState.FREE);
+        }
+
+        for (Match match: gameTable.getMatches()) {
+            if (!match.getState().equals(MatchState.NOT_PLAYING) ||
+                    tempBusy.get(match.getFirstPlayer()).isBusy() ||
+                    tempBusy.get(match.getSecondPlayer()).isBusy())
+                continue;
+
+            availableMatches.add(match);
+            tempBusy.put(match.getFirstPlayer(), PlayerState.PLAYING);
+            tempBusy.put(match.getSecondPlayer(), PlayerState.PLAYING);
+        }
+        return availableMatches.stream()
+                .map(MappingUtils::mapToMatchDTO)
+                .toList();
     }
 }
