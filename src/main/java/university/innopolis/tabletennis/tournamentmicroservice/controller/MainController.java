@@ -34,12 +34,12 @@ public class MainController {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException e) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleValidationExceptions(
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
@@ -47,46 +47,44 @@ public class MainController {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        return errors;
+        return ResponseEntity.badRequest().body(errors);
     }
 
-    // TODO: Builder ResponseEntity
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<TournamentDTO> postTournament(@Valid @RequestBody TournamentDTO tournamentDTO) {
-        return new ResponseEntity<>(tournamentService.addTournament(tournamentDTO), HttpStatus.CREATED);
-    }
+        return ResponseEntity.ok().body(tournamentService.addTournament(tournamentDTO));}
 
     @GetMapping
     public ResponseEntity<List<TournamentDTO>> getTournaments() {
-        return ResponseEntity.ok(tournamentService.retrieveAllTournaments()); // Builder
+        return ResponseEntity.ok().body(tournamentService.retrieveAllTournaments());
     }
 
     @GetMapping("/{tournamentId}")
     public ResponseEntity<TournamentDTO> getTournament(@PathVariable Long tournamentId) {
-        return ResponseEntity.ok(tournamentService.retrieveTournament(tournamentId));
+        return ResponseEntity.ok().body(tournamentService.retrieveTournament(tournamentId));
     }
 
     @PatchMapping("/{tournamentId}")
     public ResponseEntity<TournamentDTO> patchTournament(@PathVariable Long tournamentId) {
-        return ResponseEntity.ok(tournamentService.patchTournamentState(tournamentId));
+        return ResponseEntity.ok().body(tournamentService.patchTournamentState(tournamentId));
     }
 
     @GetMapping("/{tournamentId}/tables")
     public ResponseEntity<List<GameTableDTO>> getAllTables(@PathVariable Long tournamentId) {
-        return ResponseEntity.ok(tournamentService.retrieveGameTables(tournamentId));
+        return ResponseEntity.ok().body(tournamentService.retrieveGameTables(tournamentId));
     }
 
     @PatchMapping("/{tournamentId}/match/{matchId}")
     public ResponseEntity<MatchDTO> patchMatchState(@PathVariable Long tournamentId,
                                                     @PathVariable Long matchId,
                                                     @RequestBody Optional<PatchMatchRequestBody> matchInfo) {
-        return ResponseEntity.ok(matchService.patchMatchState(matchId, matchInfo));
+        return ResponseEntity.ok().body(matchService.patchMatchState(matchId, matchInfo));
     }
 
     @GetMapping("/{tournamentId}/tables/{tableId}/matches_available")
     public ResponseEntity<List<MatchDTO>> getAvailableMatches(@PathVariable Long tournamentId,
                                                               @PathVariable Long tableId) {
-        return ResponseEntity.ok(matchService.retrieveAvailableMatches(tableId));
+        return ResponseEntity.ok().body(matchService.retrieveAvailableMatches(tableId));
     }
 }
