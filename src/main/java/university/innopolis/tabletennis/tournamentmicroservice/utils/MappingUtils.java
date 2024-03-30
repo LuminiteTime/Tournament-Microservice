@@ -14,6 +14,7 @@ public class MappingUtils {
                 .players(entity.getPlayers().stream()
                         .map(MappingUtils::mapToPlayerDTO)
                         .toList())
+                .state(entity.getState())
                 .build();
     }
 
