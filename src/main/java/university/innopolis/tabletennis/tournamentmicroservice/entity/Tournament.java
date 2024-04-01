@@ -105,200 +105,187 @@ public class Tournament {
         return tableList;
     }
 
-    private static List<List<List<Integer>>> setTypeOfGameTable(GameTable gameTable, int sizeOfGameTable) {
-        List<List<List<Integer>>> playersIndexes;
-        switch (sizeOfGameTable) {
-            case 8:
-                playersIndexes = List.of(
-                        // Round 1
-                        List.of(
-                                List.of(0, 7),
-                                List.of(1, 6),
-                                List.of(2, 5),
-                                List.of(3, 4)
-                        ),
-                        // Round 2
-                        List.of(
-                                List.of(6, 0),
-                                List.of(7, 5),
-                                List.of(1, 4),
-                                List.of(2, 3)
-                        ),
-                        // Round 3
-                        List.of(
-                                List.of(0, 5),
-                                List.of(6, 4),
-                                List.of(7, 3),
-                                List.of(1, 2)
-                        ),
-                        // Round 4
-                        List.of(
-                                List.of(4, 0),
-                                List.of(5, 3),
-                                List.of(6, 2),
-                                List.of(7, 1)
-                        ),
-                        // Round 5
-                        List.of(
-                                List.of(0, 3),
-                                List.of(4, 2),
-                                List.of(5, 1),
-                                List.of(6, 7)
-                        ),
-                        // Round 6
-                        List.of(
-                                List.of(2, 0),
-                                List.of(3, 1),
-                                List.of(4, 7),
-                                List.of(5, 6)
-                        ),
-                        // Round 7
-                        List.of(
-                                List.of(0, 1),
-                                List.of(2, 7),
-                                List.of(3, 6),
-                                List.of(4, 5)
-                        )
-                );
-                break;
-            case 7:
-                playersIndexes = List.of(
-                        // Round 1
-                        List.of(
-                                List.of(1, 6),
-                                List.of(2, 5),
-                                List.of(3, 4)
-                        ),
-                        // Round 2
-                        List.of(
-                                List.of(6, 0),
-                                List.of(1, 4),
-                                List.of(2, 3)
-                        ),
-                        // Round 3
-                        List.of(
-                                List.of(0, 5),
-                                List.of(6, 4),
-                                List.of(1, 2)
-                        ),
-                        // Round 4
-                        List.of(
-                                List.of(4, 0),
-                                List.of(5, 3),
-                                List.of(6, 2)
-                        ),
-                        // Round 5
-                        List.of(
-                                List.of(0, 3),
-                                List.of(4, 2),
-                                List.of(5, 1)
-                        ),
-                        // Round 6
-                        List.of(
-                                List.of(2, 0),
-                                List.of(3, 1),
-                                List.of(5, 6)
-                        ),
-                        // Round 7
-                        List.of(
-                                List.of(0, 1),
-                                List.of(3, 6),
-                                List.of(4, 5)
-                        )
-                );
-                break;
-            case 6:
-                playersIndexes = List.of(
-                        // Round 1
-                        List.of(
-                                List.of(0, 5),
-                                List.of(1, 4),
-                                List.of(2, 3)
-                        ),
-                        // Round 2
-                        List.of(
-                                List.of(4, 0),
-                                List.of(5, 3),
-                                List.of(1, 2)
-                        ),
-                        // Round 3
-                        List.of(
-                                List.of(0, 3),
-                                List.of(4, 2),
-                                List.of(5, 1)
-                        ),
-                        // Round 4
-                        List.of(
-                                List.of(2, 0),
-                                List.of(3, 1),
-                                List.of(4, 5)
-                        ),
-                        // Round 5
-                        List.of(
-                                List.of(0, 1),
-                                List.of(2, 5),
-                                List.of(3, 4)
-                        )
-                );
-                break;
-            case 5:
-                playersIndexes = List.of(
-                        // Round 1
-                        List.of(
-                                List.of(1, 4),
-                                List.of(2, 3)
-                        ),
-                        // Round 2
-                        List.of(
-                                List.of(4, 0),
-                                List.of(1, 2)
-                        ),
-                        // Round 3
-                        List.of(
-                                List.of(0, 3),
-                                List.of(4, 2)
-                        ),
-                        // Round 4
-                        List.of(
-                                List.of(2, 0),
-                                List.of(3, 1)
-                        ),
-                        // Round 5
-                        List.of(
-                                List.of(0, 1),
-                                List.of(3, 4)
-                        )
-                );
-                break;
-            case 4:
-                playersIndexes = List.of(
-                        // Round 1
-                        List.of(
-                                List.of(0, 3),
-                                List.of(1, 2)
-                        ),
-                        // Round 2
-                        List.of(
-                                List.of(0, 2),
-                                List.of(1, 3)
-                        ),
-                        // Round 3
-                        List.of(
-                                List.of(0, 1),
-                                List.of(2, 3)
-                        )
-                );
-                break;
-            default:
-                playersIndexes = new ArrayList<>();
-        }
+    private static List<List<List<Integer>>> setTypeOfGameTable(int sizeOfGameTable) {
+        List<List<List<Integer>>> playersIndexes = switch (sizeOfGameTable) {
+            case 8 -> List.of(
+                    // Round 1
+                    List.of(
+                            List.of(0, 7),
+                            List.of(1, 6),
+                            List.of(2, 5),
+                            List.of(3, 4)
+                    ),
+                    // Round 2
+                    List.of(
+                            List.of(6, 0),
+                            List.of(7, 5),
+                            List.of(1, 4),
+                            List.of(2, 3)
+                    ),
+                    // Round 3
+                    List.of(
+                            List.of(0, 5),
+                            List.of(6, 4),
+                            List.of(7, 3),
+                            List.of(1, 2)
+                    ),
+                    // Round 4
+                    List.of(
+                            List.of(4, 0),
+                            List.of(5, 3),
+                            List.of(6, 2),
+                            List.of(7, 1)
+                    ),
+                    // Round 5
+                    List.of(
+                            List.of(0, 3),
+                            List.of(4, 2),
+                            List.of(5, 1),
+                            List.of(6, 7)
+                    ),
+                    // Round 6
+                    List.of(
+                            List.of(2, 0),
+                            List.of(3, 1),
+                            List.of(4, 7),
+                            List.of(5, 6)
+                    ),
+                    // Round 7
+                    List.of(
+                            List.of(0, 1),
+                            List.of(2, 7),
+                            List.of(3, 6),
+                            List.of(4, 5)
+                    )
+            );
+            case 7 -> List.of(
+                    // Round 1
+                    List.of(
+                            List.of(1, 6),
+                            List.of(2, 5),
+                            List.of(3, 4)
+                    ),
+                    // Round 2
+                    List.of(
+                            List.of(6, 0),
+                            List.of(1, 4),
+                            List.of(2, 3)
+                    ),
+                    // Round 3
+                    List.of(
+                            List.of(0, 5),
+                            List.of(6, 4),
+                            List.of(1, 2)
+                    ),
+                    // Round 4
+                    List.of(
+                            List.of(4, 0),
+                            List.of(5, 3),
+                            List.of(6, 2)
+                    ),
+                    // Round 5
+                    List.of(
+                            List.of(0, 3),
+                            List.of(4, 2),
+                            List.of(5, 1)
+                    ),
+                    // Round 6
+                    List.of(
+                            List.of(2, 0),
+                            List.of(3, 1),
+                            List.of(5, 6)
+                    ),
+                    // Round 7
+                    List.of(
+                            List.of(0, 1),
+                            List.of(3, 6),
+                            List.of(4, 5)
+                    )
+            );
+            case 6 -> List.of(
+                    // Round 1
+                    List.of(
+                            List.of(0, 5),
+                            List.of(1, 4),
+                            List.of(2, 3)
+                    ),
+                    // Round 2
+                    List.of(
+                            List.of(4, 0),
+                            List.of(5, 3),
+                            List.of(1, 2)
+                    ),
+                    // Round 3
+                    List.of(
+                            List.of(0, 3),
+                            List.of(4, 2),
+                            List.of(5, 1)
+                    ),
+                    // Round 4
+                    List.of(
+                            List.of(2, 0),
+                            List.of(3, 1),
+                            List.of(4, 5)
+                    ),
+                    // Round 5
+                    List.of(
+                            List.of(0, 1),
+                            List.of(2, 5),
+                            List.of(3, 4)
+                    )
+            );
+            case 5 -> List.of(
+                    // Round 1
+                    List.of(
+                            List.of(1, 4),
+                            List.of(2, 3)
+                    ),
+                    // Round 2
+                    List.of(
+                            List.of(4, 0),
+                            List.of(1, 2)
+                    ),
+                    // Round 3
+                    List.of(
+                            List.of(0, 3),
+                            List.of(4, 2)
+                    ),
+                    // Round 4
+                    List.of(
+                            List.of(2, 0),
+                            List.of(3, 1)
+                    ),
+                    // Round 5
+                    List.of(
+                            List.of(0, 1),
+                            List.of(3, 4)
+                    )
+            );
+            case 4 -> List.of(
+                    // Round 1
+                    List.of(
+                            List.of(0, 3),
+                            List.of(1, 2)
+                    ),
+                    // Round 2
+                    List.of(
+                            List.of(0, 2),
+                            List.of(1, 3)
+                    ),
+                    // Round 3
+                    List.of(
+                            List.of(0, 1),
+                            List.of(2, 3)
+                    )
+            );
+            default -> new ArrayList<>();
+        };
         return playersIndexes;
     }
 
     public void fillTables(List<Player> allPlayers) {
         int tableIndex = 0;
-        for (int i = 0; i < allPlayers.size(); i++) {
-            Player player = allPlayers.get(i);
+        for (Player player: allPlayers) {
             this.tablesOfTournament.get(tableIndex).addPlayer(player);
             tableIndex = (tableIndex + 1) % this.tablesOfTournament.size();
         }
