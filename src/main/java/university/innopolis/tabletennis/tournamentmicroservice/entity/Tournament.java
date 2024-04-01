@@ -25,7 +25,7 @@ public class Tournament {
     @OneToMany
     private List<GameTable> tablesOfTournament;
 
-    @OneToMany()
+    @OneToMany
     private List<Player> players;
 
     private TournamentState state;
