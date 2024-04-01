@@ -7,8 +7,8 @@ import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 @Service
 public class MappingUtils {
 
-    static public TournamentDTO mapToTournamentDTO(Tournament entity) {
-        return new TournamentDTO.TournamentDTOBuilder()
+    public static TournamentDTO mapToTournamentDTO(Tournament entity) {
+        return TournamentDTO.builder()
                 .title(entity.getTitle())
                 .date(entity.getDate())
                 .players(entity.getPlayers().stream()
@@ -19,7 +19,7 @@ public class MappingUtils {
     }
 
     public static GameTableDTO mapToGameTableDTO(GameTable entity) {
-        return new GameTableDTO.GameTableDTOBuilder()
+        return GameTableDTO.builder()
                 .players(entity.getPlayers().stream()
                         .map(MappingUtils::mapToPlayerDTO)
                         .toList())
@@ -33,7 +33,7 @@ public class MappingUtils {
     }
 
     public static MatchDTO mapToMatchDTO(Match entity) {
-        return new MatchDTO.MatchDTOBuilder()
+        return MatchDTO.builder()
                 .firstPlayerId(entity.getFirstPlayer().getExternalId())
                 .secondPlayerId(entity.getSecondPlayer().getExternalId())
                 .firstPlayerScore(entity.getFirstPlayerScore())
