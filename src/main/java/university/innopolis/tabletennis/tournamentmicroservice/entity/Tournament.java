@@ -41,7 +41,7 @@ public class Tournament {
         this.tablesOfTournament = chooseGameTables(this.players.size());
         this.fillTables(this.players);
         for (GameTable gameTable: this.tablesOfTournament) {
-            this.fillRounds(gameTable, setTypeOfGameTable(gameTable, gameTable.getSize()));
+            this.fillRounds(gameTable, setTypeOfGameTable(gameTable.getSize()));
         }
     }
 
