@@ -93,7 +93,10 @@ public class MainController {
                 .toList());
     }
 
-    @Operation(summary = "Make the match started if not started and completed if started", description = "Allows to make the match started if not started and completed if started")
+    @Operation(
+            summary = "Make the match started if not started and completed if started",
+            description = "Allows to make the match started if not started and completed if started. " +
+                    "No matter what to pass when a match starts but it is important to provide score to make the match completed.")
     @PatchMapping("/{tournamentId}/match/{matchId}")
     public ResponseEntity<MatchDTO> patchMatchState(@PathVariable @Parameter(description = "Id of the tournament") Long tournamentId, @PathVariable @Parameter(description = "Id of the match") Long matchId, @RequestBody @Parameter(description = "Match score to mark match as completed") Optional<PatchMatchDTO> matchInfo) {
         return ResponseEntity.ok().body(matchService.patchMatchState(matchId, matchInfo));
