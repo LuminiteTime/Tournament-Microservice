@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.TournamentDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
+import university.innopolis.tabletennis.tournamentmicroservice.exception.TournamentNotFoundException;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.*;
 import university.innopolis.tabletennis.tournamentmicroservice.states.TournamentState;
 
@@ -31,11 +32,9 @@ public class TournamentService {
         return tournamentRepository.findAll();
     }
 
-    public Tournament retrieveTournament(Long id) {
-        return tournamentRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException(
-                        "Tournament with id " + id + " does not exist."
-                )
+    public Tournament retrieveTournament(Long tournamentId) {
+        return tournamentRepository.findById(tournamentId).orElseThrow(() ->
+                new TournamentNotFoundException(tournamentId)
         );
     }
 
@@ -43,9 +42,7 @@ public class TournamentService {
         Tournament tournament = tournamentRepository
                 .findById(tournamentId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Tournament with id " + tournamentId + " does not exist."
-                        )
+                        new TournamentNotFoundException(tournamentId)
                 );
         return tournament.getTablesOfTournament();
     }
@@ -88,9 +85,7 @@ public class TournamentService {
         Tournament tournament = tournamentRepository
                 .findById(tournamentId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Tournament with id " + tournamentId + " does not exist."
-                        )
+                        new TournamentNotFoundException(tournamentId)
                 );
         tournament.setState(TournamentState.FINISHED);
         tournamentRepository.save(tournament);
