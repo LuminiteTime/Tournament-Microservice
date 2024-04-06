@@ -17,9 +17,11 @@ import university.innopolis.tabletennis.tournamentmicroservice.dto.MatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.TournamentDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
+import university.innopolis.tabletennis.tournamentmicroservice.entity.Tournament;
 import university.innopolis.tabletennis.tournamentmicroservice.exception.ErrorResponse;
 import university.innopolis.tabletennis.tournamentmicroservice.service.MatchService;
 import university.innopolis.tabletennis.tournamentmicroservice.service.TournamentService;
+import university.innopolis.tabletennis.tournamentmicroservice.states.TournamentState;
 import university.innopolis.tabletennis.tournamentmicroservice.utils.MappingUtils;
 
 import java.util.HashMap;
@@ -109,6 +111,9 @@ public class MainController {
     @Operation(summary = "Get matches available to be played", description = "Allows to get matches ready to be played")
     @GetMapping("/{tournamentId}/tables/{tableId}/matches_available")
     public ResponseEntity<List<MatchDTO>> getAvailableMatches(@PathVariable @Parameter(description = "Id of the tournament") Long tournamentId, @PathVariable @Parameter(description = "Id of the table with matches") Long tableId) {
+        if (tournamentService.retrieveTournament(tournamentId).getState() != TournamentState.PLAYING) {
+            throw new IllegalArgumentException("Tournament with id " + tournamentId + " is not being played.");
+        }
         return ResponseEntity.ok().body(matchService.retrieveAvailableMatches(tableId));
     }
 }
