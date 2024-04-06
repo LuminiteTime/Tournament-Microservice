@@ -4,13 +4,15 @@ import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.*;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 
+import java.time.LocalDate;
+
 @Service
 public class MappingUtils {
 
     public static TournamentDTO mapToTournamentDTO(Tournament entity) {
         return TournamentDTO.builder()
                 .title(entity.getTitle())
-                .date(entity.getDate())
+                .date(LocalDate.now())
                 .players(entity.getPlayers().stream()
                         .map(MappingUtils::mapToPlayerDTO)
                         .toList())

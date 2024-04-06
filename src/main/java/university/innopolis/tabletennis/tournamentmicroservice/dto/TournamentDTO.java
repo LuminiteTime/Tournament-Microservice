@@ -24,7 +24,6 @@ public class TournamentDTO {
     private String title;
 
     @Schema(description = "Date of the tournament")
-    @NotNull(message = "Date is not provided")
     private LocalDate date;
 
     @Schema(description = "Players of the tournament")

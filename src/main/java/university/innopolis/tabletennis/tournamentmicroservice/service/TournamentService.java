@@ -58,7 +58,6 @@ public class TournamentService {
 
         Tournament tournament = new Tournament.TournamentBuilder()
                 .title(tournamentDTO.getTitle())
-                .date(tournamentDTO.getDate())
                 .players(playersToAdd)
                 .build();
         List<GameTable> tablesOfTournament = tournament.getTablesOfTournament();
