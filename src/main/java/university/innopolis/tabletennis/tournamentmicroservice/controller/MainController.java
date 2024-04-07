@@ -116,5 +116,14 @@ public class MainController {
         }
         return ResponseEntity.ok().body(matchService.retrieveAvailableMatches(tableId));
     }
+
+    @GetMapping("/{tournamentId}/matches")
+    public ResponseEntity<List<MatchDTO>> getAllMatches(@PathVariable Long tournamentId) {
+        return ResponseEntity.ok().body(
+                tournamentService.retrieveALlMatches(tournamentId).stream()
+                        .map(MappingUtils::mapToMatchDTO)
+                        .toList()
+        );
+    }
 }
 

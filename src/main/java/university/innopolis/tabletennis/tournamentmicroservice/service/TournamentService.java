@@ -90,4 +90,19 @@ public class TournamentService {
         tournamentRepository.save(tournament);
         return tournament;
     }
+
+    public List<Match> retrieveALlMatches(Long tournamentId) {
+        Tournament tournament = tournamentRepository
+                .findById(tournamentId)
+                .orElseThrow(() ->
+                        new TournamentNotFoundException(tournamentId)
+                );
+        List<Match> allMatches = new ArrayList<>();
+        for (GameTable table: tournament.getTablesOfTournament()) {
+            allMatches.addAll(table.getMatches());
+        }
+        return allMatches.stream()
+                .sorted(Comparator.comparing(Match::getId))
+                .toList();
+    }
 }
