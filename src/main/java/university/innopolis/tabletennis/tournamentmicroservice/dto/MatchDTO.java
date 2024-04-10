@@ -1,6 +1,7 @@
 package university.innopolis.tabletennis.tournamentmicroservice.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -27,12 +28,14 @@ public class MatchDTO {
 
     @Schema(description = "Score of the first player", example = "2")
     @NotNull(message = "Score for the first player is not provided")
-    @Min(value = 0, message = "Invalid score")
+    @Min(value = 0, message = "Too small score")
+    @Max(value = 11, message = "Too big score")
     private Integer firstPlayerScore;
 
     @Schema(description = "Score of the second player", example = "1")
     @NotNull(message = "Score for the second player is not provided")
-    @Min(value = 0, message = "Invalid score")
+    @Min(value = 0, message = "Too small score")
+    @Max(value = 11, message = "Too big score")
     private Integer secondPlayerScore;
 
     @Schema(description = "State of the match", example = "PLAYING")

@@ -41,7 +41,7 @@ public class Tournament {
         this.tablesOfTournament = chooseGameTables(this.players.size());
         this.fillTables(this.players);
         for (GameTable gameTable: this.tablesOfTournament) {
-            this.fillRounds(gameTable, setTypeOfGameTable(gameTable, gameTable.getSize()));
+            this.fillRounds(gameTable, setTypeOfGameTable(gameTable.getSize()));
         }
     }
 
@@ -106,7 +106,7 @@ public class Tournament {
     }
 
     private static List<List<List<Integer>>> setTypeOfGameTable(int sizeOfGameTable) {
-        List<List<List<Integer>>> playersIndexes = switch (sizeOfGameTable) {
+        return switch (sizeOfGameTable) {
             case 8 -> List.of(
                     // Round 1
                     List.of(
@@ -280,7 +280,6 @@ public class Tournament {
             );
             default -> new ArrayList<>();
         };
-        return playersIndexes;
     }
 
     public void fillTables(List<Player> allPlayers) {
