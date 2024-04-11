@@ -3,7 +3,6 @@ package university.innopolis.tabletennis.tournamentmicroservice.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import university.innopolis.tabletennis.tournamentmicroservice.dto.MatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.TournamentDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.Tournament;
 import university.innopolis.tabletennis.tournamentmicroservice.exception.ErrorResponse;
 import university.innopolis.tabletennis.tournamentmicroservice.service.MatchService;
 import university.innopolis.tabletennis.tournamentmicroservice.service.TournamentService;
@@ -60,7 +58,6 @@ public class MainController {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    @Operation(summary = "Create tournament", description = "Allows to create a tournament")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<TournamentDTO> postTournament(@Valid @RequestBody @Parameter TournamentDTO tournamentDTO) {
@@ -71,7 +68,6 @@ public class MainController {
                 tournamentService.addTournament(tournamentDTO, playersToAdd)));
     }
 
-    @Operation(summary = "Get all tournaments", description = "Allows to get all tournaments")
     @GetMapping
     public ResponseEntity<List<TournamentDTO>> getTournaments() {
         return ResponseEntity.ok().body(tournamentService.retrieveAllTournaments().stream()
@@ -79,46 +75,43 @@ public class MainController {
                 .toList());
     }
 
-    @Operation(summary = "Get a tournament", description = "Allows to get a tournament by id")
     @GetMapping("/{tournamentId}")
-    public ResponseEntity<TournamentDTO> getTournament(@PathVariable @Parameter(description = "Id of a tournament to get") Long tournamentId) {
+    public ResponseEntity<TournamentDTO> getTournament(@PathVariable Long tournamentId) {
         return ResponseEntity.ok().body(MappingUtils.mapToTournamentDTO(tournamentService.retrieveTournament(tournamentId)));
     }
 
-    @Operation(summary = "Finish the tournament", description = "Allows to finish the tournament by id")
     @PatchMapping("/{tournamentId}")
-    public ResponseEntity<TournamentDTO> patchTournament(@PathVariable @Parameter(description = "Id of a tournament to finish") Long tournamentId) {
+    public ResponseEntity<TournamentDTO> patchTournament(@PathVariable Long tournamentId) {
         return ResponseEntity.ok().body(MappingUtils.mapToTournamentDTO(tournamentService.patchTournamentState(tournamentId)));
     }
 
-    @Operation(summary = "Get all game tables of the tournament", description = "Allows to get all game tables of the tournament by id")
     @GetMapping("/{tournamentId}/tables")
-    public ResponseEntity<List<GameTableDTO>> getAllTables(@PathVariable @Parameter(description = "Id of the tournament") Long tournamentId) {
+    public ResponseEntity<List<GameTableDTO>> getAllTables(@PathVariable Long tournamentId) {
         return ResponseEntity.ok().body(tournamentService.retrieveGameTables(tournamentId).stream()
                 .map(MappingUtils::mapToGameTableDTO)
                 .toList());
     }
 
-    @Operation(
-            summary = "Make the match started if not started and completed if started",
-            description = "Allows to make the match started if not started and completed if started. " +
-                    "No matter what to pass when a match starts but it is important to provide score to make the match completed.")
     @PatchMapping("/{tournamentId}/match/{matchId}")
-    public ResponseEntity<MatchDTO> patchMatchState(@PathVariable @Parameter(description = "Id of the tournament") Long tournamentId, @PathVariable @Parameter(description = "Id of the match") Long matchId, @RequestBody @Parameter(description = "Match score to mark match as completed") Optional<PatchMatchDTO> matchInfo) {
+    public ResponseEntity<MatchDTO> patchMatchState(@PathVariable Long tournamentId, @PathVariable Long matchId, @RequestBody Optional<PatchMatchDTO> matchInfo) {
         return ResponseEntity.ok().body(matchService.patchMatchState(matchId, matchInfo));
     }
 
-    @Operation(summary = "Get matches available to be played", description = "Allows to get matches ready to be played")
     @GetMapping("/{tournamentId}/tables/{tableId}/matches_available")
-    public ResponseEntity<List<MatchDTO>> getAvailableMatches(@PathVariable @Parameter(description = "Id of the tournament") Long tournamentId, @PathVariable @Parameter(description = "Id of the table with matches") Long tableId) {
+    public ResponseEntity<List<MatchDTO>> getAvailableMatches(@PathVariable Long tournamentId, @PathVariable Long tableId) {
         if (tournamentService.retrieveTournament(tournamentId).getState() != TournamentState.PLAYING) {
             throw new IllegalArgumentException("Tournament with id " + tournamentId + " is not being played.");
         }
         return ResponseEntity.ok().body(matchService.retrieveAvailableMatches(tableId));
     }
 
+
+    @Operation(
+            summary = "Get all matches of the tournament",
+            description = "Allow to get all matches of the tournament by its id"
+    )
     @GetMapping("/{tournamentId}/matches")
-    public ResponseEntity<List<MatchDTO>> getAllMatches(@PathVariable Long tournamentId) {
+    public ResponseEntity<List<MatchDTO>> getAllMatches(@PathVariable @Parameter(description = "Id of the tournament") Long tournamentId) {
         return ResponseEntity.ok().body(
                 tournamentService.retrieveALlMatches(tournamentId).stream()
                         .map(MappingUtils::mapToMatchDTO)
