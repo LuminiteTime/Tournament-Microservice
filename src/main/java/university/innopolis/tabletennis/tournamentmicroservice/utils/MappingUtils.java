@@ -1,5 +1,7 @@
 package university.innopolis.tabletennis.tournamentmicroservice.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.*;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
@@ -7,6 +9,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 import java.time.LocalDate;
 
 @Service
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MappingUtils {
 
     public static TournamentDTO mapToTournamentDTO(Tournament entity) {

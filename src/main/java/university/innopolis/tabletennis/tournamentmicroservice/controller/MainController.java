@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -29,15 +30,13 @@ import java.util.Optional;
 
 @Tag(name = "Main Controller", description = "Controls creation of tournaments and operations on matches," + " game tables, and tournaments.")
 @RestController
-@NoArgsConstructor
+@AllArgsConstructor
 @RequestMapping("/tournaments")
 public class MainController {
 
-    @Autowired
-    private TournamentService tournamentService;
+    private final TournamentService tournamentService;
 
-    @Autowired
-    private MatchService matchService;
+    private final MatchService matchService;
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException e) {
@@ -50,7 +49,7 @@ public class MainController {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
+        ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
@@ -61,6 +60,7 @@ public class MainController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<TournamentDTO> postTournament(@Valid @RequestBody @Parameter TournamentDTO tournamentDTO) {
+    public ResponseEntity<TournamentDTO> postTournament(@Valid @RequestBody TournamentDTO tournamentDTO) {
         List<Player> playersToAdd = tournamentDTO.getPlayers().stream()
                 .map(MappingUtils::mapToPlayerEntity)
                 .toList();

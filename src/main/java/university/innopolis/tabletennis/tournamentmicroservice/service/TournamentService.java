@@ -1,6 +1,6 @@
 package university.innopolis.tabletennis.tournamentmicroservice.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.TournamentDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
@@ -11,22 +11,18 @@ import university.innopolis.tabletennis.tournamentmicroservice.states.Tournament
 import java.util.*;
 
 @Service
+@AllArgsConstructor
 public class TournamentService {
 
-    @Autowired
-    private PlayerRepository playerRepository;
+    private final PlayerRepository playerRepository;
 
-    @Autowired
-    private MatchRepository matchRepository;
+    private final MatchRepository matchRepository;
 
-    @Autowired
-    private GameTableRepository gameTableRepository;
+    private final GameTableRepository gameTableRepository;
 
-    @Autowired
-    private RoundRepository roundRepository;
+    private final RoundRepository roundRepository;
 
-    @Autowired
-    private TournamentRepository tournamentRepository;
+    private final TournamentRepository tournamentRepository;
 
     public List<Tournament> retrieveAllTournaments() {
         return tournamentRepository.findAll();

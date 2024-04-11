@@ -34,7 +34,7 @@ public class Tournament {
 
     private Tournament(TournamentBuilder builder) {
         this.title = builder.title;
-        this.date = builder.date;
+        this.date = LocalDate.now();
         this.state = TournamentState.PLAYING;
         this.players = builder.players;
 
@@ -50,17 +50,10 @@ public class Tournament {
 
         private String title;
         private List<Player> players;
-        private LocalDate date;
 
         @Override
         public Tournament.TournamentBuilder title(String title) {
             this.title = title;
-            return this;
-        }
-
-        @Override
-        public Tournament.TournamentBuilder date(LocalDate date) {
-            this.date = date;
             return this;
         }
 
@@ -95,6 +88,8 @@ public class Tournament {
                     sizeOfGameTable1 = (numberOfPlayers + 1) / 2;
                     sizeOfGameTable2 = (numberOfPlayers - 1) / 2;
                     break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + numberOfPlayers % 2);
             }
             table1.setSize(sizeOfGameTable1);
             table2.setSize(sizeOfGameTable2);
