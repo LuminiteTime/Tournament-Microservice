@@ -5,7 +5,7 @@ info:
   contact:
     name: Mikhail Trifonov
     email: trifonov2812@gmail.com
-  version: 1.0.0
+  version: 0.2.0
 servers:
   - url: http://localhost:8080
     description: Generated server url
@@ -21,7 +21,7 @@ paths:
       description: Allows to get all tournaments
       operationId: getTournaments
       responses:
-        '200':
+        200:
           description: OK
           content:
             application/json:
@@ -29,6 +29,28 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Tournament'
+        404:
+          description: Tournaments not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                tournamentsNotFound:
+                  value:
+                    message: "Tournaments not found"
+                    status: 404
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                internalServerError:
+                  value:
+                    message: "Internal server error"
+                    status: 500
     post:
       tags:
         - Main Controller
@@ -42,12 +64,34 @@ paths:
             schema:
               $ref: '#/components/schemas/Tournament'
       responses:
-        '201':
-          description: Created
+        201:
+          description: Tournament created successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tournament'
+        400:
+          description: Bad request, invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    message: "Bad request, invalid input"
+                    status: 400
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                internalServerError:
+                  value:
+                    message: "Internal server error"
+                    status: 500
   /tournaments/{tournamentId}:
     get:
       tags:
@@ -64,12 +108,34 @@ paths:
             type: integer
             format: int64
       responses:
-        '200':
+        200:
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tournament'
+        404:
+          description: Tournament not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                tournamentNotFound:
+                  value:
+                    message: "Tournament not found"
+                    status: 404
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                internalServerError:
+                  value:
+                    message: "Internal server error"
+                    status: 500
     patch:
       tags:
         - Main Controller
@@ -85,12 +151,45 @@ paths:
             type: integer
             format: int64
       responses:
-        '200':
+        200:
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tournament'
+        400:
+          description: Bad request, invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    message: "Bad request, invalid input"
+                    status: 400
+        404:
+          description: Tournament not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                tournamentNotFound:
+                  value:
+                    message: "Tournament not found"
+                    status: 404
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                internalServerError:
+                  value:
+                    message: "Internal server error"
+                    status: 500
   /tournaments/{tournamentId}/match/{matchId}:
     patch:
       tags:
@@ -119,12 +218,45 @@ paths:
             schema:
               $ref: '#/components/schemas/Match Info'
       responses:
-        '200':
+        200:
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Match'
+        400:
+          description: Bad request, invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    message: "Bad request, invalid input"
+                    status: 400
+        404:
+          description: Match or tournament not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                matchOrTournamentNotFound:
+                  value:
+                    message: "Match or tournament not found"
+                    status: 404
+        500:
+          description: Internal server error
+          content:
+              application/json:
+                  schema:
+                    $ref: '#/components/schemas/ErrorResponse'
+                  examples:
+                    internalServerError:
+                      value:
+                        message: "Internal server error"
+                        status: 500
   /tournaments/{tournamentId}/tables:
     get:
       tags:
@@ -141,7 +273,7 @@ paths:
             type: integer
             format: int64
       responses:
-        '200':
+        200:
           description: OK
           content:
             application/json:
@@ -149,6 +281,28 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Game table'
+        404:
+          description: Game tables not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                gameTablesNotFound:
+                  value:
+                    message: "Game tables not found"
+                    status: 404
+        500:
+            description: Internal server error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+                examples:
+                    internalServerError:
+                        value:
+                        message: "Internal server error"
+                        status: 500
   /tournaments/{tournamentId}/tables/{tableId}/matches_available:
     get:
       tags:
@@ -172,7 +326,7 @@ paths:
             type: integer
             format: int64
       responses:
-        '200':
+        200:
           description: OK
           content:
             application/json:
@@ -180,6 +334,28 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Match'
+        404:
+            description: Matches or tournament not found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+                examples:
+                    matchesOrTournamentNotFound:
+                        value:
+                        message: "Matches or tournament not found"
+                        status: 404
+        500:
+            description: Internal server error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+                examples:
+                    internalServerError:
+                        value:
+                        message: "Internal server error"
+                        status: 500
   /tournaments/{tournamentId}/matches:
     get:
       tags:
@@ -193,7 +369,7 @@ paths:
             type: integer
             format: int64
       responses:
-        '200':
+        200:
           description: OK
           content:
             application/json:
@@ -201,6 +377,28 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Match'
+        404:
+            description: Matches or tournament not found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+                examples:
+                    matchesOrTournamentNotFound:
+                        value:
+                        message: "Matches or tournament not found"
+                        status: 404
+        500:
+            description: Internal server error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+                examples:
+                    internalServerError:
+                        value:
+                        message: "Internal server error"
+                        status: 500
 components:
   schemas:
     Player:
@@ -339,3 +537,15 @@ components:
           items:
             $ref: '#/components/schemas/Match'
       description: Round DTO
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+        status:
+          type: integer
+          format: int32
+          description: Error status code
+      description: Error response DTO
+
