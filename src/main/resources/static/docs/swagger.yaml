@@ -301,8 +301,8 @@ paths:
                 examples:
                     internalServerError:
                         value:
-                        message: "Internal server error"
-                        status: 500
+                          message: "Internal server error"
+                          status: 500
   /tournaments/{tournamentId}/tables/{tableId}/matches_available:
     get:
       tags:
@@ -343,8 +343,8 @@ paths:
                 examples:
                     matchesOrTournamentNotFound:
                         value:
-                        message: "Matches or tournament not found"
-                        status: 404
+                          message: "Matches or tournament not found"
+                          status: 404
         500:
             description: Internal server error
             content:
@@ -354,8 +354,8 @@ paths:
                 examples:
                     internalServerError:
                         value:
-                        message: "Internal server error"
-                        status: 500
+                          message: "Internal server error"
+                          status: 500
   /tournaments/{tournamentId}/matches:
     get:
       tags:
@@ -386,8 +386,8 @@ paths:
                 examples:
                     matchesOrTournamentNotFound:
                         value:
-                        message: "Matches or tournament not found"
-                        status: 404
+                          message: "Matches or tournament not found"
+                          status: 404
         500:
             description: Internal server error
             content:
@@ -397,8 +397,8 @@ paths:
                 examples:
                     internalServerError:
                         value:
-                        message: "Internal server error"
-                        status: 500
+                          message: "Internal server error"
+                          status: 500
 components:
   schemas:
     Player:
