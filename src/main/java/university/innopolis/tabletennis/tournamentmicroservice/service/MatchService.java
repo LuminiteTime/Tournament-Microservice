@@ -66,12 +66,6 @@ public class MatchService {
 
     private void setMatchIsBeingPlayed(Match match) {
         match.setState(MatchState.PLAYING);
-
-        Player firstPlayer = match.getFirstPlayer();
-        Player secondPlayer = match.getSecondPlayer();
-
-        playerRepository.save(firstPlayer);
-        playerRepository.save(secondPlayer);
     }
 
     public List<MatchDTO> retrieveAvailableMatches(Long tableId) {
