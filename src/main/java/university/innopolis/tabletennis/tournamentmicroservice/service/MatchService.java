@@ -8,7 +8,6 @@ import university.innopolis.tabletennis.tournamentmicroservice.entity.Match;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.GameTableRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.MatchRepository;
-import university.innopolis.tabletennis.tournamentmicroservice.repository.PlayerRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
 import university.innopolis.tabletennis.tournamentmicroservice.states.PlayerState;
@@ -22,7 +21,7 @@ public class MatchService {
 
     private final MatchRepository matchRepository;
 
-    private final PlayerRepository playerRepository;
+
 
     private final GameTableRepository gameTableRepository;
 
