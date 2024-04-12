@@ -60,12 +60,6 @@ public class MatchService {
     private void setMatchIsCompleted(Match match, PatchMatchDTO matchInfo) {
         match.setState(MatchState.COMPLETED);
 
-        Player firstPlayer = match.getFirstPlayer();
-        Player secondPlayer = match.getSecondPlayer();
-
-        playerRepository.save(firstPlayer);
-        playerRepository.save(secondPlayer);
-
         match.setFirstPlayerScore(matchInfo.getFirstPlayerScore());
         match.setSecondPlayerScore(matchInfo.getSecondPlayerScore());
     }
