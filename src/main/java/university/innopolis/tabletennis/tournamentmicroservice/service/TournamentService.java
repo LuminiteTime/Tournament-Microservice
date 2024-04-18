@@ -1,6 +1,7 @@
 package university.innopolis.tabletennis.tournamentmicroservice.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.TournamentDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
@@ -10,6 +11,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.states.Tournament
 
 import java.util.*;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class TournamentService {
@@ -48,7 +50,10 @@ public class TournamentService {
                 .map(Tournament::getTitle)
                 .toList()
                 .contains(tournamentDTO.getTitle()))
+        {
+            log.warn("Title must be unique.");
             throw new IllegalArgumentException("Title must be unique.");
+        }
 
         playerRepository.saveAll(playersToAdd);
 
@@ -58,21 +63,18 @@ public class TournamentService {
                 .build();
         List<GameTable> tablesOfTournament = tournament.getTablesOfTournament();
 
-        // Saving matches.
         for (GameTable table: tablesOfTournament) {
             matchRepository.saveAll(table.getMatches());
         }
 
-        // Saving rounds.
         for (GameTable table: tablesOfTournament) {
             roundRepository.saveAll(table.getRounds());
         }
 
-        // Saving tables,
         gameTableRepository.saveAll(tournament.getTablesOfTournament());
 
-        // Saving tournament.
         tournamentRepository.save(tournament);
+        log.debug("Tournament is saved.");
         return tournament;
     }
 

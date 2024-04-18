@@ -1,6 +1,7 @@
 package university.innopolis.tabletennis.tournamentmicroservice.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.MatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.GameTable;
@@ -15,6 +16,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.utils.MappingUtil
 
 import java.util.*;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class MatchService {
@@ -22,29 +24,33 @@ public class MatchService {
     private final MatchRepository matchRepository;
 
 
-
     private final GameTableRepository gameTableRepository;
 
     public MatchDTO patchMatchState(Long matchId, Optional<PatchMatchDTO> matchInfo) {
-        Match match = matchRepository
-                .findById(matchId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Match with id " + matchId + " does not exist."
-                        )
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> {
+                            log.warn("Match with id {} does not exist", matchId);
+                            return new IllegalArgumentException("Match with id " + matchId + " does not exist.");
+                        }
                 );
 
         // Match is already completed, no changes in state needed.
-        if (match.getState().equals(MatchState.COMPLETED))
+        if (match.getState().equals(MatchState.COMPLETED)) {
+            log.info("Match with id {} is already completed", matchId);
             return MappingUtils.mapToMatchDTO(match);
+        }
 
         // Switching the state of the match.
         if (match.getState().equals(MatchState.PLAYING)) {
             // Match is about to start but an empty request body provided.
             if (matchInfo.isEmpty()) {
+                log.warn("Match score is not provided");
                 throw new IllegalArgumentException("Match score is not provided.");
             } else if (matchInfo.get().getFirstPlayerScore() == null) {
+                log.warn("First player score is not provided");
                 throw new IllegalArgumentException("First player score is not provided.");
             } else if (matchInfo.get().getSecondPlayerScore() == null) {
+                log.warn("Second player score is not provided");
                 throw new IllegalArgumentException("Second player score is not provided.");
             }
             setMatchIsCompleted(match, matchInfo.get());
@@ -58,21 +64,23 @@ public class MatchService {
 
     private void setMatchIsCompleted(Match match, PatchMatchDTO matchInfo) {
         match.setState(MatchState.COMPLETED);
-
         match.setFirstPlayerScore(matchInfo.getFirstPlayerScore());
         match.setSecondPlayerScore(matchInfo.getSecondPlayerScore());
+        log.info("Match with id {} is completed", match.getId());
     }
 
     private void setMatchIsBeingPlayed(Match match) {
         match.setState(MatchState.PLAYING);
+        log.info("Match with id {} has been started", match.getId());
     }
 
     public List<MatchDTO> retrieveAvailableMatches(Long tableId) {
         GameTable gameTable = gameTableRepository
                 .findById(tableId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Game table with id " + tableId + " does not exist."
-                        )
+                .orElseThrow(() -> {
+                            log.warn("Game table with id {} does not exist", tableId);
+                            return new IllegalArgumentException("Game table with id " + tableId + " does not exist.");
+                        }
                 );
 
         List<Match> availableMatches = new ArrayList<>();

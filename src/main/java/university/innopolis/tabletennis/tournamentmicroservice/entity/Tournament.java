@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import university.innopolis.tabletennis.tournamentmicroservice.builderinterface.ITournamentBuilder;
 import university.innopolis.tabletennis.tournamentmicroservice.states.TournamentState;
 
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Entity
 @Getter
 @Setter
@@ -76,8 +78,8 @@ public class Tournament {
             table.setSize(numberOfPlayers);
             tableList.add(table);
         } else {
-            int sizeOfGameTable1 = 0;
-            int sizeOfGameTable2 = 0;
+            int sizeOfGameTable1;
+            int sizeOfGameTable2;
             GameTable table1 = new GameTable();
             GameTable table2 = new GameTable();
             switch (numberOfPlayers % 2) {
@@ -89,6 +91,7 @@ public class Tournament {
                     sizeOfGameTable2 = (numberOfPlayers - 1) / 2;
                     break;
                 default:
+                    log.error("Unexpected value: {}", numberOfPlayers % 2);
                     throw new IllegalStateException("Unexpected value: " + numberOfPlayers % 2);
             }
             table1.setSize(sizeOfGameTable1);
@@ -97,6 +100,7 @@ public class Tournament {
             tableList.add(table1);
             tableList.add(table2);
         }
+        log.debug("Game tables are chosen for {} players", numberOfPlayers);
         return tableList;
     }
 
@@ -283,6 +287,7 @@ public class Tournament {
             this.tablesOfTournament.get(tableIndex).addPlayer(player);
             tableIndex = (tableIndex + 1) % this.tablesOfTournament.size();
         }
+        log.debug("Tables are filled with players");
     }
 
     public void fillRounds(GameTable table, List<List<List<Integer>>> playersIndexes) {
@@ -298,5 +303,6 @@ public class Tournament {
             }
             table.addRound(roundToAdd);
         }
+        log.debug("Rounds are filled with matches");
     }
 }
