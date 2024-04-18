@@ -34,4 +34,15 @@ public class MatchDTO {
 
     @NotNull(message = "State of the match is not provided")
     private MatchState state;
+
+    @Override
+    public String toString() {
+        return "MatchDTO{" +
+                "firstPlayerId=" + firstPlayerId +
+                ", secondPlayerId=" + secondPlayerId +
+                ", firstPlayerScore=" + firstPlayerScore +
+                ", secondPlayerScore=" + secondPlayerScore +
+                ", state=" + state +
+                '}';
+    }
 }

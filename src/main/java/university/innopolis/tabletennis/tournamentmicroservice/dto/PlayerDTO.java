@@ -13,4 +13,11 @@ public class PlayerDTO {
     @NotNull(message = "Id is not provided")
     @Min(value = 1, message = "Invalid id format")
     private Long externalId;
+
+    @Override
+    public String toString() {
+        return "PlayerDTO{" +
+                "externalId=" + externalId +
+                '}';
+    }
 }

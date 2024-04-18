@@ -27,4 +27,14 @@ public class TournamentDTO {
 
 //    @NotNull(message = "State is not provided")
     private TournamentState state;
+
+    @Override
+    public String toString() {
+        return "TournamentDTO{" +
+                "title='" + title + '\'' +
+                ", date=" + date +
+                ", players=" + players +
+                ", state=" + state +
+                '}';
+    }
 }

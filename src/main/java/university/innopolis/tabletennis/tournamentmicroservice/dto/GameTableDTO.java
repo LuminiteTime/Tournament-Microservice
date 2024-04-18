@@ -19,4 +19,13 @@ public class GameTableDTO {
 
     @NotNull(message = "Matches are not provided")
     private final List<MatchDTO> matches;
+
+    @Override
+    public String toString() {
+        return "GameTableDTO{" +
+                "players=" + players +
+                ", rounds=" + rounds +
+                ", matches=" + matches +
+                '}';
+    }
 }
