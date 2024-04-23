@@ -19,6 +19,7 @@ public class MappingUtils {
                 .players(entity.getPlayers().stream()
                         .map(MappingUtils::mapToPlayerDTO)
                         .toList())
+                .amountOfTables(entity.getTablesOfTournament().size())
                 .state(entity.getState())
                 .build();
     }

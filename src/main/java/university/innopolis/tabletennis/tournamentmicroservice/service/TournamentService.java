@@ -60,6 +60,7 @@ public class TournamentService {
         Tournament tournament = new Tournament.TournamentBuilder()
                 .title(tournamentDTO.getTitle())
                 .players(playersToAdd)
+                .desiredNumberOfTables(tournamentDTO.getAmountOfTables())
                 .build();
         List<GameTable> tablesOfTournament = tournament.getTablesOfTournament();
 

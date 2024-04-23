@@ -22,9 +22,7 @@ public class GameTable {
     private List<Round> rounds;
 
     @OneToMany
-    private List<Match> matches; // TODO
-
-    private Integer size;
+    private List<Match> matches;
 
     public GameTable() {
         this.players = new ArrayList<>();

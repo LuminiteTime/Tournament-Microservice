@@ -10,5 +10,7 @@ public interface ITournamentBuilder {
 
     Tournament.TournamentBuilder players(List<Player> players);
 
+    Tournament.TournamentBuilder desiredNumberOfTables(Integer desiredNumberOfTables);
+
     Tournament build();
 }
