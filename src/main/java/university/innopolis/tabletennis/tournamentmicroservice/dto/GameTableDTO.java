@@ -14,9 +14,6 @@ public class GameTableDTO {
     @NotNull(message = "Players are not provided")
     private final List<PlayerDTO> players;
 
-    @NotNull(message = "Rounds are not provided")
-    private final List<RoundDTO> rounds;
-
     @NotNull(message = "Matches are not provided")
     private final List<MatchDTO> matches;
 
@@ -24,7 +21,6 @@ public class GameTableDTO {
     public String toString() {
         return "GameTableDTO{" +
                 "players=" + players +
-                ", rounds=" + rounds +
                 ", matches=" + matches +
                 '}';
     }

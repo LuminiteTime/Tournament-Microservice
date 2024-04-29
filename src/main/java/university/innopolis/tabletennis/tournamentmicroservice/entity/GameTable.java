@@ -18,15 +18,12 @@ public class GameTable {
     @OneToMany
     private List<Player> players;
 
-    @OneToMany
-    private List<Round> rounds;
 
     @OneToMany
     private List<Match> matches;
 
     public GameTable() {
         this.players = new ArrayList<>();
-        this.rounds = new ArrayList<>();
         this.matches = new ArrayList<>();
     }
 
@@ -35,5 +32,4 @@ public class GameTable {
     }
 
     public void addMatch(Match match) { this.matches.add(match); }
-    public void addRound(Round round) { this.rounds.add(round); }
 }

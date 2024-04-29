@@ -22,8 +22,6 @@ public class TournamentService {
 
     private final GameTableRepository gameTableRepository;
 
-    private final RoundRepository roundRepository;
-
     private final TournamentRepository tournamentRepository;
 
     public List<Tournament> retrieveAllTournaments() {
@@ -66,10 +64,6 @@ public class TournamentService {
 
         for (GameTable table: tablesOfTournament) {
             matchRepository.saveAll(table.getMatches());
-        }
-
-        for (GameTable table: tablesOfTournament) {
-            roundRepository.saveAll(table.getRounds());
         }
 
         gameTableRepository.saveAll(tournament.getTablesOfTournament());

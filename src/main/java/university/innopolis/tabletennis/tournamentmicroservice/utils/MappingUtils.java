@@ -29,9 +29,6 @@ public class MappingUtils {
                 .players(entity.getPlayers().stream()
                         .map(MappingUtils::mapToPlayerDTO)
                         .toList())
-                .rounds(entity.getRounds().stream()
-                        .map(MappingUtils::mapToRoundDTO)
-                        .toList())
                 .matches(entity.getMatches().stream()
                         .map(MappingUtils::mapToMatchDTO)
                         .toList())
@@ -58,13 +55,5 @@ public class MappingUtils {
         Player entity = new Player();
         entity.setExternalId(dto.getExternalId());
         return entity;
-    }
-
-    public static RoundDTO mapToRoundDTO(Round entity) {
-        RoundDTO dto = new RoundDTO();
-        dto.setMatches(entity.getMatches().stream()
-                .map(MappingUtils::mapToMatchDTO)
-                .toList());
-        return dto;
     }
 }
