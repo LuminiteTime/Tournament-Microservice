@@ -57,10 +57,10 @@ public class RoundsCreator {
             startIndex = 0;
         } else {
             startIndex = 1;
-            round.add(new Integer[]{n - 1, 0});
+            round.add(new Integer[]{this.players.get(n - 1), this.players.get(0)});
         }
         for (int i = startIndex; i < half; i++) {
-            round.add(new Integer[]{i, n - 1 - i});
+            round.add(new Integer[]{this.players.get(i), this.players.get(n - 1 - i)});
         }
         return round;
     }
