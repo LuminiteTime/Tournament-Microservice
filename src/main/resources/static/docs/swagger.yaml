@@ -1,0 +1,551 @@
+openapi: 3.0.1
+info:
+  title: Tournament Management System Api
+  description: Tournament Management System
+  contact:
+    name: Mikhail Trifonov
+    email: trifonov2812@gmail.com
+  version: 0.2.0
+servers:
+  - url: http://localhost:8080
+    description: Generated server url
+tags:
+  - name: Main Controller
+    description: Controls creation of tournaments and operations on matches, game tables, and tournaments.
+paths:
+  /tournaments:
+    get:
+      tags:
+        - Main Controller
+      summary: Get all tournaments
+      description: Allows to get all tournaments
+      operationId: getTournaments
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tournament'
+        404:
+          description: Tournaments not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                tournamentsNotFound:
+                  value:
+                    message: "Tournaments not found"
+                    status: 404
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                internalServerError:
+                  value:
+                    message: "Internal server error"
+                    status: 500
+    post:
+      tags:
+        - Main Controller
+      summary: Create tournament
+      description: Allows to create a tournament
+      operationId: postTournament
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tournament'
+      responses:
+        201:
+          description: Tournament created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        400:
+          description: Bad request, invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    message: "Bad request, invalid input"
+                    status: 400
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                internalServerError:
+                  value:
+                    message: "Internal server error"
+                    status: 500
+  /tournaments/{tournamentId}:
+    get:
+      tags:
+        - Main Controller
+      summary: Get a tournament
+      description: Allows to get a tournament by id
+      operationId: getTournament
+      parameters:
+        - name: tournamentId
+          in: path
+          description: Id of a tournament to get
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        404:
+          description: Tournament not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                tournamentNotFound:
+                  value:
+                    message: "Tournament not found"
+                    status: 404
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                internalServerError:
+                  value:
+                    message: "Internal server error"
+                    status: 500
+    patch:
+      tags:
+        - Main Controller
+      summary: Finish the tournament
+      description: Allows to finish the tournament by id
+      operationId: patchTournament
+      parameters:
+        - name: tournamentId
+          in: path
+          description: Id of a tournament to finish
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        400:
+          description: Bad request, invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    message: "Bad request, invalid input"
+                    status: 400
+        404:
+          description: Tournament not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                tournamentNotFound:
+                  value:
+                    message: "Tournament not found"
+                    status: 404
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                internalServerError:
+                  value:
+                    message: "Internal server error"
+                    status: 500
+  /tournaments/{tournamentId}/match/{matchId}:
+    patch:
+      tags:
+        - Main Controller
+      summary: Make the match started if not started and completed if started
+      description: Allows to make the match started if not started and completed if started. No matter what to pass when a match starts but it is important to provide score to make the match completed.
+      operationId: patchMatchState
+      parameters:
+        - name: tournamentId
+          in: path
+          description: Id of the tournament
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: matchId
+          in: path
+          description: Id of the match
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Match Info'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+        400:
+          description: Bad request, invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    message: "Bad request, invalid input"
+                    status: 400
+        404:
+          description: Match or tournament not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                matchOrTournamentNotFound:
+                  value:
+                    message: "Match or tournament not found"
+                    status: 404
+        500:
+          description: Internal server error
+          content:
+              application/json:
+                  schema:
+                    $ref: '#/components/schemas/ErrorResponse'
+                  examples:
+                    internalServerError:
+                      value:
+                        message: "Internal server error"
+                        status: 500
+  /tournaments/{tournamentId}/tables:
+    get:
+      tags:
+        - Main Controller
+      summary: Get all game tables of the tournament
+      description: Allows to get all game tables of the tournament by id
+      operationId: getAllTables
+      parameters:
+        - name: tournamentId
+          in: path
+          description: Id of the tournament
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game table'
+        404:
+          description: Game tables not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                gameTablesNotFound:
+                  value:
+                    message: "Game tables not found"
+                    status: 404
+        500:
+            description: Internal server error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+                examples:
+                    internalServerError:
+                        value:
+                          message: "Internal server error"
+                          status: 500
+  /tournaments/{tournamentId}/tables/{tableId}/matches_available:
+    get:
+      tags:
+        - Main Controller
+      summary: Get matches available to be played
+      description: Allows to get matches ready to be played
+      operationId: getAvailableMatches
+      parameters:
+        - name: tournamentId
+          in: path
+          description: Id of the tournament
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: tableId
+          in: path
+          description: Id of the table with matches
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+        404:
+            description: Matches or tournament not found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+                examples:
+                    matchesOrTournamentNotFound:
+                        value:
+                          message: "Matches or tournament not found"
+                          status: 404
+        500:
+            description: Internal server error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+                examples:
+                    internalServerError:
+                        value:
+                          message: "Internal server error"
+                          status: 500
+  /tournaments/{tournamentId}/matches:
+    get:
+      tags:
+        - Main Controller
+      operationId: getAllMatches
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+        404:
+            description: Matches or tournament not found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+                examples:
+                    matchesOrTournamentNotFound:
+                        value:
+                          message: "Matches or tournament not found"
+                          status: 404
+        500:
+            description: Internal server error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+                examples:
+                    internalServerError:
+                        value:
+                          message: "Internal server error"
+                          status: 500
+components:
+  schemas:
+    Player:
+      required:
+        - externalId
+      type: object
+      properties:
+        externalId:
+          minimum: 1
+          type: integer
+          description: Id of a player in the external database
+          format: int64
+          example: 34
+      description: Player DTO
+    Tournament:
+      required:
+        - players
+        - title
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the tournament, must be unique
+          example: Beginners 15
+        date:
+          type: string
+          description: Date of the tournament
+          format: date
+        players:
+          type: array
+          description: Players of the tournament
+          items:
+            $ref: '#/components/schemas/Player'
+        state:
+          type: string
+          description: State of the tournament
+          example: PLAYING
+          enum:
+            - PLAYING
+            - FINISHED
+      description: Tournament DTO
+    Match Info:
+      required:
+        - firstPlayerScore
+        - secondPlayerScore
+      type: object
+      properties:
+        firstPlayerScore:
+          maximum: 11
+          minimum: 0
+          type: integer
+          description: Score of the first player
+          format: int32
+        secondPlayerScore:
+          maximum: 11
+          minimum: 0
+          type: integer
+          description: Score of the second player
+          format: int32
+      description: Match score to mark match as completed
+    Match:
+      required:
+        - firstPlayerId
+        - firstPlayerScore
+        - secondPlayerId
+        - secondPlayerScore
+        - state
+      type: object
+      properties:
+        firstPlayerId:
+          minimum: 1
+          type: integer
+          description: Id of the first player
+          format: int64
+          example: 34
+        secondPlayerId:
+          minimum: 1
+          type: integer
+          description: Id of the second player
+          format: int64
+          example: 56
+        firstPlayerScore:
+          maximum: 11
+          minimum: 0
+          type: integer
+          description: Score of the first player
+          format: int32
+          example: 2
+        secondPlayerScore:
+          maximum: 11
+          minimum: 0
+          type: integer
+          description: Score of the second player
+          format: int32
+          example: 1
+        state:
+          type: string
+          description: State of the match
+          example: PLAYING
+          enum:
+            - NOT_PLAYING
+            - PLAYING
+            - COMPLETED
+      description: Match DTO
+    Game table:
+      required:
+        - matches
+        - players
+        - rounds
+      type: object
+      properties:
+        players:
+          type: array
+          description: Players in the game table
+          items:
+            $ref: '#/components/schemas/Player'
+        rounds:
+          type: array
+          description: Rounds of the table
+          items:
+            $ref: '#/components/schemas/Round'
+        matches:
+          type: array
+          description: Matches of the table
+          items:
+            $ref: '#/components/schemas/Match'
+      description: Game table DTO
+    Round:
+      required:
+        - matches
+      type: object
+      properties:
+        matches:
+          type: array
+          description: Matches of the round
+          items:
+            $ref: '#/components/schemas/Match'
+      description: Round DTO
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+        status:
+          type: integer
+          format: int32
+          description: Error status code
+      description: Error response DTO
+

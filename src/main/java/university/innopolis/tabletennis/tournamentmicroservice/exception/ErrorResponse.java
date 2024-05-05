@@ -8,5 +8,7 @@ import lombok.Getter;
 @Builder
 @Getter
 public class ErrorResponse {
+    private int code;
     private String message;
+    private Long timestamp;
 }

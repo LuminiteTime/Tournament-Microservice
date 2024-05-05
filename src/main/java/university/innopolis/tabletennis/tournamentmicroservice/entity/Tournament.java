@@ -4,13 +4,16 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import university.innopolis.tabletennis.tournamentmicroservice.builderinterface.ITournamentBuilder;
 import university.innopolis.tabletennis.tournamentmicroservice.states.TournamentState;
+import university.innopolis.tabletennis.tournamentmicroservice.utils.RoundsCreator;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Entity
 @Getter
 @Setter
@@ -33,15 +36,19 @@ public class Tournament {
     private LocalDate date;
 
     private Tournament(TournamentBuilder builder) {
+        if (builder.desiredNumberOfTables > (builder.players.size() / 2)) {
+            throw new IllegalArgumentException("Desired number of tables must be less than the number of players minus 1");
+        }
+
         this.title = builder.title;
-        this.date = builder.date;
+        this.date = LocalDate.now();
         this.state = TournamentState.PLAYING;
         this.players = builder.players;
 
-        this.tablesOfTournament = chooseGameTables(this.players.size());
-        this.fillTables(this.players);
+        this.createGameTables(builder.desiredNumberOfTables);
+        this.fillTables();
         for (GameTable gameTable: this.tablesOfTournament) {
-            this.fillRounds(gameTable, setTypeOfGameTable(gameTable.getSize()));
+            this.createRoundsWithMatches(gameTable);
         }
     }
 
@@ -50,17 +57,11 @@ public class Tournament {
 
         private String title;
         private List<Player> players;
-        private LocalDate date;
+        private Integer desiredNumberOfTables;
 
         @Override
         public Tournament.TournamentBuilder title(String title) {
             this.title = title;
-            return this;
-        }
-
-        @Override
-        public Tournament.TournamentBuilder date(LocalDate date) {
-            this.date = date;
             return this;
         }
 
@@ -70,238 +71,46 @@ public class Tournament {
             return this;
         }
 
+        public Tournament.TournamentBuilder desiredNumberOfTables(Integer desiredNumberOfTables) {
+            this.desiredNumberOfTables = desiredNumberOfTables;
+            return this;
+        }
+
         @Override
         public Tournament build() {
             return new Tournament(this);
         }
     }
 
-    private static List<GameTable> chooseGameTables(int numberOfPlayers) {
+    private void createGameTables(int desiredNumberOfTables) {
         List<GameTable> tableList = new ArrayList<>();
-        if (numberOfPlayers < 8) {
-            GameTable table = new GameTable();
-            table.setSize(numberOfPlayers);
-            tableList.add(table);
-        } else {
-            int sizeOfGameTable1 = 0;
-            int sizeOfGameTable2 = 0;
-            GameTable table1 = new GameTable();
-            GameTable table2 = new GameTable();
-            switch (numberOfPlayers % 2) {
-                case 0:
-                    sizeOfGameTable1 = sizeOfGameTable2 = numberOfPlayers / 2;
-                    break;
-                case 1:
-                    sizeOfGameTable1 = (numberOfPlayers + 1) / 2;
-                    sizeOfGameTable2 = (numberOfPlayers - 1) / 2;
-                    break;
+
+        for (int i = 0; i < desiredNumberOfTables; i++) {
+            tableList.add(new GameTable());
+        }
+
+        log.debug("Created {} game tables", tableList.size());
+        this.tablesOfTournament = tableList;
+    }
+
+    private void fillTables() {
+        int tableIndex;
+        for (int playerIndex = 0; playerIndex < this.players.size(); playerIndex++) {
+            tableIndex = (this.tablesOfTournament.size() - 1) * (playerIndex / this.tablesOfTournament.size() % 2) + playerIndex % this.tablesOfTournament.size() - playerIndex % this.tablesOfTournament.size() * 2 * (playerIndex / this.tablesOfTournament.size() % 2);
+            this.tablesOfTournament.get(tableIndex).addPlayer(this.players.get(playerIndex));
+        }
+        log.debug("Tables are filled with players");
+    }
+
+    private void createRoundsWithMatches(GameTable table) {
+        RoundsCreator roundsCreator = new RoundsCreator();
+        List<List<Player[]>> schedule = roundsCreator.prepareRounds(table.getPlayers());
+
+        for (List<Player[]> round: schedule) {
+            for (Player[] match: round) {
+                table.addMatch(new Match(match[0], match[1]));
             }
-            table1.setSize(sizeOfGameTable1);
-            table2.setSize(sizeOfGameTable2);
-
-            tableList.add(table1);
-            tableList.add(table2);
         }
-        return tableList;
-    }
-
-    private static List<List<List<Integer>>> setTypeOfGameTable(int sizeOfGameTable) {
-        return switch (sizeOfGameTable) {
-            case 8 -> List.of(
-                    // Round 1
-                    List.of(
-                            List.of(0, 7),
-                            List.of(1, 6),
-                            List.of(2, 5),
-                            List.of(3, 4)
-                    ),
-                    // Round 2
-                    List.of(
-                            List.of(6, 0),
-                            List.of(7, 5),
-                            List.of(1, 4),
-                            List.of(2, 3)
-                    ),
-                    // Round 3
-                    List.of(
-                            List.of(0, 5),
-                            List.of(6, 4),
-                            List.of(7, 3),
-                            List.of(1, 2)
-                    ),
-                    // Round 4
-                    List.of(
-                            List.of(4, 0),
-                            List.of(5, 3),
-                            List.of(6, 2),
-                            List.of(7, 1)
-                    ),
-                    // Round 5
-                    List.of(
-                            List.of(0, 3),
-                            List.of(4, 2),
-                            List.of(5, 1),
-                            List.of(6, 7)
-                    ),
-                    // Round 6
-                    List.of(
-                            List.of(2, 0),
-                            List.of(3, 1),
-                            List.of(4, 7),
-                            List.of(5, 6)
-                    ),
-                    // Round 7
-                    List.of(
-                            List.of(0, 1),
-                            List.of(2, 7),
-                            List.of(3, 6),
-                            List.of(4, 5)
-                    )
-            );
-            case 7 -> List.of(
-                    // Round 1
-                    List.of(
-                            List.of(1, 6),
-                            List.of(2, 5),
-                            List.of(3, 4)
-                    ),
-                    // Round 2
-                    List.of(
-                            List.of(6, 0),
-                            List.of(1, 4),
-                            List.of(2, 3)
-                    ),
-                    // Round 3
-                    List.of(
-                            List.of(0, 5),
-                            List.of(6, 4),
-                            List.of(1, 2)
-                    ),
-                    // Round 4
-                    List.of(
-                            List.of(4, 0),
-                            List.of(5, 3),
-                            List.of(6, 2)
-                    ),
-                    // Round 5
-                    List.of(
-                            List.of(0, 3),
-                            List.of(4, 2),
-                            List.of(5, 1)
-                    ),
-                    // Round 6
-                    List.of(
-                            List.of(2, 0),
-                            List.of(3, 1),
-                            List.of(5, 6)
-                    ),
-                    // Round 7
-                    List.of(
-                            List.of(0, 1),
-                            List.of(3, 6),
-                            List.of(4, 5)
-                    )
-            );
-            case 6 -> List.of(
-                    // Round 1
-                    List.of(
-                            List.of(0, 5),
-                            List.of(1, 4),
-                            List.of(2, 3)
-                    ),
-                    // Round 2
-                    List.of(
-                            List.of(4, 0),
-                            List.of(5, 3),
-                            List.of(1, 2)
-                    ),
-                    // Round 3
-                    List.of(
-                            List.of(0, 3),
-                            List.of(4, 2),
-                            List.of(5, 1)
-                    ),
-                    // Round 4
-                    List.of(
-                            List.of(2, 0),
-                            List.of(3, 1),
-                            List.of(4, 5)
-                    ),
-                    // Round 5
-                    List.of(
-                            List.of(0, 1),
-                            List.of(2, 5),
-                            List.of(3, 4)
-                    )
-            );
-            case 5 -> List.of(
-                    // Round 1
-                    List.of(
-                            List.of(1, 4),
-                            List.of(2, 3)
-                    ),
-                    // Round 2
-                    List.of(
-                            List.of(4, 0),
-                            List.of(1, 2)
-                    ),
-                    // Round 3
-                    List.of(
-                            List.of(0, 3),
-                            List.of(4, 2)
-                    ),
-                    // Round 4
-                    List.of(
-                            List.of(2, 0),
-                            List.of(3, 1)
-                    ),
-                    // Round 5
-                    List.of(
-                            List.of(0, 1),
-                            List.of(3, 4)
-                    )
-            );
-            case 4 -> List.of(
-                    // Round 1
-                    List.of(
-                            List.of(0, 3),
-                            List.of(1, 2)
-                    ),
-                    // Round 2
-                    List.of(
-                            List.of(0, 2),
-                            List.of(1, 3)
-                    ),
-                    // Round 3
-                    List.of(
-                            List.of(0, 1),
-                            List.of(2, 3)
-                    )
-            );
-            default -> new ArrayList<>();
-        };
-    }
-
-    public void fillTables(List<Player> allPlayers) {
-        int tableIndex = 0;
-        for (Player player: allPlayers) {
-            this.tablesOfTournament.get(tableIndex).addPlayer(player);
-            tableIndex = (tableIndex + 1) % this.tablesOfTournament.size();
-        }
-    }
-
-    public void fillRounds(GameTable table, List<List<List<Integer>>> playersIndexes) {
-        for (List<List<Integer>> playersIndex: playersIndexes) {
-            Round roundToAdd = new Round();
-            for (List<Integer> match: playersIndex) {
-                Match matchToAdd = new Match(
-                        table.getPlayers().get(match.get(0)),
-                        table.getPlayers().get(match.get(1))
-                );
-                roundToAdd.addMatch(matchToAdd);
-                table.addMatch(matchToAdd);
-            }
-            table.addRound(roundToAdd);
-        }
+        log.debug("Matches and rounds of the table {} are created", table.getId());
     }
 }

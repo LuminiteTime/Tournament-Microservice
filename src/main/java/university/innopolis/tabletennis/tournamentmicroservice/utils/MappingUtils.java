@@ -1,5 +1,7 @@
 package university.innopolis.tabletennis.tournamentmicroservice.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.*;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
@@ -7,6 +9,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 import java.time.LocalDate;
 
 @Service
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MappingUtils {
 
     public static TournamentDTO mapToTournamentDTO(Tournament entity) {
@@ -16,6 +19,7 @@ public class MappingUtils {
                 .players(entity.getPlayers().stream()
                         .map(MappingUtils::mapToPlayerDTO)
                         .toList())
+                .amountOfTables(entity.getTablesOfTournament().size())
                 .state(entity.getState())
                 .build();
     }
@@ -24,9 +28,6 @@ public class MappingUtils {
         return GameTableDTO.builder()
                 .players(entity.getPlayers().stream()
                         .map(MappingUtils::mapToPlayerDTO)
-                        .toList())
-                .rounds(entity.getRounds().stream()
-                        .map(MappingUtils::mapToRoundDTO)
                         .toList())
                 .matches(entity.getMatches().stream()
                         .map(MappingUtils::mapToMatchDTO)
@@ -54,13 +55,5 @@ public class MappingUtils {
         Player entity = new Player();
         entity.setExternalId(dto.getExternalId());
         return entity;
-    }
-
-    public static RoundDTO mapToRoundDTO(Round entity) {
-        RoundDTO dto = new RoundDTO();
-        dto.setMatches(entity.getMatches().stream()
-                .map(MappingUtils::mapToMatchDTO)
-                .toList());
-        return dto;
     }
 }

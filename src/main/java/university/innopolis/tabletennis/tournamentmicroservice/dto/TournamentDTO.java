@@ -1,6 +1,6 @@
 package university.innopolis.tabletennis.tournamentmicroservice.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -12,25 +12,34 @@ import university.innopolis.tabletennis.tournamentmicroservice.states.Tournament
 import java.time.LocalDate;
 import java.util.List;
 
-@Schema(name = "Tournament", description = "Tournament DTO")
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class TournamentDTO {
 
-    @Schema(description = "Title of the tournament, must be unique", example = "Beginners 15")
     @NotBlank(message = "Title is not provided")
     private String title;
 
-    @Schema(description = "Date of the tournament")
     private LocalDate date;
 
-    @Schema(description = "Players of the tournament")
     @NotNull(message = "Players are not provided")
     private List<PlayerDTO> players;
 
-    @Schema(description = "State of the tournament", example = "PLAYING")
+    @NotNull(message = "Desired number of tables is not provided")
+    @Min(value = 1, message = "Amount of tables must be at least 1")
+    private Integer amountOfTables;
+
 //    @NotNull(message = "State is not provided")
     private TournamentState state;
+
+    @Override
+    public String toString() {
+        return "TournamentDTO{" +
+                "title='" + title + '\'' +
+                ", date=" + date +
+                ", players=" + players +
+                ", state=" + state +
+                '}';
+    }
 }

@@ -1,6 +1,7 @@
 package university.innopolis.tabletennis.tournamentmicroservice.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.TournamentDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
@@ -10,23 +11,18 @@ import university.innopolis.tabletennis.tournamentmicroservice.states.Tournament
 
 import java.util.*;
 
+@Slf4j
 @Service
+@AllArgsConstructor
 public class TournamentService {
 
-    @Autowired
-    private PlayerRepository playerRepository;
+    private final PlayerRepository playerRepository;
 
-    @Autowired
-    private MatchRepository matchRepository;
+    private final MatchRepository matchRepository;
 
-    @Autowired
-    private GameTableRepository gameTableRepository;
+    private final GameTableRepository gameTableRepository;
 
-    @Autowired
-    private RoundRepository roundRepository;
-
-    @Autowired
-    private TournamentRepository tournamentRepository;
+    private final TournamentRepository tournamentRepository;
 
     public List<Tournament> retrieveAllTournaments() {
         return tournamentRepository.findAll();
@@ -52,31 +48,28 @@ public class TournamentService {
                 .map(Tournament::getTitle)
                 .toList()
                 .contains(tournamentDTO.getTitle()))
+        {
+            log.warn("Title must be unique.");
             throw new IllegalArgumentException("Title must be unique.");
+        }
 
         playerRepository.saveAll(playersToAdd);
 
         Tournament tournament = new Tournament.TournamentBuilder()
                 .title(tournamentDTO.getTitle())
                 .players(playersToAdd)
+                .desiredNumberOfTables(tournamentDTO.getAmountOfTables())
                 .build();
         List<GameTable> tablesOfTournament = tournament.getTablesOfTournament();
 
-        // Saving matches.
         for (GameTable table: tablesOfTournament) {
             matchRepository.saveAll(table.getMatches());
         }
 
-        // Saving rounds.
-        for (GameTable table: tablesOfTournament) {
-            roundRepository.saveAll(table.getRounds());
-        }
-
-        // Saving tables,
         gameTableRepository.saveAll(tournament.getTablesOfTournament());
 
-        // Saving tournament.
         tournamentRepository.save(tournament);
+        log.debug("Tournament is saved.");
         return tournament;
     }
 
