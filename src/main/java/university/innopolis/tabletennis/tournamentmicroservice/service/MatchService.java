@@ -13,6 +13,8 @@ import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO
 import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
 import university.innopolis.tabletennis.tournamentmicroservice.states.PlayerState;
 import university.innopolis.tabletennis.tournamentmicroservice.utils.MappingUtils;
+import university.innopolis.tabletennis.tournamentmicroservice.utils.validation.MatchInfoValidationResult;
+import university.innopolis.tabletennis.tournamentmicroservice.utils.validation.ValidationUtils;
 
 import java.util.*;
 
@@ -22,7 +24,6 @@ import java.util.*;
 public class MatchService {
 
     private final MatchRepository matchRepository;
-
 
     private final GameTableRepository gameTableRepository;
 
@@ -34,29 +35,21 @@ public class MatchService {
                         }
                 );
 
-        // Match is already completed, no changes in state needed.
-        if (match.getState().equals(MatchState.COMPLETED)) {
-            log.info("Match with id {} is already completed", matchId);
-            return MappingUtils.mapToMatchDTO(match);
+        MatchInfoValidationResult validationResult = ValidationUtils.validateMatchInfo(match, matchInfo, matchId);
+        switch (validationResult) {
+            case ALREADY_COMPLETED:
+                return MappingUtils.mapToMatchDTO(match);
+            case READY_TO_START:
+                setMatchIsBeingPlayed(match);
+                break;
+            case READY_TO_COMPLETE:
+                setMatchIsCompleted(match, matchInfo.get());
+                break;
+            default:
+                log.error("Unknown error occurred while patching the match");
+                throw new IllegalArgumentException("Unknown error occurred while patching the match.");
         }
 
-        // Switching the state of the match.
-        if (match.getState().equals(MatchState.PLAYING)) {
-            // Match is about to start but an empty request body provided.
-            if (matchInfo.isEmpty()) {
-                log.warn("Match score is not provided");
-                throw new IllegalArgumentException("Match score is not provided.");
-            } else if (matchInfo.get().getFirstPlayerScore() == null) {
-                log.warn("First player score is not provided");
-                throw new IllegalArgumentException("First player score is not provided.");
-            } else if (matchInfo.get().getSecondPlayerScore() == null) {
-                log.warn("Second player score is not provided");
-                throw new IllegalArgumentException("Second player score is not provided.");
-            }
-            setMatchIsCompleted(match, matchInfo.get());
-        } else {
-            setMatchIsBeingPlayed(match);
-        }
         matchRepository.save(match);
 
         return MappingUtils.mapToMatchDTO(match);
