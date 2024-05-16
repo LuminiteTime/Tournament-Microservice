@@ -13,7 +13,7 @@ public class RoundsCreator {
     private List<Integer> players;
 
 
-    public List<List<Player[]>> prepareRounds(List<Player> playersToSchedule) {
+    public List<List<Player[]>> createRounds(List<Player> playersToSchedule) {
         n = playersToSchedule.size();
         if (n % 2 == 1) {
             n += 1;

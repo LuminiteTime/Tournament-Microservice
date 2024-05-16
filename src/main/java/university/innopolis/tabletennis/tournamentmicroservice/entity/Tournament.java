@@ -104,7 +104,7 @@ public class Tournament {
 
     private void createRoundsWithMatches(GameTable table) {
         RoundsCreator roundsCreator = new RoundsCreator();
-        List<List<Player[]>> schedule = roundsCreator.prepareRounds(table.getPlayers());
+        List<List<Player[]>> schedule = roundsCreator.createRounds(table.getPlayers());
 
         for (List<Player[]> round: schedule) {
             for (Player[] match: round) {
