@@ -108,7 +108,7 @@ public class Tournament {
 
         for (List<Player[]> round: schedule) {
             for (Player[] match: round) {
-                table.addMatch(new Match(match[0], match[1]));
+                table.addMatch(new TablesMatch(match[0], match[1]));
             }
         }
         log.debug("Matches and rounds of the table {} are created", table.getId());

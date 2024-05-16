@@ -20,16 +20,16 @@ public class GameTable {
 
 
     @OneToMany
-    private List<Match> matches;
+    private List<TablesMatch> tablesMatches;
 
     public GameTable() {
         this.players = new ArrayList<>();
-        this.matches = new ArrayList<>();
+        this.tablesMatches = new ArrayList<>();
     }
 
     public void addPlayer(Player player) {
         this.players.add(player);
     }
 
-    public void addMatch(Match match) { this.matches.add(match); }
+    public void addMatch(TablesMatch tablesMatch) { this.tablesMatches.add(tablesMatch); }
 }

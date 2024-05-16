@@ -29,13 +29,13 @@ public class MappingUtils {
                 .players(entity.getPlayers().stream()
                         .map(MappingUtils::mapToPlayerDTO)
                         .toList())
-                .matches(entity.getMatches().stream()
+                .matches(entity.getTablesMatches().stream()
                         .map(MappingUtils::mapToMatchDTO)
                         .toList())
                 .build();
     }
 
-    public static MatchDTO mapToMatchDTO(Match entity) {
+    public static MatchDTO mapToMatchDTO(TablesMatch entity) {
         return MatchDTO.builder()
                 .firstPlayerId(entity.getFirstPlayer().getExternalId())
                 .secondPlayerId(entity.getSecondPlayer().getExternalId())

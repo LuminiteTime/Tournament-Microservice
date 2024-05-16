@@ -10,7 +10,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState
 @Getter
 @Setter
 @NoArgsConstructor
-public class Match {
+public class TablesMatch {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +28,7 @@ public class Match {
 
     private MatchState state;
 
-    public Match(Player firstPlayer, Player secondPlayer) {
+    public TablesMatch(Player firstPlayer, Player secondPlayer) {
         this.firstPlayer = firstPlayer;
         this.secondPlayer = secondPlayer;
         this.state = MatchState.NOT_PLAYING;
