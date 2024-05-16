@@ -72,14 +72,17 @@ public class MainController {
     }
 
     @PatchMapping("/{tournamentId}/match/{matchId}")
-    public ResponseEntity<MatchDTO> patchMatchState(@PathVariable Long tournamentId, @PathVariable Long matchId, @RequestBody Optional<PatchMatchDTO> matchInfo) {
+    public ResponseEntity<MatchDTO> patchMatchState(@PathVariable Long tournamentId,
+                                                    @PathVariable Long matchId,
+                                                    @RequestBody Optional<PatchMatchDTO> matchInfo) {
         log.info("Patching state of the match with id: {} in tournament with id: {}", matchId, tournamentId);
         tournamentService.retrieveTournament(tournamentId);
         return ResponseEntity.ok().body(matchService.patchMatchState(matchId, matchInfo));
     }
 
     @GetMapping("/{tournamentId}/tables/{tableId}/matches_available")
-    public ResponseEntity<List<MatchDTO>> getAvailableMatches(@PathVariable Long tournamentId, @PathVariable Long tableId) {
+    public ResponseEntity<List<MatchDTO>> getAvailableMatches(@PathVariable Long tournamentId,
+                                                              @PathVariable Long tableId) {
         log.info("Retrieving available matches for table with id: {} in tournament with id: {}", tableId, tournamentId);
         if (tournamentService.retrieveTournament(tournamentId).getState() != TournamentState.PLAYING) {
             log.warn("Invalid tournament state. Tournament with id {} is not being played", tournamentId);
