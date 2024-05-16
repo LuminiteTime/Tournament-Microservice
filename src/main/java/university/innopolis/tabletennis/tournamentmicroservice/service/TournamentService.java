@@ -18,7 +18,7 @@ public class TournamentService {
 
     private final PlayerRepository playerRepository;
 
-    private final MatchRepository matchRepository;
+    private final TablesMatchRepository tablesMatchRepository;
 
     private final GameTableRepository gameTableRepository;
 
@@ -63,7 +63,7 @@ public class TournamentService {
         List<GameTable> tablesOfTournament = tournament.getTablesOfTournament();
 
         for (GameTable table: tablesOfTournament) {
-            matchRepository.saveAll(table.getMatches());
+            tablesMatchRepository.saveAll(table.getMatches());
         }
 
         gameTableRepository.saveAll(tournament.getTablesOfTournament());

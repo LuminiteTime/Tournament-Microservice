@@ -8,7 +8,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.entity.GameTable;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Match;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.GameTableRepository;
-import university.innopolis.tabletennis.tournamentmicroservice.repository.MatchRepository;
+import university.innopolis.tabletennis.tournamentmicroservice.repository.TablesMatchRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
 import university.innopolis.tabletennis.tournamentmicroservice.states.PlayerState;
@@ -23,12 +23,12 @@ import java.util.*;
 @AllArgsConstructor
 public class MatchService {
 
-    private final MatchRepository matchRepository;
+    private final TablesMatchRepository tablesMatchRepository;
 
     private final GameTableRepository gameTableRepository;
 
     public MatchDTO patchMatchState(Long matchId, Optional<PatchMatchDTO> matchInfo) {
-        Match match = matchRepository.findById(matchId)
+        Match match = tablesMatchRepository.findById(matchId)
                 .orElseThrow(() -> {
                             log.warn("Match with id {} does not exist", matchId);
                             return new IllegalArgumentException("Match with id " + matchId + " does not exist.");
@@ -50,7 +50,7 @@ public class MatchService {
                 throw new IllegalArgumentException("Unknown error occurred while patching the match.");
         }
 
-        matchRepository.save(match);
+        tablesMatchRepository.save(match);
 
         return MappingUtils.mapToMatchDTO(match);
     }
