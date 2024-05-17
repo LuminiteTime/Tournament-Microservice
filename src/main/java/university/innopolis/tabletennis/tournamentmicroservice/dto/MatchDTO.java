@@ -14,9 +14,6 @@ import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState
 @AllArgsConstructor
 @NoArgsConstructor
 public class MatchDTO {
-
-    @NotNull(message = "Match id is not provided")
-    @Min(value = 1, message = "Invalid id format")
     private Long id;
 
     @NotNull(message = "First player id is not provided")
