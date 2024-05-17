@@ -10,7 +10,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState
 @Getter
 @Setter
 @NoArgsConstructor
-public class TablesMatch {
+public class TablesMatch implements GeneralMatch {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
