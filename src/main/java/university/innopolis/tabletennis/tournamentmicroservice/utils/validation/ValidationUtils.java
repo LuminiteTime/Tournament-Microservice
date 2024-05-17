@@ -2,7 +2,9 @@ package university.innopolis.tabletennis.tournamentmicroservice.utils.validation
 
 import lombok.extern.slf4j.Slf4j;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.Match;
+import university.innopolis.tabletennis.tournamentmicroservice.entity.GeneralMatch;
+import university.innopolis.tabletennis.tournamentmicroservice.entity.TablesMatch;
+import university.innopolis.tabletennis.tournamentmicroservice.entity.BracketsMatch;
 import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
 
 import java.util.Optional;
@@ -12,7 +14,7 @@ public class ValidationUtils {
 
     private ValidationUtils() {}
 
-    public static MatchInfoValidationResult validateMatchInfo(Match match, Optional<PatchMatchDTO> matchInfo, Long matchId) {
+    public static MatchInfoValidationResult validateMatchInfo(GeneralMatch match, Optional<PatchMatchDTO> matchInfo, Long matchId) {
         // Match is already completed, no changes in state needed.
         if (match.getState().equals(MatchState.COMPLETED)) {
             log.info("Match with id {} is already completed", matchId);
