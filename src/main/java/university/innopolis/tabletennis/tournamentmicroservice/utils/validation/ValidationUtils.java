@@ -15,6 +15,10 @@ public class ValidationUtils {
     private ValidationUtils() {}
 
     public static MatchInfoValidationResult validateMatchInfo(GeneralMatch match, Optional<PatchMatchDTO> matchInfo, Long matchId) {
+        if (match.getState().equals(MatchState.SKIPPED)) {
+            throw new IllegalArgumentException("Match with id " + matchId + " is a non-playable match.");
+        }
+
         // Match is already completed, no changes in state needed.
         if (match.getState().equals(MatchState.COMPLETED)) {
             log.info("Match with id {} is already completed", matchId);
