@@ -27,6 +27,7 @@ public class MappingUtils {
 
     public static GameTableDTO mapToGameTableDTO(GameTable entity) {
         return GameTableDTO.builder()
+                .id(entity.getId())
                 .players(entity.getPlayers().stream()
                         .map(MappingUtils::mapToPlayerDTO)
                         .toList())
