@@ -14,6 +14,7 @@ public class MappingUtils {
 
     public static TournamentDTO mapToTournamentDTO(Tournament entity) {
         return TournamentDTO.builder()
+                .id(entity.getId())
                 .title(entity.getTitle())
                 .date(LocalDate.now())
                 .players(entity.getPlayers().stream()

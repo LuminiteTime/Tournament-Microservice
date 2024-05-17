@@ -17,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TournamentDTO {
+    private Long id;
 
     @NotBlank(message = "Title is not provided")
     private String title;
