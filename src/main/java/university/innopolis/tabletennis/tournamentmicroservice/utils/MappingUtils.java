@@ -37,6 +37,7 @@ public class MappingUtils {
 
     public static MatchDTO mapToMatchDTO(TablesMatch entity) {
         return MatchDTO.builder()
+                .id(entity.getId())
                 .firstPlayerId(entity.getFirstPlayer().getExternalId())
                 .secondPlayerId(entity.getSecondPlayer().getExternalId())
                 .firstPlayerScore(entity.getFirstPlayerScore())
