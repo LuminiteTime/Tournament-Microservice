@@ -11,6 +11,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class GameTableDTO {
+    private Long id;
+
     @NotNull(message = "Players are not provided")
     private final List<PlayerDTO> players;
 

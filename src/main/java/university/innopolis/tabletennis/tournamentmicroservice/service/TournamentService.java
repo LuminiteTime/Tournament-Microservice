@@ -18,7 +18,7 @@ public class TournamentService {
 
     private final PlayerRepository playerRepository;
 
-    private final MatchRepository matchRepository;
+    private final TablesMatchRepository tablesMatchRepository;
 
     private final GameTableRepository gameTableRepository;
 
@@ -63,7 +63,7 @@ public class TournamentService {
         List<GameTable> tablesOfTournament = tournament.getTablesOfTournament();
 
         for (GameTable table: tablesOfTournament) {
-            matchRepository.saveAll(table.getMatches());
+            tablesMatchRepository.saveAll(table.getTablesMatches());
         }
 
         gameTableRepository.saveAll(tournament.getTablesOfTournament());
@@ -84,18 +84,18 @@ public class TournamentService {
         return tournament;
     }
 
-    public List<Match> retrieveALlMatches(Long tournamentId) {
+    public List<TablesMatch> retrieveALlMatches(Long tournamentId) {
         Tournament tournament = tournamentRepository
                 .findById(tournamentId)
                 .orElseThrow(() ->
                         new TournamentNotFoundException(tournamentId)
                 );
-        List<Match> allMatches = new ArrayList<>();
+        List<TablesMatch> allTablesMatches = new ArrayList<>();
         for (GameTable table: tournament.getTablesOfTournament()) {
-            allMatches.addAll(table.getMatches());
+            allTablesMatches.addAll(table.getTablesMatches());
         }
-        return allMatches.stream()
-                .sorted(Comparator.comparing(Match::getId))
+        return allTablesMatches.stream()
+                .sorted(Comparator.comparing(TablesMatch::getId))
                 .toList();
     }
 }

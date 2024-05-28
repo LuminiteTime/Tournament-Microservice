@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>university.innopolis.tabletennis</groupId>
 	<artifactId>TournamentMicroservice</artifactId>
-	<version>1.0</version>
+	<version>1.1.0</version>
 	<name>TournamentMicroservice</name>
 	<description>TournamentMicroservice</description>
 	<properties>

@@ -14,6 +14,7 @@ public class MappingUtils {
 
     public static TournamentDTO mapToTournamentDTO(Tournament entity) {
         return TournamentDTO.builder()
+                .id(entity.getId())
                 .title(entity.getTitle())
                 .date(LocalDate.now())
                 .players(entity.getPlayers().stream()
@@ -26,17 +27,19 @@ public class MappingUtils {
 
     public static GameTableDTO mapToGameTableDTO(GameTable entity) {
         return GameTableDTO.builder()
+                .id(entity.getId())
                 .players(entity.getPlayers().stream()
                         .map(MappingUtils::mapToPlayerDTO)
                         .toList())
-                .matches(entity.getMatches().stream()
+                .matches(entity.getTablesMatches().stream()
                         .map(MappingUtils::mapToMatchDTO)
                         .toList())
                 .build();
     }
 
-    public static MatchDTO mapToMatchDTO(Match entity) {
+    public static MatchDTO mapToMatchDTO(TablesMatch entity) {
         return MatchDTO.builder()
+                .id(entity.getId())
                 .firstPlayerId(entity.getFirstPlayer().getExternalId())
                 .secondPlayerId(entity.getSecondPlayer().getExternalId())
                 .firstPlayerScore(entity.getFirstPlayerScore())
