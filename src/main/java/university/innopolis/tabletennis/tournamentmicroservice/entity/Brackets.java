@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
+import university.innopolis.tabletennis.tournamentmicroservice.states.TournamentState;
 import university.innopolis.tabletennis.tournamentmicroservice.utils.BracketsCreator;
 
 import java.util.*;
@@ -29,6 +30,11 @@ public class Brackets {
 
     @OneToMany
     private Set<BracketsMatch> availableMatches = new HashSet<>();
+
+    @OneToMany
+    private Map<Integer, Player> topThree = new HashMap<>();
+
+    private TournamentState state = TournamentState.PLAYING;
 
     public Brackets(List<Player> players) {
         this.players = players;
@@ -69,5 +75,14 @@ public class Brackets {
             match = match.getNextMatch();
         }
         return null;
+    }
+
+    public void finish() {
+        this.state = TournamentState.FINISHED;
+        BracketsMatch match = firstMatches.get(0);
+        while (match.getNextMatch() != null) {
+            match = match.getNextMatch();
+        }
+        this.topThree.put(1, match.getWinner());
     }
 }
