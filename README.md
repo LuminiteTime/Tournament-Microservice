@@ -12,6 +12,12 @@ This is a Java Spring Boot application that manages table tennis tournaments. It
 - Retrieve all matches of a specific tournament
 - Update the state of a tournament
 
+- Brackets (single elimination)
+  - Generate brackets for a tournament
+  - Retrieve a specific bracket by ID
+  - Retrieve all matches of a specific bracket
+  - Update the state of a bracket
+
 ## Prerequisites
 
 - Java 11 or higher
