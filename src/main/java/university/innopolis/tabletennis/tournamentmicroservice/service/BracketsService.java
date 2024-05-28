@@ -4,12 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.Brackets;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.BracketsMatch;
+import university.innopolis.tabletennis.tournamentmicroservice.entity.WinnerBrackets;
+import university.innopolis.tabletennis.tournamentmicroservice.entity.WinnerBracketsMatch;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
 import university.innopolis.tabletennis.tournamentmicroservice.exception.BracketsNotFoundException;
-import university.innopolis.tabletennis.tournamentmicroservice.repository.BracketsMatchRepository;
-import university.innopolis.tabletennis.tournamentmicroservice.repository.BracketsRepository;
+import university.innopolis.tabletennis.tournamentmicroservice.repository.WinnerBracketsMatchRepository;
+import university.innopolis.tabletennis.tournamentmicroservice.repository.WinnerBracketsRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.PlayerRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
 import university.innopolis.tabletennis.tournamentmicroservice.utils.validation.MatchInfoValidationResult;
@@ -26,33 +26,33 @@ public class BracketsService {
 
     private final PlayerRepository playerRepository;
 
-    private final BracketsMatchRepository bracketsMatchRepository;
+    private final WinnerBracketsMatchRepository winnerBracketsMatchRepository;
 
-    private final BracketsRepository bracketsRepository;
+    private final WinnerBracketsRepository winnerBracketsRepository;
 
-    public Brackets createBrackets(List<Player> players) {
+    public WinnerBrackets createBrackets(List<Player> players) {
         playerRepository.saveAll(players);
-        Brackets newBrackets = new Brackets(players);
-        bracketsMatchRepository.saveAll(newBrackets.getMatches());
-        bracketsRepository.save(newBrackets);
-        return newBrackets;
+        WinnerBrackets newWinnerBrackets = new WinnerBrackets(players);
+        winnerBracketsMatchRepository.saveAll(newWinnerBrackets.getMatches());
+        winnerBracketsRepository.save(newWinnerBrackets);
+        return newWinnerBrackets;
     }
 
-    public Set<BracketsMatch> getAvailableMatches(Long bracketsId) {
-        return bracketsRepository.findById(bracketsId).orElseThrow(
+    public Set<WinnerBracketsMatch> getAvailableMatches(Long bracketsId) {
+        return winnerBracketsRepository.findById(bracketsId).orElseThrow(
                 () -> new BracketsNotFoundException(bracketsId)
         ).getAvailableMatches();
     }
 
-    public BracketsMatch patchBracketsMatchState(Long bracketsId, Long matchIndex, Optional<PatchMatchDTO> matchInfo) {
-        Brackets brackets = bracketsRepository.findById(bracketsId).orElseThrow(
+    public WinnerBracketsMatch patchBracketsMatchState(Long bracketsId, Long matchIndex, Optional<PatchMatchDTO> matchInfo) {
+        WinnerBrackets winnerBrackets = winnerBracketsRepository.findById(bracketsId).orElseThrow(
                 () -> new BracketsNotFoundException(bracketsId)
         );
-        if (matchIndex > brackets.getMatches().size()) {
+        if (matchIndex > winnerBrackets.getMatches().size()) {
             throw new IllegalArgumentException("Match with index " + matchIndex + " does not exist.");
         }
 
-        BracketsMatch match = brackets.getMatch(matchIndex);
+        WinnerBracketsMatch match = winnerBrackets.getMatch(matchIndex);
 
         // TODO: Make one method for BracketsService and for MatchService.
         MatchInfoValidationResult validationResult = ValidationUtils.validateMatchInfo(match, matchInfo, matchIndex);
@@ -71,15 +71,15 @@ public class BracketsService {
         }
 
 
-        brackets.collectAvailableMatches();
+        winnerBrackets.collectAvailableMatches();
 
-        bracketsMatchRepository.save(match);
-        bracketsRepository.save(brackets);
+        winnerBracketsMatchRepository.save(match);
+        winnerBracketsRepository.save(winnerBrackets);
 
         return match;
     }
 
-    private void setMatchIsCompleted(BracketsMatch match, PatchMatchDTO matchInfo) {
+    private void setMatchIsCompleted(WinnerBracketsMatch match, PatchMatchDTO matchInfo) {
         match.setState(MatchState.COMPLETED);
         match.setFirstPlayerScore(matchInfo.getFirstPlayerScore());
         match.setSecondPlayerScore(matchInfo.getSecondPlayerScore());
@@ -87,35 +87,35 @@ public class BracketsService {
         match.setWinner(matchInfo.getFirstPlayerScore() > match.getSecondPlayerScore() ?
                 match.getFirstPlayer() : match.getSecondPlayer());
 
-        BracketsMatch next = match.getNextMatch();
+        WinnerBracketsMatch next = match.getNextMatch();
         if (next != null) {
             if (next.getFirstPlayer() == null) {
                 next.setFirstPlayer(match.getWinner());
             } else {
                 next.setSecondPlayer(match.getWinner());
             }
-            bracketsMatchRepository.save(next);
+            winnerBracketsMatchRepository.save(next);
         }
 
         log.info("Match with id {} is completed", match.getId());
     }
 
-    private void setMatchIsBeingPlayed(BracketsMatch match) {
+    private void setMatchIsBeingPlayed(WinnerBracketsMatch match) {
         match.setState(MatchState.PLAYING);
         log.info("Match with id {} has been started", match.getId());
     }
 
-    public List<BracketsMatch> getAllMatches(Long bracketsId) {
-        return bracketsRepository.findById(bracketsId).orElseThrow(
+    public List<WinnerBracketsMatch> getAllMatches(Long bracketsId) {
+        return winnerBracketsRepository.findById(bracketsId).orElseThrow(
                 () -> new BracketsNotFoundException(bracketsId)
         ).getMatches();
     }
 
-    public Brackets finishBrackets(Long bracketsId) {
-        Brackets brackets = bracketsRepository.findById(bracketsId).orElseThrow(
+    public WinnerBrackets finishBrackets(Long bracketsId) {
+        WinnerBrackets winnerBrackets = winnerBracketsRepository.findById(bracketsId).orElseThrow(
                 () -> new BracketsNotFoundException(bracketsId)
         );
-        brackets.finish();
-        return brackets;
+        winnerBrackets.finish();
+        return winnerBrackets;
     }
 }

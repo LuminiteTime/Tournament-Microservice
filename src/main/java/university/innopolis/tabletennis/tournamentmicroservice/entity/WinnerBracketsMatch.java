@@ -8,7 +8,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState
 @Setter
 @Entity
 @NoArgsConstructor
-public class BracketsMatch implements GeneralMatch {
+public class WinnerBracketsMatch implements GeneralMatch {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,7 +29,7 @@ public class BracketsMatch implements GeneralMatch {
     private int secondPlayerScore;
 
     @ManyToOne
-    private BracketsMatch nextMatch;
+    private WinnerBracketsMatch nextMatch;
 
     private MatchState state;
 }
