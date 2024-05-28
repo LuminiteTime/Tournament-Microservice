@@ -110,4 +110,12 @@ public class BracketsService {
                 () -> new BracketsNotFoundException(bracketsId)
         ).getMatches();
     }
+
+    public Brackets finishBrackets(Long bracketsId) {
+        Brackets brackets = bracketsRepository.findById(bracketsId).orElseThrow(
+                () -> new BracketsNotFoundException(bracketsId)
+        );
+        brackets.finish();
+        return brackets;
+    }
 }

@@ -29,7 +29,12 @@ public class BracketsController {
         return ResponseEntity.ok().body(bracketsService.createBrackets(players.stream().map(MappingUtils::mapToPlayerEntity).toList()));
     }
 
-    // TODO: Should we pass match index in brackets or match id in db?
+    @PatchMapping("/{bracketsId}/")
+    public ResponseEntity<Brackets> finishBrackets(@PathVariable Long bracketsId) {
+        log.info("Completing brackets with id: {}", bracketsId);
+        return ResponseEntity.ok().body(bracketsService.finishBrackets(bracketsId));
+    }
+
     @PatchMapping("/{bracketsId}/match/{matchIndex}")
     public ResponseEntity<BracketsMatch> patchBracketsMatchState(@PathVariable Long bracketsId,
                                                                  @PathVariable Long matchIndex,
