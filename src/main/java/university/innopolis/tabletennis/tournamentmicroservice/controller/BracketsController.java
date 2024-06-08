@@ -36,14 +36,14 @@ public class BracketsController {
         return ResponseEntity.ok().body(bracketsService.finishBrackets(bracketsId));
     }
 
-    @PatchMapping("/{bracketsId}/match/{matchIndex}")
+    @PatchMapping("/{bracketsId}/match/{matchId}")
     public ResponseEntity<BracketsMatchDTO> patchBracketsMatchState(@PathVariable Long bracketsId,
-                                                                    @PathVariable Long matchIndex,
+                                                                    @PathVariable Long matchId,
                                                                     @RequestBody Optional<PatchMatchDTO> matchInfo) {
-        log.info("Patching match with id {}", matchIndex);
+        log.info("Patching match with id {}", matchId);
         return ResponseEntity.ok().body(MappingUtils.mapToBracketsMatchDTO(bracketsService.patchBracketsMatchState(
                 bracketsId,
-                matchIndex,
+                matchId,
                 matchInfo)));
     }
 
