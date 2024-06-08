@@ -64,11 +64,12 @@ public class MappingUtils {
         return BracketsMatchDTO.builder()
                 .id(winnerBracketsMatch.getId())
                 .matchIndex(winnerBracketsMatch.getMatchIndex())
-                .firstPlayerId(winnerBracketsMatch.getFirstPlayer().getExternalId())
-                .secondPlayerId(winnerBracketsMatch.getSecondPlayer().getExternalId())
+                .firstPlayerId(winnerBracketsMatch.getFirstPlayer() == null ? null : winnerBracketsMatch.getFirstPlayer().getExternalId())
+                .secondPlayerId(winnerBracketsMatch.getSecondPlayer() == null ? null : winnerBracketsMatch.getSecondPlayer().getExternalId())
                 .firstPlayerScore(winnerBracketsMatch.getFirstPlayerScore())
                 .secondPlayerScore(winnerBracketsMatch.getSecondPlayerScore())
-                .winnerId(winnerBracketsMatch.getWinner().getExternalId())
+                .winnerId(winnerBracketsMatch.getWinner() == null ? null : winnerBracketsMatch.getWinner().getExternalId())
+                .nextMatchIndex(winnerBracketsMatch.getNextMatch() == null ? null : winnerBracketsMatch.getNextMatch().getMatchIndex())
                 .state(winnerBracketsMatch.getState())
                 .build();
     }
