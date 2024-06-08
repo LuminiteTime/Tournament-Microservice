@@ -39,25 +39,7 @@ public class WinnerBracketsCreator {
 
 
         for (int i = 0; i < numberOfAllPlayers / 2; i++) {
-            WinnerBracketsMatch winnerBracketsMatch = new WinnerBracketsMatch();
-
-            boolean isRealFirstPlayer = i < numberOfRealPlayers;
-            boolean isRealSecondPlayer = numberOfAllPlayers - 1 - i < numberOfRealPlayers;
-
-            if (isRealFirstPlayer) {
-                winnerBracketsMatch.setFirstPlayer(players.get(i));
-            }
-            if (isRealSecondPlayer) {
-                winnerBracketsMatch.setSecondPlayer(players.get(numberOfAllPlayers - 1 - i));
-            }
-
-            if (!isRealFirstPlayer || !isRealSecondPlayer) {
-                winnerBracketsMatch.setState(MatchState.SKIPPED);
-            } else {
-                winnerBracketsMatch.setState(MatchState.NOT_PLAYING);
-            }
-
-            winnerBracketsMatch.setMatchIndex(matchIndex++);
+            WinnerBracketsMatch winnerBracketsMatch = createLeafWinnerBracketsMatch(i);
 
             matches.add(winnerBracketsMatch);
             currentRound.add(winnerBracketsMatch);
@@ -103,6 +85,28 @@ public class WinnerBracketsCreator {
             }
             currentRound = nextRound;
         }
+    }
+
+    WinnerBracketsMatch createLeafWinnerBracketsMatch(int i) {
+        WinnerBracketsMatch winnerBracketsMatch = new WinnerBracketsMatch();
+
+        boolean isRealFirstPlayer = i < numberOfRealPlayers;
+        boolean isRealSecondPlayer = numberOfAllPlayers - 1 - i < numberOfRealPlayers;
+
+        if (isRealFirstPlayer) {
+            winnerBracketsMatch.setFirstPlayer(players.get(i));
+        }
+        if (isRealSecondPlayer) {
+            winnerBracketsMatch.setSecondPlayer(players.get(numberOfAllPlayers - 1 - i));
+        }
+
+        if (!isRealFirstPlayer || !isRealSecondPlayer) {
+            winnerBracketsMatch.setState(MatchState.SKIPPED);
+        } else {
+            winnerBracketsMatch.setState(MatchState.NOT_PLAYING);
+        }
+
+        return winnerBracketsMatch;
     }
 
     // TODO: Fill leaves players.
