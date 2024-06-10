@@ -57,16 +57,6 @@ public class WinnerBrackets {
         }
     }
 
-    public WinnerBracketsMatch getMatch(Long matchIndex) {
-        for (WinnerBracketsMatch firstMatch: firstMatches) {
-            WinnerBracketsMatch matchFound = getMatchFromLeaf(firstMatch, matchIndex);
-            if (matchFound != null) {
-                return matchFound;
-            }
-        }
-        return null;
-    }
-
     private WinnerBracketsMatch getMatchFromLeaf(WinnerBracketsMatch match, Long matchIndex) {
         while (match != null) {
             if (Objects.equals(match.getMatchIndex(), matchIndex)) {
