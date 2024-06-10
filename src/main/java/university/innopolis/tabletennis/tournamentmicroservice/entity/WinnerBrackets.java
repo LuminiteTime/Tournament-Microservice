@@ -57,16 +57,6 @@ public class WinnerBrackets {
         }
     }
 
-    private WinnerBracketsMatch getMatchFromLeaf(WinnerBracketsMatch match, Long matchIndex) {
-        while (match != null) {
-            if (Objects.equals(match.getMatchIndex(), matchIndex)) {
-                return match;
-            }
-            match = match.getNextMatch();
-        }
-        return null;
-    }
-
     public void finish() {
         this.state = TournamentState.FINISHED;
         WinnerBracketsMatch match = firstMatches.get(0);
