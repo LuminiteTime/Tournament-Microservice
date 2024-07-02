@@ -21,9 +21,6 @@ public class WinnerBracketsMatch implements GeneralMatch {
 
     private Long matchIndex;
 
-    @ManyToOne
-    private Player winner;
-
     private Integer firstPlayerScore;
 
     private Integer secondPlayerScore;

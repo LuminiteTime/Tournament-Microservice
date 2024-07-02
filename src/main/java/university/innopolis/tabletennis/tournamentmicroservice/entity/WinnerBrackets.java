@@ -63,6 +63,9 @@ public class WinnerBrackets {
         while (match.getNextMatch() != null) {
             match = match.getNextMatch();
         }
-        this.topThree.put(1, match.getWinner());
+        this.topThree.put(1,
+                match.getFirstPlayerScore() > match.getSecondPlayerScore() ?
+                match.getFirstPlayer() :
+                match.getSecondPlayer());
     }
 }

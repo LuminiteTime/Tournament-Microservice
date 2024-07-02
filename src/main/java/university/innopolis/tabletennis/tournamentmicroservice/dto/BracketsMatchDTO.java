@@ -17,7 +17,6 @@ public class BracketsMatchDTO {
     private Integer firstPlayerScore;
     private Integer secondPlayerScore;
     private Long matchIndex;
-    private Long winnerId;
     private Long nextMatchIndex;
     private MatchState state;
 }

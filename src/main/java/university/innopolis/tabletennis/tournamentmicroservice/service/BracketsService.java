@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.LoserBrackets;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.WinnerBrackets;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.WinnerBracketsMatch;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
+import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 import university.innopolis.tabletennis.tournamentmicroservice.exception.BracketsNotFoundException;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.*;
 import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
@@ -98,16 +95,13 @@ public class BracketsService {
         match.setFirstPlayerScore(matchInfo.getFirstPlayerScore());
         match.setSecondPlayerScore(matchInfo.getSecondPlayerScore());
 
-        // Do not save winner.
-        match.setWinner(matchInfo.getFirstPlayerScore() > match.getSecondPlayerScore() ?
-                match.getFirstPlayer() : match.getSecondPlayer());
-
         WinnerBracketsMatch next = match.getNextMatch();
         if (next != null) {
+            Player winner = getWinnerFromMatch(match);
             if (next.getFirstPlayer() == null) {
-                next.setFirstPlayer(match.getWinner());
+                next.setFirstPlayer(winner);
             } else {
-                next.setSecondPlayer(match.getWinner());
+                next.setSecondPlayer(winner);
             }
             winnerBracketsMatchRepository.save(next);
         }
@@ -132,5 +126,11 @@ public class BracketsService {
         );
         winnerBrackets.finish();
         return winnerBrackets;
+    }
+
+    public Player getWinnerFromMatch(GeneralMatch match) {
+        return match.getFirstPlayerScore() > match.getSecondPlayerScore() ?
+                match.getFirstPlayer() :
+                match.getSecondPlayer();
     }
 }
