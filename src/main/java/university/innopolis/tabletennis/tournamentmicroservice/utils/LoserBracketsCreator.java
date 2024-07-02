@@ -68,6 +68,7 @@ public class LoserBracketsCreator {
                     rightMatch.setNextMatch(loserBracketsMatch);
                     rightMatch.setMatchIndex(startMatchIndex++);
                 } else {
+                    // TODO: Complete build loser brackets tree logic.
 //                    loserBracketsMatch.setFromSecondPlayerMatchIndex();
                 }
 
