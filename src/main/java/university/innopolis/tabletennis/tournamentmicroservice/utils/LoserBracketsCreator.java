@@ -68,7 +68,7 @@ public class LoserBracketsCreator {
                     rightMatch.setNextMatch(loserBracketsMatch);
                     rightMatch.setMatchIndex(startMatchIndex++);
                 } else {
-                    loserBracketsMatch.setFromSecondPlayerMatchIndex();
+//                    loserBracketsMatch.setFromSecondPlayerMatchIndex();
                 }
 
                 if (roundIndex % 2 != 0) {
