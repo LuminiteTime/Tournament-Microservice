@@ -1,39 +1,45 @@
 package university.innopolis.tabletennis.tournamentmicroservice.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.*;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 
+import java.time.LocalDate;
+
 @Service
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MappingUtils {
 
     public static TournamentDTO mapToTournamentDTO(Tournament entity) {
         return TournamentDTO.builder()
+                .id(entity.getId())
                 .title(entity.getTitle())
-                .date(entity.getDate())
+                .date(LocalDate.now())
                 .players(entity.getPlayers().stream()
                         .map(MappingUtils::mapToPlayerDTO)
                         .toList())
+                .amountOfTables(entity.getTablesOfTournament().size())
                 .state(entity.getState())
                 .build();
     }
 
     public static GameTableDTO mapToGameTableDTO(GameTable entity) {
         return GameTableDTO.builder()
+                .id(entity.getId())
                 .players(entity.getPlayers().stream()
                         .map(MappingUtils::mapToPlayerDTO)
                         .toList())
-                .rounds(entity.getRounds().stream()
-                        .map(MappingUtils::mapToRoundDTO)
-                        .toList())
-                .matches(entity.getMatches().stream()
+                .matches(entity.getTablesMatches().stream()
                         .map(MappingUtils::mapToMatchDTO)
                         .toList())
                 .build();
     }
 
-    public static MatchDTO mapToMatchDTO(Match entity) {
+    public static MatchDTO mapToMatchDTO(TablesMatch entity) {
         return MatchDTO.builder()
+                .id(entity.getId())
                 .firstPlayerId(entity.getFirstPlayer().getExternalId())
                 .secondPlayerId(entity.getSecondPlayer().getExternalId())
                 .firstPlayerScore(entity.getFirstPlayerScore())
@@ -52,13 +58,5 @@ public class MappingUtils {
         Player entity = new Player();
         entity.setExternalId(dto.getExternalId());
         return entity;
-    }
-
-    public static RoundDTO mapToRoundDTO(Round entity) {
-        RoundDTO dto = new RoundDTO();
-        dto.setMatches(entity.getMatches().stream()
-                .map(MappingUtils::mapToMatchDTO)
-                .toList());
-        return dto;
     }
 }

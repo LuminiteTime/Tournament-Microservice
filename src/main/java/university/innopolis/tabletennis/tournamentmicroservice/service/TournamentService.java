@@ -1,110 +1,101 @@
 package university.innopolis.tabletennis.tournamentmicroservice.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import university.innopolis.tabletennis.tournamentmicroservice.dto.GameTableDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.TournamentDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
+import university.innopolis.tabletennis.tournamentmicroservice.exception.TournamentNotFoundException;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.*;
 import university.innopolis.tabletennis.tournamentmicroservice.states.TournamentState;
-import university.innopolis.tabletennis.tournamentmicroservice.utils.MappingUtils;
 
 import java.util.*;
 
+@Slf4j
 @Service
+@AllArgsConstructor
 public class TournamentService {
 
-    @Autowired
-    private PlayerRepository playerRepository;
+    private final PlayerRepository playerRepository;
 
-    @Autowired
-    private MatchRepository matchRepository;
+    private final TablesMatchRepository tablesMatchRepository;
 
-    @Autowired
-    private GameTableRepository gameTableRepository;
+    private final GameTableRepository gameTableRepository;
 
-    @Autowired
-    private RoundRepository roundRepository;
+    private final TournamentRepository tournamentRepository;
 
-    @Autowired
-    private TournamentRepository tournamentRepository;
-
-    public List<TournamentDTO> retrieveAllTournaments() {
-        return tournamentRepository.findAll().stream()
-                .map(MappingUtils::mapToTournamentDTO)
-                .toList();
+    public List<Tournament> retrieveAllTournaments() {
+        return tournamentRepository.findAll();
     }
 
-    public TournamentDTO retrieveTournament(Long id) {
-        Tournament tournament = tournamentRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException(
-                        "Tournament with id " + id + " does not exist."
-                )
+    public Tournament retrieveTournament(Long tournamentId) {
+        return tournamentRepository.findById(tournamentId).orElseThrow(() ->
+                new TournamentNotFoundException(tournamentId)
         );
-        return MappingUtils.mapToTournamentDTO(tournament);
     }
 
-    public List<GameTableDTO> retrieveGameTables(Long tournamentId) {
+    public List<GameTable> retrieveGameTables(Long tournamentId) {
         Tournament tournament = tournamentRepository
                 .findById(tournamentId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Tournament with id " + tournamentId + " does not exist."
-                        )
+                        new TournamentNotFoundException(tournamentId)
                 );
-        return tournament.getTablesOfTournament().stream()
-                .map(MappingUtils::mapToGameTableDTO)
-                .toList();
+        return tournament.getTablesOfTournament();
     }
 
-    public TournamentDTO addTournament(TournamentDTO tournamentDTO) {
+    public Tournament addTournament(TournamentDTO tournamentDTO, List<Player> playersToAdd) {
         if (tournamentRepository.findAll().stream()
                 .map(Tournament::getTitle)
                 .toList()
                 .contains(tournamentDTO.getTitle()))
+        {
+            log.warn("Title must be unique.");
             throw new IllegalArgumentException("Title must be unique.");
-
-        List<Player> playersToAdd = tournamentDTO.getPlayers().stream()
-                .map(MappingUtils::mapToPlayerEntity)
-                .toList();
+        }
 
         playerRepository.saveAll(playersToAdd);
 
         Tournament tournament = new Tournament.TournamentBuilder()
                 .title(tournamentDTO.getTitle())
-                .date(tournamentDTO.getDate())
                 .players(playersToAdd)
+                .desiredNumberOfTables(tournamentDTO.getAmountOfTables())
                 .build();
         List<GameTable> tablesOfTournament = tournament.getTablesOfTournament();
 
-        // Saving matches.
         for (GameTable table: tablesOfTournament) {
-            matchRepository.saveAll(table.getMatches());
+            tablesMatchRepository.saveAll(table.getTablesMatches());
         }
 
-        // Saving rounds.
-        for (GameTable table: tablesOfTournament) {
-            roundRepository.saveAll(table.getRounds());
-        }
-
-        // Saving tables,
         gameTableRepository.saveAll(tournament.getTablesOfTournament());
 
-        // Saving tournament.
         tournamentRepository.save(tournament);
-        return MappingUtils.mapToTournamentDTO(tournament);
+        log.debug("Tournament is saved.");
+        return tournament;
     }
 
-    public TournamentDTO patchTournamentState(Long tournamentId) {
+    public Tournament patchTournamentState(Long tournamentId) {
         Tournament tournament = tournamentRepository
                 .findById(tournamentId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Tournament with id " + tournamentId + " does not exist."
-                        )
+                        new TournamentNotFoundException(tournamentId)
                 );
         tournament.setState(TournamentState.FINISHED);
         tournamentRepository.save(tournament);
-        return MappingUtils.mapToTournamentDTO(tournament);
+        return tournament;
+    }
+
+    public List<TablesMatch> retrieveALlMatches(Long tournamentId) {
+        Tournament tournament = tournamentRepository
+                .findById(tournamentId)
+                .orElseThrow(() ->
+                        new TournamentNotFoundException(tournamentId)
+                );
+        List<TablesMatch> allTablesMatches = new ArrayList<>();
+        for (GameTable table: tournament.getTablesOfTournament()) {
+            allTablesMatches.addAll(table.getTablesMatches());
+        }
+        return allTablesMatches.stream()
+                .sorted(Comparator.comparing(TablesMatch::getId))
+                .toList();
     }
 }

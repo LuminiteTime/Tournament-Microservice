@@ -1,115 +1,99 @@
 package university.innopolis.tabletennis.tournamentmicroservice.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.MatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.GameTable;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.Match;
+import university.innopolis.tabletennis.tournamentmicroservice.entity.TablesMatch;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.GameTableRepository;
-import university.innopolis.tabletennis.tournamentmicroservice.repository.MatchRepository;
-import university.innopolis.tabletennis.tournamentmicroservice.repository.PlayerRepository;
+import university.innopolis.tabletennis.tournamentmicroservice.repository.TablesMatchRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
 import university.innopolis.tabletennis.tournamentmicroservice.states.PlayerState;
 import university.innopolis.tabletennis.tournamentmicroservice.utils.MappingUtils;
+import university.innopolis.tabletennis.tournamentmicroservice.utils.validation.MatchInfoValidationResult;
+import university.innopolis.tabletennis.tournamentmicroservice.utils.validation.ValidationUtils;
 
 import java.util.*;
 
+@Slf4j
 @Service
+@AllArgsConstructor
 public class MatchService {
-    @Autowired
-    private MatchRepository matchRepository;
 
-    @Autowired
-    private PlayerRepository playerRepository;
+    private final TablesMatchRepository tablesMatchRepository;
 
-    @Autowired
-    private GameTableRepository gameTableRepository;
+    private final GameTableRepository gameTableRepository;
 
     public MatchDTO patchMatchState(Long matchId, Optional<PatchMatchDTO> matchInfo) {
-        Match match = matchRepository
-                .findById(matchId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Match with id " + matchId + " does not exist."
-                        )
+        TablesMatch tablesMatch = tablesMatchRepository.findById(matchId)
+                .orElseThrow(() -> {
+                            log.warn("Match with id {} does not exist", matchId);
+                            return new IllegalArgumentException("Match with id " + matchId + " does not exist.");
+                        }
                 );
 
-        // Match is already completed, no changes in state needed.
-        if (match.getState().equals(MatchState.COMPLETED))
-            return MappingUtils.mapToMatchDTO(match);
-
-        // Match is about to start but an empty request body provided.
-        if (match.getState().equals(MatchState.PLAYING)) {
-            if (matchInfo.isEmpty()) {
-                throw new IllegalArgumentException("Match score is not provided.");
-            } else if (matchInfo.get().getFirstPlayerScore() == null) {
-                throw new IllegalArgumentException("First player score is not provided.");
-            } else if (matchInfo.get().getSecondPlayerScore() == null) {
-                throw new IllegalArgumentException("Second player score is not provided.");
-            }
+        MatchInfoValidationResult validationResult = ValidationUtils.validateMatchInfo(tablesMatch, matchInfo, matchId);
+        switch (validationResult) {
+            case ALREADY_COMPLETED:
+                return MappingUtils.mapToMatchDTO(tablesMatch);
+            case READY_TO_START:
+                setMatchIsBeingPlayed(tablesMatch);
+                break;
+            case READY_TO_COMPLETE:
+                setMatchIsCompleted(tablesMatch, matchInfo.get());
+                break;
+            default:
+                log.error("Unknown error occurred while patching the match");
+                throw new IllegalArgumentException("Unknown error occurred while patching the match.");
         }
 
-        // Switching the state of the match.
-        if (match.getState().equals(MatchState.PLAYING)) {
-            setMatchIsCompleted(match, matchInfo.get());
-        } else {
-            setMatchIsBeingPlayed(match);
-        }
-        matchRepository.save(match);
+        tablesMatchRepository.save(tablesMatch);
 
-        return MappingUtils.mapToMatchDTO(match);
+        return MappingUtils.mapToMatchDTO(tablesMatch);
     }
 
-    private void setMatchIsCompleted(Match match, PatchMatchDTO matchInfo) {
-        match.setState(MatchState.COMPLETED);
-
-        Player firstPlayer = match.getFirstPlayer();
-        Player secondPlayer = match.getSecondPlayer();
-
-        playerRepository.save(firstPlayer);
-        playerRepository.save(secondPlayer);
-
-        match.setFirstPlayerScore(matchInfo.getFirstPlayerScore());
-        match.setSecondPlayerScore(matchInfo.getSecondPlayerScore());
+    private void setMatchIsCompleted(TablesMatch tablesMatch, PatchMatchDTO matchInfo) {
+        tablesMatch.setState(MatchState.COMPLETED);
+        tablesMatch.setFirstPlayerScore(matchInfo.getFirstPlayerScore());
+        tablesMatch.setSecondPlayerScore(matchInfo.getSecondPlayerScore());
+        log.info("Match with id {} is completed", tablesMatch.getId());
     }
 
-    private void setMatchIsBeingPlayed(Match match) {
-        match.setState(MatchState.PLAYING);
-
-        Player firstPlayer = match.getFirstPlayer();
-        Player secondPlayer = match.getSecondPlayer();
-
-        playerRepository.save(firstPlayer);
-        playerRepository.save(secondPlayer);
+    private void setMatchIsBeingPlayed(TablesMatch tablesMatch) {
+        tablesMatch.setState(MatchState.PLAYING);
+        log.info("Match with id {} has been started", tablesMatch.getId());
     }
 
     public List<MatchDTO> retrieveAvailableMatches(Long tableId) {
         GameTable gameTable = gameTableRepository
                 .findById(tableId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Game table with id " + tableId + " does not exist."
-                        )
+                .orElseThrow(() -> {
+                            log.warn("Game table with id {} does not exist", tableId);
+                            return new IllegalArgumentException("Game table with id " + tableId + " does not exist.");
+                        }
                 );
 
-        List<Match> availableMatches = new ArrayList<>();
+        List<TablesMatch> availableTablesMatches = new ArrayList<>();
         Map<Player, PlayerState> tempBusy = new HashMap<>();
 
         for (Player player: gameTable.getPlayers()) {
             tempBusy.put(player, PlayerState.FREE);
         }
 
-        for (Match match: gameTable.getMatches()) {
-            if (!match.getState().equals(MatchState.NOT_PLAYING) ||
-                    tempBusy.get(match.getFirstPlayer()).isBusy() ||
-                    tempBusy.get(match.getSecondPlayer()).isBusy())
+        for (TablesMatch tablesMatch: gameTable.getTablesMatches()) {
+            if (Boolean.TRUE.equals(!tablesMatch.getState().equals(MatchState.NOT_PLAYING) ||
+                    tempBusy.get(tablesMatch.getFirstPlayer()).isBusy()) ||
+                    Boolean.TRUE.equals(tempBusy.get(tablesMatch.getSecondPlayer()).isBusy()))
                 continue;
 
-            availableMatches.add(match);
-            tempBusy.put(match.getFirstPlayer(), PlayerState.PLAYING);
-            tempBusy.put(match.getSecondPlayer(), PlayerState.PLAYING);
+            availableTablesMatches.add(tablesMatch);
+            tempBusy.put(tablesMatch.getFirstPlayer(), PlayerState.PLAYING);
+            tempBusy.put(tablesMatch.getSecondPlayer(), PlayerState.PLAYING);
         }
-        return availableMatches.stream()
+        return availableTablesMatches.stream()
                 .map(MappingUtils::mapToMatchDTO)
                 .toList();
     }
