@@ -1,0 +1,19 @@
+services:
+  db:
+    container_name: tournament-db
+    image: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tournaments
+      POSTGRES_PASSWORD: postgres
+  backend-dev:
+    container_name: tournaments-backend
+    build: .
+    image: tournaments-service
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    environment:
+      spring.datasource.url: jdbc:postgresql://db:5432/tournaments
