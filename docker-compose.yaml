@@ -9,7 +9,7 @@ services:
   backend-dev:
     container_name: tournaments-backend
     build: .
-    image: tournaments-service
+    image: system205/tournaments-service
     restart: unless-stopped
     ports:
       - 8080:8080
