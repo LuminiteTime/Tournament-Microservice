@@ -12,6 +12,10 @@ servers:
 tags:
   - name: Main Controller
     description: Controls creation of tournaments and operations on matches, game tables, and tournaments.
+  - name: Brackets Controller
+    description: Controls creation of brackets and operations on brackets matches.
+  - name: Possible Error Responses
+    description: Possible error responses that can be returned by the API.
 paths:
   /tournaments:
     get:
@@ -40,17 +44,6 @@ paths:
                   value:
                     message: "Tournaments not found"
                     status: 404
-        500:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                internalServerError:
-                  value:
-                    message: "Internal server error"
-                    status: 500
     post:
       tags:
         - Main Controller
@@ -70,28 +63,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tournament'
-        400:
-          description: Bad request, invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                badRequest:
-                  value:
-                    message: "Bad request, invalid input"
-                    status: 400
-        500:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                internalServerError:
-                  value:
-                    message: "Internal server error"
-                    status: 500
+#        400:
+#          $ref: '#/components/responses/BadRequest'
   /tournaments/{tournamentId}:
     get:
       tags:
@@ -125,17 +98,6 @@ paths:
                   value:
                     message: "Tournament not found"
                     status: 404
-        500:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                internalServerError:
-                  value:
-                    message: "Internal server error"
-                    status: 500
     patch:
       tags:
         - Main Controller
@@ -157,17 +119,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tournament'
-        400:
-          description: Bad request, invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                badRequest:
-                  value:
-                    message: "Bad request, invalid input"
-                    status: 400
+#        400:
+#          $ref: '#/components/responses/BadRequest'
         404:
           description: Tournament not found
           content:
@@ -179,17 +132,6 @@ paths:
                   value:
                     message: "Tournament not found"
                     status: 404
-        500:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                internalServerError:
-                  value:
-                    message: "Internal server error"
-                    status: 500
   /tournaments/{tournamentId}/match/{matchId}:
     patch:
       tags:
@@ -224,17 +166,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Match'
-        400:
-          description: Bad request, invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                badRequest:
-                  value:
-                    message: "Bad request, invalid input"
-                    status: 400
+#        400:
+#          $ref: '#/components/responses/BadRequest'
         404:
           description: Match or tournament not found
           content:
@@ -246,17 +179,6 @@ paths:
                   value:
                     message: "Match or tournament not found"
                     status: 404
-        500:
-          description: Internal server error
-          content:
-              application/json:
-                  schema:
-                    $ref: '#/components/schemas/ErrorResponse'
-                  examples:
-                    internalServerError:
-                      value:
-                        message: "Internal server error"
-                        status: 500
   /tournaments/{tournamentId}/tables:
     get:
       tags:
@@ -292,17 +214,6 @@ paths:
                   value:
                     message: "Game tables not found"
                     status: 404
-        500:
-            description: Internal server error
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ErrorResponse'
-                examples:
-                    internalServerError:
-                        value:
-                          message: "Internal server error"
-                          status: 500
   /tournaments/{tournamentId}/tables/{tableId}/matches_available:
     get:
       tags:
@@ -345,17 +256,6 @@ paths:
                         value:
                           message: "Matches or tournament not found"
                           status: 404
-        500:
-            description: Internal server error
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ErrorResponse'
-                examples:
-                    internalServerError:
-                        value:
-                          message: "Internal server error"
-                          status: 500
   /tournaments/{tournamentId}/matches:
     get:
       tags:
@@ -388,17 +288,132 @@ paths:
                         value:
                           message: "Matches or tournament not found"
                           status: 404
-        500:
-            description: Internal server error
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ErrorResponse'
-                examples:
-                    internalServerError:
-                        value:
-                          message: "Internal server error"
-                          status: 500
+  /brackets:
+    post:
+      tags:
+        - Brackets Controller
+      summary: Create brackets with players
+      operationId: createBrackets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Player'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WinnerBrackets'
+#        400:
+#          $ref: '#/components/responses/BadRequest'
+  /brackets/{bracketsId}:
+    patch:
+      tags:
+        - Brackets Controller
+      summary: Finish brackets
+      operationId: finishBrackets
+      parameters:
+        - name: bracketsId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WinnerBrackets'
+#        400:
+#          $ref: '#/components/responses/BadRequest'
+  /brackets/{bracketsId}/match/{matchIndex}:
+    patch:
+      tags:
+        - Brackets Controller
+      summary: Patch brackets match state
+      operationId: patchBracketsMatchState
+      parameters:
+        - name: bracketsId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: matchIndex
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Match Info'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WinnerBracketsMatch'
+#        400:
+#          $ref: '#/components/responses/BadRequest'
+  /brackets/{bracketsId}/matches:
+    get:
+      tags:
+        - Brackets Controller
+      summary: Get all matches
+      operationId: getAllMatches
+      parameters:
+        - name: bracketsId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WinnerBracketsMatch'
+#        400:
+#          $ref: '#/components/responses/BadRequest'
+  /brackets/{bracketsId}/available_matches:
+    get:
+      tags:
+        - Brackets Controller
+      summary: Get available matches
+      operationId: getAvailableMatches
+      parameters:
+        - name: bracketsId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WinnerBracketsMatch'
+#        400:
+#          $ref: '#/components/responses/BadRequest'
 components:
   schemas:
     Player:
@@ -537,6 +552,81 @@ components:
           items:
             $ref: '#/components/schemas/Match'
       description: Round DTO
+    WinnerBracketsMatch:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The unique identifier of the match.
+        firstPlayer:
+          $ref: '#/components/schemas/Player'
+          description: The first player in the match.
+        secondPlayer:
+          $ref: '#/components/schemas/Player'
+          description: The second player in the match.
+        matchIndex:
+          type: integer
+          format: int64
+          description: The index of the match.
+        winner:
+          $ref: '#/components/schemas/Player'
+          description: The winner of the match.
+        firstPlayerScore:
+          type: integer
+          format: int32
+          description: The score of the first player.
+        secondPlayerScore:
+          type: integer
+          format: int32
+          description: The score of the second player.
+        state:
+          type: string
+          description: The current state of the match.
+          enum:
+            - NOT_PLAYING
+            - PLAYING
+            - COMPLETED
+      description: Winner brackets match data transfer object
+    WinnerBrackets:
+        type: object
+        properties:
+          id:
+            type: integer
+            format: int64
+            description: The unique identifier of the brackets.
+          players:
+            type: array
+            items:
+              $ref: '#/components/schemas/Player'
+            description: The players in the brackets.
+          firstMatches:
+            type: array
+            items:
+              $ref: '#/components/schemas/WinnerBracketsMatch'
+            description: The first matches in the brackets.
+          matches:
+            type: array
+            items:
+              $ref: '#/components/schemas/WinnerBracketsMatch'
+            description: The matches in the brackets.
+          availableMatches:
+            type: array
+            items:
+              $ref: '#/components/schemas/WinnerBracketsMatch'
+            description: The available matches in the brackets.
+          topThree:
+            type: object
+            additionalProperties:
+              type: integer
+            description: The top three players in the brackets.
+          state:
+            type: string
+            description: The current state of the brackets.
+            enum:
+              - PLAYING
+              - FINISHED
+        description: Winner brackets data transfer object
     ErrorResponse:
       type: object
       properties:
@@ -548,4 +638,15 @@ components:
           format: int32
           description: Error status code
       description: Error response DTO
-
+    responses:
+      BadRequest:
+        description: Bad request, invalid input
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorResponse'
+            examples:
+              badRequest:
+                value:
+                  message: "Bad request, invalid input"
+                  status: 400
