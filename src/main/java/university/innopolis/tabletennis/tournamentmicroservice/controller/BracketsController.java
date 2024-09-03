@@ -18,7 +18,7 @@ import java.util.Set;
 @Slf4j
 @RestController
 @AllArgsConstructor
-@RequestMapping("/brackets")
+@RequestMapping("tournaments/brackets") // TODO: Change path in swagger (/tournaments/{tournamentId}/brackets).
 public class BracketsController {
 
     private final BracketsService bracketsService;
@@ -35,7 +35,7 @@ public class BracketsController {
         return ResponseEntity.ok().body(bracketsService.finishBrackets(bracketsId));
     }
 
-    @PatchMapping("/{bracketsId}/match/{matchIndex}")
+    @PatchMapping("/{bracketsId}/match/{matchIndex}") // TODO: /match/{matchIndex}, get match from tournament matches.
     public ResponseEntity<WinnerBracketsMatch> patchBracketsMatchState(@PathVariable Long bracketsId,
                                                                        @PathVariable Long matchIndex,
                                                                        @RequestBody Optional<PatchMatchDTO> matchInfo) {
