@@ -24,9 +24,9 @@ public class WinnerBracketsMatch implements GeneralMatch {
     @ManyToOne
     private Player winner;
 
-    private int firstPlayerScore;
+    private Integer firstPlayerScore;
 
-    private int secondPlayerScore;
+    private Integer secondPlayerScore;
 
     @ManyToOne
     private WinnerBracketsMatch nextMatch;

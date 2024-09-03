@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import university.innopolis.tabletennis.tournamentmicroservice.dto.BracketsMatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.WinnerBrackets;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.WinnerBracketsMatch;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PlayerDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.service.BracketsService;
@@ -14,6 +14,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.utils.MappingUtil
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -42,19 +43,23 @@ public class BracketsController {
         log.info("Patching match with id {}", matchIndex);
         return ResponseEntity.ok().body(bracketsService.patchBracketsMatchState(
                 bracketsId,
-                matchIndex,
-                matchInfo));
+                matchId,
+                matchInfo)));
     }
 
     @GetMapping("/{bracketsId}")
-    public ResponseEntity<List<WinnerBracketsMatch>> getAllMatches(@PathVariable Long bracketsId) {
+    public ResponseEntity<List<BracketsMatchDTO>> getAllMatches(@PathVariable Long bracketsId) {
         log.info("Retrieving all matches");
-        return ResponseEntity.ok().body(bracketsService.getAllMatches(bracketsId));
+        return ResponseEntity.ok().body(bracketsService.getAllMatches(bracketsId).stream()
+                .map(MappingUtils::mapToBracketsMatchDTO)
+                .toList());
     }
 
     @GetMapping("/{bracketsId}/available_matches")
-    public ResponseEntity<Set<WinnerBracketsMatch>> getAvailableMatches(@PathVariable Long bracketsId) {
+    public ResponseEntity<Set<BracketsMatchDTO>> getAvailableMatches(@PathVariable Long bracketsId) {
         log.info("Retrieving available matches");
-        return ResponseEntity.ok().body(bracketsService.getAvailableMatches(bracketsId));
+        return ResponseEntity.ok().body(bracketsService.getAvailableMatches(bracketsId).stream()
+                .map(MappingUtils::mapToBracketsMatchDTO)
+                .collect(Collectors.toSet()));
     }
 }

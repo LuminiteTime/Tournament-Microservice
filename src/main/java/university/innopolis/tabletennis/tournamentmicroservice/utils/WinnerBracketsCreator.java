@@ -35,29 +35,9 @@ public class WinnerBracketsCreator {
         long matchIndex = 1L;
         List<WinnerBracketsMatch> currentRound = new ArrayList<>();
 
-        // TODO: Refactor leaves creation.
-
 
         for (int i = 0; i < numberOfAllPlayers / 2; i++) {
-            WinnerBracketsMatch winnerBracketsMatch = new WinnerBracketsMatch();
-
-            boolean isRealFirstPlayer = i < numberOfRealPlayers;
-            boolean isRealSecondPlayer = numberOfAllPlayers - 1 - i < numberOfRealPlayers;
-
-            if (isRealFirstPlayer) {
-                winnerBracketsMatch.setFirstPlayer(players.get(i));
-            }
-            if (isRealSecondPlayer) {
-                winnerBracketsMatch.setSecondPlayer(players.get(numberOfAllPlayers - 1 - i));
-            }
-
-            if (!isRealFirstPlayer || !isRealSecondPlayer) {
-                winnerBracketsMatch.setState(MatchState.SKIPPED);
-            } else {
-                winnerBracketsMatch.setState(MatchState.NOT_PLAYING);
-            }
-
-            winnerBracketsMatch.setMatchIndex(matchIndex++);
+            WinnerBracketsMatch winnerBracketsMatch = createLeafWinnerBracketsMatch(i);
 
             matches.add(winnerBracketsMatch);
             currentRound.add(winnerBracketsMatch);
@@ -69,7 +49,6 @@ public class WinnerBracketsCreator {
             for (int i = 0; i < currentRound.size() / 2; i++) {
                 WinnerBracketsMatch winnerBracketsMatch = new WinnerBracketsMatch();
 
-                winnerBracketsMatch.setMatchIndex(matchIndex++);
                 winnerBracketsMatch.setState(MatchState.NOT_PLAYING);
 
                 WinnerBracketsMatch leftMatch = currentRound.get(i);
@@ -77,6 +56,9 @@ public class WinnerBracketsCreator {
 
                 leftMatch.setNextMatch(winnerBracketsMatch);
                 rightMatch.setNextMatch(winnerBracketsMatch);
+
+                leftMatch.setMatchIndex(matchIndex++);
+                rightMatch.setMatchIndex(matchIndex++);
 
                 if (leftMatch.getState().equals(MatchState.SKIPPED)) {
                     if (leftMatch.getFirstPlayer() == null && leftMatch.getSecondPlayer() != null) {
@@ -103,6 +85,29 @@ public class WinnerBracketsCreator {
             }
             currentRound = nextRound;
         }
+        currentRound.get(0).setMatchIndex(matchIndex);
+    }
+
+    WinnerBracketsMatch createLeafWinnerBracketsMatch(int i) {
+        WinnerBracketsMatch winnerBracketsMatch = new WinnerBracketsMatch();
+
+        boolean isRealFirstPlayer = i < numberOfRealPlayers;
+        boolean isRealSecondPlayer = numberOfAllPlayers - 1 - i < numberOfRealPlayers;
+
+        if (isRealFirstPlayer) {
+            winnerBracketsMatch.setFirstPlayer(players.get(i));
+        }
+        if (isRealSecondPlayer) {
+            winnerBracketsMatch.setSecondPlayer(players.get(numberOfAllPlayers - 1 - i));
+        }
+
+        if (!isRealFirstPlayer || !isRealSecondPlayer) {
+            winnerBracketsMatch.setState(MatchState.SKIPPED);
+        } else {
+            winnerBracketsMatch.setState(MatchState.NOT_PLAYING);
+        }
+
+        return winnerBracketsMatch;
     }
 
     // TODO: Fill leaves players.

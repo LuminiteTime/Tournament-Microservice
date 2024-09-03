@@ -44,18 +44,22 @@ public class BracketsService {
         ).getAvailableMatches();
     }
 
-    public WinnerBracketsMatch patchBracketsMatchState(Long bracketsId, Long matchIndex, Optional<PatchMatchDTO> matchInfo) {
+    public WinnerBracketsMatch patchBracketsMatchState(Long bracketsId, Long matchId, Optional<PatchMatchDTO> matchInfo) {
         WinnerBrackets winnerBrackets = winnerBracketsRepository.findById(bracketsId).orElseThrow(
                 () -> new BracketsNotFoundException(bracketsId)
         );
-        if (matchIndex > winnerBrackets.getMatches().size()) {
-            throw new IllegalArgumentException("Match with index " + matchIndex + " does not exist.");
-        }
 
-        WinnerBracketsMatch match = winnerBrackets.getMatch(matchIndex);
+        List<WinnerBracketsMatch> matchFoundInBracketsById = winnerBrackets.getMatches().stream()
+                .filter(bracketsMatch -> bracketsMatch.getId().equals(matchId))
+                .toList();
+        if (matchFoundInBracketsById.isEmpty()) {
+            throw new IllegalArgumentException("Match with id " + matchId + " is not in brackets with id " + bracketsId
+                    + " or does not exist at all.");
+        }
+        WinnerBracketsMatch match = matchFoundInBracketsById.get(0);
 
         // TODO: Make one method for BracketsService and for MatchService.
-        MatchInfoValidationResult validationResult = ValidationUtils.validateMatchInfo(match, matchInfo, matchIndex);
+        MatchInfoValidationResult validationResult = ValidationUtils.validateMatchInfo(match, matchInfo, matchId);
         switch (validationResult) {
             case ALREADY_COMPLETED:
                 return match;
