@@ -57,32 +57,15 @@ public class WinnerBrackets {
         }
     }
 
-    public WinnerBracketsMatch getMatch(Long matchIndex) {
-        for (WinnerBracketsMatch firstMatch: firstMatches) {
-            WinnerBracketsMatch matchFound = getMatchFromLeaf(firstMatch, matchIndex);
-            if (matchFound != null) {
-                return matchFound;
-            }
-        }
-        return null;
-    }
-
-    private WinnerBracketsMatch getMatchFromLeaf(WinnerBracketsMatch match, Long matchIndex) {
-        while (match != null) {
-            if (Objects.equals(match.getMatchIndex(), matchIndex)) {
-                return match;
-            }
-            match = match.getNextMatch();
-        }
-        return null;
-    }
-
     public void finish() {
         this.state = TournamentState.FINISHED;
         WinnerBracketsMatch match = firstMatches.get(0);
         while (match.getNextMatch() != null) {
             match = match.getNextMatch();
         }
-        this.topThree.put(1, match.getWinner());
+        this.topThree.put(1,
+                match.getFirstPlayerScore() > match.getSecondPlayerScore() ?
+                match.getFirstPlayer() :
+                match.getSecondPlayer());
     }
 }

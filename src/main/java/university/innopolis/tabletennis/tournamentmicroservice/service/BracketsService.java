@@ -4,13 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.WinnerBrackets;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.WinnerBracketsMatch;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
+import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 import university.innopolis.tabletennis.tournamentmicroservice.exception.BracketsNotFoundException;
-import university.innopolis.tabletennis.tournamentmicroservice.repository.WinnerBracketsMatchRepository;
-import university.innopolis.tabletennis.tournamentmicroservice.repository.WinnerBracketsRepository;
-import university.innopolis.tabletennis.tournamentmicroservice.repository.PlayerRepository;
+import university.innopolis.tabletennis.tournamentmicroservice.repository.*;
 import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
 import university.innopolis.tabletennis.tournamentmicroservice.utils.validation.MatchInfoValidationResult;
 import university.innopolis.tabletennis.tournamentmicroservice.utils.validation.ValidationUtils;
@@ -28,7 +24,11 @@ public class BracketsService {
 
     private final WinnerBracketsMatchRepository winnerBracketsMatchRepository;
 
+    private final LoserBracketsMatchRepository loserBracketsMatchRepository;
+
     private final WinnerBracketsRepository winnerBracketsRepository;
+
+    private final LoserBracketsRepository loserBracketsRepository;
 
     public WinnerBrackets createBrackets(List<Player> players) {
         playerRepository.saveAll(players);
@@ -36,6 +36,13 @@ public class BracketsService {
         winnerBracketsMatchRepository.saveAll(newWinnerBrackets.getMatches());
         winnerBracketsRepository.save(newWinnerBrackets);
         return newWinnerBrackets;
+    }
+
+    public LoserBrackets createLoserBrackets(int numberOfStartPlayers, Long startLoserBracketsIndex, Long startMatchIndex) {
+        LoserBrackets newLoserBrackets = new LoserBrackets(numberOfStartPlayers, startLoserBracketsIndex, startMatchIndex);
+        loserBracketsMatchRepository.saveAll(newLoserBrackets.getMatches());
+        loserBracketsRepository.save(newLoserBrackets);
+        return newLoserBrackets;
     }
 
     public Set<WinnerBracketsMatch> getAvailableMatches(Long bracketsId) {
@@ -88,15 +95,13 @@ public class BracketsService {
         match.setFirstPlayerScore(matchInfo.getFirstPlayerScore());
         match.setSecondPlayerScore(matchInfo.getSecondPlayerScore());
 
-        match.setWinner(matchInfo.getFirstPlayerScore() > match.getSecondPlayerScore() ?
-                match.getFirstPlayer() : match.getSecondPlayer());
-
         WinnerBracketsMatch next = match.getNextMatch();
         if (next != null) {
+            Player winner = getWinnerFromMatch(match);
             if (next.getFirstPlayer() == null) {
-                next.setFirstPlayer(match.getWinner());
+                next.setFirstPlayer(winner);
             } else {
-                next.setSecondPlayer(match.getWinner());
+                next.setSecondPlayer(winner);
             }
             winnerBracketsMatchRepository.save(next);
         }
@@ -121,5 +126,11 @@ public class BracketsService {
         );
         winnerBrackets.finish();
         return winnerBrackets;
+    }
+
+    public Player getWinnerFromMatch(GeneralMatch match) {
+        return match.getFirstPlayerScore() > match.getSecondPlayerScore() ?
+                match.getFirstPlayer() :
+                match.getSecondPlayer();
     }
 }

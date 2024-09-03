@@ -68,7 +68,6 @@ public class MappingUtils {
                 .secondPlayerId(winnerBracketsMatch.getSecondPlayer() == null ? null : winnerBracketsMatch.getSecondPlayer().getExternalId())
                 .firstPlayerScore(winnerBracketsMatch.getFirstPlayerScore())
                 .secondPlayerScore(winnerBracketsMatch.getSecondPlayerScore())
-                .winnerId(winnerBracketsMatch.getWinner() == null ? null : winnerBracketsMatch.getWinner().getExternalId())
                 .nextMatchIndex(winnerBracketsMatch.getNextMatch() == null ? null : winnerBracketsMatch.getNextMatch().getMatchIndex())
                 .state(winnerBracketsMatch.getState())
                 .build();

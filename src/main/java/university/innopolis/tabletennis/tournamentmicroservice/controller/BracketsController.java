@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.BracketsMatchDTO;
+import university.innopolis.tabletennis.tournamentmicroservice.entity.LoserBrackets;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.WinnerBrackets;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PlayerDTO;
@@ -28,6 +29,14 @@ public class BracketsController {
     public ResponseEntity<WinnerBrackets> createBrackets(@RequestBody List<PlayerDTO> players) {
         log.info("Creating brackets with players: {}", players);
         return ResponseEntity.ok().body(bracketsService.createBrackets(players.stream().map(MappingUtils::mapToPlayerEntity).toList()));
+    }
+
+    @PostMapping("/losers/num-of-players/{numberOfStartPlayers}/start-ind/{startMatchIndex}/start-loser-ind/{startLoserBracketsIndex}")
+    public ResponseEntity<LoserBrackets> createLoserBrackets(@PathVariable int numberOfStartPlayers,
+                                                             @PathVariable Long startLoserBracketsIndex,
+                                                             @PathVariable Long startMatchIndex) {
+        log.info("Creating loser brackets...");
+        return ResponseEntity.ok().body(bracketsService.createLoserBrackets(numberOfStartPlayers, startLoserBracketsIndex, startMatchIndex));
     }
 
     @PatchMapping("/{bracketsId}/")
