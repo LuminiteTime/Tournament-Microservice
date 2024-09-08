@@ -51,22 +51,21 @@ public class BracketsService {
         ).getAvailableMatches();
     }
 
-    public WinnerBracketsMatch patchBracketsMatchState(Long bracketsId, Long matchId, Optional<PatchMatchDTO> matchInfo) {
+    public WinnerBracketsMatch patchBracketsMatchState(Long bracketsId, Long matchIndex, Optional<PatchMatchDTO> matchInfo) {
         WinnerBrackets winnerBrackets = winnerBracketsRepository.findById(bracketsId).orElseThrow(
                 () -> new BracketsNotFoundException(bracketsId)
         );
 
-        List<WinnerBracketsMatch> matchFoundInBracketsById = winnerBrackets.getMatches().stream()
-                .filter(bracketsMatch -> bracketsMatch.getId().equals(matchId))
-                .toList();
-        if (matchFoundInBracketsById.isEmpty()) {
-            throw new IllegalArgumentException("Match with id " + matchId + " is not in brackets with id " + bracketsId
-                    + " or does not exist at all.");
-        }
-        WinnerBracketsMatch match = matchFoundInBracketsById.get(0);
+        WinnerBracketsMatch match = winnerBrackets.getMatches().stream()
+                .filter(bracketsMatch -> bracketsMatch.getMatchIndex().equals(matchIndex))
+                .findFirst()
+                .orElseThrow(
+                        () -> new IllegalArgumentException("Match with index " + matchIndex + " is not in brackets with id " + bracketsId
+                                + " or does not exist at all.")
+                );
 
         // TODO: Make one method for BracketsService and for MatchService.
-        MatchInfoValidationResult validationResult = ValidationUtils.validateMatchInfo(match, matchInfo, matchId);
+        MatchInfoValidationResult validationResult = ValidationUtils.validateMatchInfo(match, matchInfo, matchIndex);
         switch (validationResult) {
             case ALREADY_COMPLETED:
                 return match;
@@ -80,7 +79,6 @@ public class BracketsService {
                 log.error("Unknown error occurred while patching the match");
                 throw new IllegalArgumentException("Unknown error occurred while patching the match.");
         }
-
 
         winnerBrackets.collectAvailableMatches();
 

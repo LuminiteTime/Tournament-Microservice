@@ -9,6 +9,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.entity.LoserBrack
 import university.innopolis.tabletennis.tournamentmicroservice.entity.WinnerBrackets;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PlayerDTO;
+import university.innopolis.tabletennis.tournamentmicroservice.entity.WinnerBracketsMatch;
 import university.innopolis.tabletennis.tournamentmicroservice.service.BracketsService;
 import university.innopolis.tabletennis.tournamentmicroservice.utils.MappingUtils;
 
@@ -31,15 +32,16 @@ public class BracketsController {
         return ResponseEntity.ok().body(bracketsService.createBrackets(players.stream().map(MappingUtils::mapToPlayerEntity).toList()));
     }
 
-    @PostMapping("/losers/num-of-players/{numberOfStartPlayers}/start-ind/{startMatchIndex}/start-loser-ind/{startLoserBracketsIndex}")
-    public ResponseEntity<LoserBrackets> createLoserBrackets(@PathVariable int numberOfStartPlayers,
-                                                             @PathVariable Long startLoserBracketsIndex,
-                                                             @PathVariable Long startMatchIndex) {
-        log.info("Creating loser brackets...");
-        return ResponseEntity.ok().body(bracketsService.createLoserBrackets(numberOfStartPlayers, startLoserBracketsIndex, startMatchIndex));
+    @GetMapping("/{bracketsId}/matches")
+    public ResponseEntity<List<BracketsMatchDTO>> getAllMatches(@PathVariable Long bracketsId) {
+        log.info("Retrieving all matches");
+        return ResponseEntity.ok().body(bracketsService.getAllMatches(bracketsId).stream()
+                .map(MappingUtils::mapToBracketsMatchDTO)
+                .toList());
     }
 
-    @PatchMapping("/{bracketsId}/")
+    // ! FIX FIX FIX FIX FIX FIX FIX FIX FIX
+    @PatchMapping("/{bracketsId}")
     public ResponseEntity<WinnerBrackets> finishBrackets(@PathVariable Long bracketsId) {
         log.info("Completing brackets with id: {}", bracketsId);
         return ResponseEntity.ok().body(bracketsService.finishBrackets(bracketsId));
@@ -52,16 +54,8 @@ public class BracketsController {
         log.info("Patching match with id {}", matchIndex);
         return ResponseEntity.ok().body(bracketsService.patchBracketsMatchState(
                 bracketsId,
-                matchId,
-                matchInfo)));
-    }
-
-    @GetMapping("/{bracketsId}")
-    public ResponseEntity<List<BracketsMatchDTO>> getAllMatches(@PathVariable Long bracketsId) {
-        log.info("Retrieving all matches");
-        return ResponseEntity.ok().body(bracketsService.getAllMatches(bracketsId).stream()
-                .map(MappingUtils::mapToBracketsMatchDTO)
-                .toList());
+                matchIndex,
+                matchInfo));
     }
 
     @GetMapping("/{bracketsId}/available_matches")
@@ -70,5 +64,16 @@ public class BracketsController {
         return ResponseEntity.ok().body(bracketsService.getAvailableMatches(bracketsId).stream()
                 .map(MappingUtils::mapToBracketsMatchDTO)
                 .collect(Collectors.toSet()));
+    }
+
+    // TODO: Temp endpoint for developing double elimination brackets.
+    // * TEMPORARY DISABLED
+    @PostMapping("/losers/num-of-players/{numberOfStartPlayers}/start-ind/{startMatchIndex}/start-loser-ind/{startLoserBracketsIndex}")
+    public void createLoserBrackets(@PathVariable int numberOfStartPlayers,
+                                                             @PathVariable Long startLoserBracketsIndex,
+                                                             @PathVariable Long startMatchIndex) {
+        log.warn("Double elimination brackets system is not finished yet. Do not use this endpoint.");
+//        log.info("Creating loser brackets...");
+//        return ResponseEntity.ok().body(bracketsService.createLoserBrackets(numberOfStartPlayers, startLoserBracketsIndex, startMatchIndex));
     }
 }

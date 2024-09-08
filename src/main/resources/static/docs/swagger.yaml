@@ -55,7 +55,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Tournament'
+              $ref: '#/components/schemas/CreateTournament'
       responses:
         201:
           description: Tournament created successfully
@@ -63,13 +63,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tournament'
-#        400:
-#          $ref: '#/components/responses/BadRequest'
   /tournaments/{tournamentId}:
     get:
       tags:
         - Main Controller
-      summary: Get a tournament
+      summary: Get tournament
       description: Allows to get a tournament by id
       operationId: getTournament
       parameters:
@@ -137,7 +135,7 @@ paths:
       tags:
         - Main Controller
       summary: Make the match started if not started and completed if started
-      description: Allows to make the match started if not started and completed if started. No matter what to pass when a match starts but it is important to provide score to make the match completed.
+      description: Allows to make the match started if not started and completed if started. No matter what to pass when the match starts but it is important to provide score to make the match completed.
       operationId: patchMatchState
       parameters:
         - name: tournamentId
@@ -165,7 +163,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Match'
+                $ref: '#/components/schemas/Tables Match'
 #        400:
 #          $ref: '#/components/responses/BadRequest'
         404:
@@ -244,7 +242,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Match'
+                  $ref: '#/components/schemas/Tables Match'
         404:
             description: Matches or tournament not found
             content:
@@ -260,6 +258,8 @@ paths:
     get:
       tags:
         - Main Controller
+      summary: Get all matches of the tournament
+      description: Allows to get matches of the tournament
       operationId: getAllMatches
       parameters:
         - name: tournamentId
@@ -276,7 +276,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Match'
+                  $ref: '#/components/schemas/Tables Match'
         404:
             description: Matches or tournament not found
             content:
@@ -288,11 +288,12 @@ paths:
                         value:
                           message: "Matches or tournament not found"
                           status: 404
-  /brackets:
+  /tournaments/brackets:
     post:
       tags:
         - Brackets Controller
-      summary: Create brackets with players
+      summary: Create single elimination brackets with players
+      description: Allows to create a single elimination brackets
       operationId: createBrackets
       requestBody:
         required: true
@@ -309,13 +310,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WinnerBrackets'
-#        400:
-#          $ref: '#/components/responses/BadRequest'
-  /brackets/{bracketsId}:
+  /tournaments/brackets/{bracketsId}:
     patch:
       tags:
         - Brackets Controller
       summary: Finish brackets
+      description: Allows to finish a single elimination brackets
       operationId: finishBrackets
       parameters:
         - name: bracketsId
@@ -331,13 +331,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WinnerBrackets'
-#        400:
-#          $ref: '#/components/responses/BadRequest'
-  /brackets/{bracketsId}/match/{matchIndex}:
+  /tournaments/brackets/{bracketsId}/match/{matchIndex}:
     patch:
       tags:
         - Brackets Controller
-      summary: Patch brackets match state
+      summary: Make the match started if not started and completed if started
+      description: Allows to make the match started if not started and completed if started. No matter what to pass when the match starts but it is important to provide score to make the match completed.
       operationId: patchBracketsMatchState
       parameters:
         - name: bracketsId
@@ -364,9 +363,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WinnerBracketsMatch'
-#        400:
-#          $ref: '#/components/responses/BadRequest'
-  /brackets/{bracketsId}/matches:
+  /tournaments/brackets/{bracketsId}/matches:
     get:
       tags:
         - Brackets Controller
@@ -388,9 +385,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/WinnerBracketsMatch'
-#        400:
-#          $ref: '#/components/responses/BadRequest'
-  /brackets/{bracketsId}/available_matches:
+  /tournaments/brackets/{bracketsId}/available_matches:
     get:
       tags:
         - Brackets Controller
@@ -412,8 +407,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/WinnerBracketsMatch'
-#        400:
-#          $ref: '#/components/responses/BadRequest'
 components:
   schemas:
     Player:
@@ -429,11 +422,13 @@ components:
           example: 34
       description: Player DTO
     Tournament:
-      required:
-        - players
-        - title
       type: object
       properties:
+        id:
+          type: integer
+          format: int64
+          description: ID of tournament in database
+          example: 1
         title:
           type: string
           description: Title of the tournament, must be unique
@@ -447,6 +442,11 @@ components:
           description: Players of the tournament
           items:
             $ref: '#/components/schemas/Player'
+        amountOfTables:
+          type: integer
+          description: Amount of table to distribute players across
+          example: 1
+          format: int64
         state:
           type: string
           description: State of the tournament
@@ -455,6 +455,29 @@ components:
             - PLAYING
             - FINISHED
       description: Tournament DTO
+    CreateTournament:
+      required:
+        - players
+        - title
+        - amountOfTables
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the tournament, must be unique
+          example: Beginners 15
+        amountOfTables:
+          type: integer
+          description: Amount of table to distribute players across
+          example: 1
+          format: int64
+          minimum: 1
+        players:
+          type: array
+          description: Players of the tournament
+          items:
+            $ref: '#/components/schemas/Player'
+      description: Create Tournament DTO
     Match Info:
       required:
         - firstPlayerScore
@@ -467,14 +490,16 @@ components:
           type: integer
           description: Score of the first player
           format: int32
+          example: 2
         secondPlayerScore:
           maximum: 11
           minimum: 0
           type: integer
           description: Score of the second player
           format: int32
+          example: 0
       description: Match score to mark match as completed
-    Match:
+    Tables Match:
       required:
         - firstPlayerId
         - firstPlayerScore
@@ -483,6 +508,12 @@ components:
         - state
       type: object
       properties:
+        id:
+          minimum: 1
+          type: integer
+          description: ID of the match
+          format: int64
+          example: 1
         firstPlayerId:
           minimum: 1
           type: integer
@@ -519,75 +550,71 @@ components:
             - COMPLETED
       description: Match DTO
     Game table:
-      required:
-        - matches
-        - players
-        - rounds
       type: object
       properties:
+        id:
+          minimum: 1
+          type: integer
+          description: ID of the match
+          format: int64
+          example: 1
         players:
           type: array
           description: Players in the game table
           items:
             $ref: '#/components/schemas/Player'
-        rounds:
-          type: array
-          description: Rounds of the table
-          items:
-            $ref: '#/components/schemas/Round'
         matches:
           type: array
           description: Matches of the table
           items:
-            $ref: '#/components/schemas/Match'
+            $ref: '#/components/schemas/Tables Match'
       description: Game table DTO
-    Round:
-      required:
-        - matches
-      type: object
-      properties:
-        matches:
-          type: array
-          description: Matches of the round
-          items:
-            $ref: '#/components/schemas/Match'
-      description: Round DTO
     WinnerBracketsMatch:
       type: object
       properties:
         id:
           type: integer
+          description: ID of the match.
           format: int64
-          description: The unique identifier of the match.
-        firstPlayer:
-          $ref: '#/components/schemas/Player'
-          description: The first player in the match.
-        secondPlayer:
-          $ref: '#/components/schemas/Player'
-          description: The second player in the match.
-        matchIndex:
+          example: 1
+        firstPlayerId:
           type: integer
+          description: ID of the first player.
           format: int64
-          description: The index of the match.
-        winner:
-          $ref: '#/components/schemas/Player'
-          description: The winner of the match.
+          example: 34
+        secondPlayerId:
+          type: integer
+          description: ID of the second player.
+          format: int64
+          example: 56
         firstPlayerScore:
           type: integer
-          format: int32
-          description: The score of the first player.
+          description: Score of the first player.
+          format: int64
+          example: 2
         secondPlayerScore:
           type: integer
-          format: int32
-          description: The score of the second player.
+          description: Score of the second player.
+          format: int64
+          example: 0
+        matchIndex:
+          type: integer
+          description: Index of the match in the brackets
+          format: int64
+          example: 1
+        nextMatchIndex:
+          type: integer
+          description: Index of the next match in the brackets
         state:
           type: string
-          description: The current state of the match.
+          description: State of the match
+          example: PLAYING
           enum:
             - NOT_PLAYING
             - PLAYING
             - COMPLETED
-      description: Winner brackets match data transfer object
+            - SKIPPED
+      description: Single elimination brackets match DTO
     WinnerBrackets:
         type: object
         properties:
