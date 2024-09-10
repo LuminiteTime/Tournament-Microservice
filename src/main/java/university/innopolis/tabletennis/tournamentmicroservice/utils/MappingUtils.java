@@ -59,4 +59,17 @@ public class MappingUtils {
         entity.setExternalId(dto.getExternalId());
         return entity;
     }
+
+    public static BracketsMatchDTO mapToBracketsMatchDTO(WinnerBracketsMatch winnerBracketsMatch) {
+        return BracketsMatchDTO.builder()
+                .id(winnerBracketsMatch.getId())
+                .matchIndex(winnerBracketsMatch.getMatchIndex())
+                .firstPlayerId(winnerBracketsMatch.getFirstPlayer() == null ? null : winnerBracketsMatch.getFirstPlayer().getExternalId())
+                .secondPlayerId(winnerBracketsMatch.getSecondPlayer() == null ? null : winnerBracketsMatch.getSecondPlayer().getExternalId())
+                .firstPlayerScore(winnerBracketsMatch.getFirstPlayerScore())
+                .secondPlayerScore(winnerBracketsMatch.getSecondPlayerScore())
+                .nextMatchIndex(winnerBracketsMatch.getNextMatch() == null ? null : winnerBracketsMatch.getNextMatch().getMatchIndex())
+                .state(winnerBracketsMatch.getState())
+                .build();
+    }
 }

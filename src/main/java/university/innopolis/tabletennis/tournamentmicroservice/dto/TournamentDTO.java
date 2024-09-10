@@ -31,7 +31,6 @@ public class TournamentDTO {
     @Min(value = 1, message = "Amount of tables must be at least 1")
     private Integer amountOfTables;
 
-//    @NotNull(message = "State is not provided")
     private TournamentState state;
 
     @Override

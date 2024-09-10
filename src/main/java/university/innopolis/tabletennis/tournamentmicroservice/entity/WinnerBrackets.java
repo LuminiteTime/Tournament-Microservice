@@ -57,32 +57,22 @@ public class WinnerBrackets {
         }
     }
 
-    public WinnerBracketsMatch getMatch(Long matchIndex) {
-        for (WinnerBracketsMatch firstMatch: firstMatches) {
-            WinnerBracketsMatch matchFound = getMatchFromLeaf(firstMatch, matchIndex);
-            if (matchFound != null) {
-                return matchFound;
-            }
-        }
-        return null;
-    }
-
-    private WinnerBracketsMatch getMatchFromLeaf(WinnerBracketsMatch match, Long matchIndex) {
-        while (match != null) {
-            if (Objects.equals(match.getMatchIndex(), matchIndex)) {
-                return match;
-            }
-            match = match.getNextMatch();
-        }
-        return null;
-    }
-
+    // * For now distribution only of two first places is implemented (for single elimination).
     public void finish() {
         this.state = TournamentState.FINISHED;
-        WinnerBracketsMatch match = firstMatches.get(0);
-        while (match.getNextMatch() != null) {
-            match = match.getNextMatch();
+        WinnerBracketsMatch finalMatch = firstMatches.get(0);
+        while (finalMatch.getNextMatch() != null) {
+            finalMatch = finalMatch.getNextMatch();
         }
-        this.topThree.put(1, match.getWinner());
+        if (!finalMatch.getState().equals(MatchState.COMPLETED)) {
+            return;
+        }
+        if (finalMatch.getFirstPlayerScore() > finalMatch.getSecondPlayerScore()) {
+            this.topThree.put(1, finalMatch.getFirstPlayer());
+            this.topThree.put(2, finalMatch.getSecondPlayer());
+        } else {
+            this.topThree.put(1, finalMatch.getSecondPlayer());
+            this.topThree.put(2, finalMatch.getFirstPlayer());
+        }
     }
 }
