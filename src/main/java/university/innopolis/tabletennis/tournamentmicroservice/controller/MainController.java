@@ -41,6 +41,7 @@ public class MainController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<TournamentDTO>> getTournaments() {
         log.info("Retrieving all tournaments");
         return ResponseEntity.ok().body(tournamentService.retrieveAllTournaments().stream()
@@ -49,18 +50,21 @@ public class MainController {
     }
 
     @GetMapping("/{tournamentId}")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<TournamentDTO> getTournament(@PathVariable Long tournamentId) {
         log.info("Retrieving tournament with id: {}", tournamentId);
         return ResponseEntity.ok().body(MappingUtils.mapToTournamentDTO(tournamentService.retrieveTournament(tournamentId)));
     }
 
     @PatchMapping("/{tournamentId}")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<TournamentDTO> patchTournament(@PathVariable Long tournamentId) {
         log.info("Patching state of the tournament with id: {}", tournamentId);
         return ResponseEntity.ok().body(MappingUtils.mapToTournamentDTO(tournamentService.patchTournamentState(tournamentId)));
     }
 
     @GetMapping("/{tournamentId}/tables")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<GameTableDTO>> getAllTables(@PathVariable Long tournamentId) {
         log.info("Retrieving all tables of the tournament with id: {}", tournamentId);
         return ResponseEntity.ok().body(tournamentService.retrieveGameTables(tournamentId).stream()
@@ -69,6 +73,7 @@ public class MainController {
     }
 
     @PatchMapping("/{tournamentId}/match/{matchId}")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<MatchDTO> patchMatchState(@PathVariable Long tournamentId,
                                                     @PathVariable Long matchId,
                                                     @RequestBody Optional<PatchMatchDTO> matchInfo) {
@@ -78,6 +83,7 @@ public class MainController {
     }
 
     @GetMapping("/{tournamentId}/tables/{tableId}/matches_available")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<MatchDTO>> getAvailableMatches(@PathVariable Long tournamentId,
                                                               @PathVariable Long tableId) {
         log.info("Retrieving available matches for table with id: {} in tournament with id: {}", tableId, tournamentId);
@@ -88,12 +94,8 @@ public class MainController {
         return ResponseEntity.ok().body(matchService.retrieveAvailableMatches(tableId));
     }
 
-
-    @Operation(
-            summary = "Get all matches of the tournament",
-            description = "Allow to get all matches of the tournament by its id"
-    )
     @GetMapping("/{tournamentId}/matches")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<MatchDTO>> getAllMatches(@PathVariable @Parameter(description = "Id of the tournament") Long tournamentId) {
         log.info("Retrieving all matches of the tournament with id: {}", tournamentId);
         return ResponseEntity.ok().body(
