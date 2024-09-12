@@ -1,7 +1,6 @@
 package university.innopolis.tabletennis.tournamentmicroservice.controller;
 
 import org.junit.jupiter.api.*;
-import org.mockito.internal.matchers.Equals;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -14,6 +13,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.repository.Player
 import university.innopolis.tabletennis.tournamentmicroservice.repository.TablesMatchRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.TournamentRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.service.TournamentService;
+import university.innopolis.tabletennis.tournamentmicroservice.states.TournamentState;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -142,5 +142,36 @@ class MainControllerTest {
                 .statusCode(400)
                 .and()
                 .body("message", equalTo("Tournament with id 1 does not exist."));
+    }
+
+    @Test
+    void whenFinishingTournamentById_thenChangeStatusToFinished() {
+        TournamentDTO tournamentDTO = getTestTournament();
+        tournamentService.addTournament(tournamentDTO);
+        given()
+                .port(port)
+                .contentType("application/json")
+                .when()
+                .patch("/tournaments/1")
+                .then()
+                .statusCode(200)
+                .and()
+                .body("state", equalTo("FINISHED"));
+    }
+
+    @Test
+    void whenFinishingFinishedTournamentById_thenNothingChanges() {
+        TournamentDTO tournamentDTO = getTestTournament();
+        tournamentDTO.setState(TournamentState.FINISHED);
+        tournamentService.addTournament(tournamentDTO);
+        given()
+                .port(port)
+                .contentType("application/json")
+                .when()
+                .patch("/tournaments/1")
+                .then()
+                .statusCode(200)
+                .and()
+                .body("state", equalTo("FINISHED"));
     }
 }
