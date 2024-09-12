@@ -15,6 +15,8 @@ import university.innopolis.tabletennis.tournamentmicroservice.repository.Tourna
 import university.innopolis.tabletennis.tournamentmicroservice.service.TournamentService;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItems;
+
 import university.innopolis.tabletennis.tournamentmicroservice.testingutils.TestDTOs;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -93,5 +95,22 @@ class MainControllerTest {
                 .post("/tournaments")
                 .then()
                 .statusCode(400);
+    }
+
+    @Test
+    void whenRequestingTournament_thenReturnAllTournament() {
+        TournamentDTO tournamentDTO1 = TestDTOs.getTestTournament("Tournament 1");
+        TournamentDTO tournamentDTO2 = TestDTOs.getTestTournament("Tournament 2");
+        tournamentService.addTournament(tournamentDTO1);
+        tournamentService.addTournament(tournamentDTO2);
+        given()
+                .port(port)
+                .contentType("application/json")
+                .when()
+                .get("/tournaments")
+                .then()
+                .statusCode(200)
+                .and()
+                .body("title", hasItems("Tournament 1", "Tournament 2"));
     }
 }

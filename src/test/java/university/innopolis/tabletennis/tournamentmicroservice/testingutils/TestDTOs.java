@@ -7,8 +7,12 @@ import java.util.List;
 
 public class TestDTOs {
     public static TournamentDTO getTestTournament() {
+        return getTestTournament("Test Tournament");
+    }
+
+    public static TournamentDTO getTestTournament(String title) {
         return TournamentDTO.builder()
-                .title("Test Tournament")
+                .title(title)
                 .amountOfTables(1)
                 .players(
                         List.of(
