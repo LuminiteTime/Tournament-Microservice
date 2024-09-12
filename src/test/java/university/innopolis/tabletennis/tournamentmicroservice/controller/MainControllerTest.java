@@ -98,7 +98,7 @@ class MainControllerTest {
     }
 
     @Test
-    void whenRequestingTournament_thenReturnAllTournament() {
+    void whenRequestingTournaments_thenReturnAllTournament() {
         TournamentDTO tournamentDTO1 = TestDTOs.getTestTournament("Tournament 1");
         TournamentDTO tournamentDTO2 = TestDTOs.getTestTournament("Tournament 2");
         tournamentService.addTournament(tournamentDTO1);
