@@ -1,6 +1,7 @@
 package university.innopolis.tabletennis.tournamentmicroservice.controller;
 
 import org.junit.jupiter.api.*;
+import org.mockito.internal.matchers.Equals;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -15,6 +16,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.repository.Tourna
 import university.innopolis.tabletennis.tournamentmicroservice.service.TournamentService;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 
 import static university.innopolis.tabletennis.tournamentmicroservice.testingutils.TestDTOs.getTestTournament;
@@ -112,5 +114,33 @@ class MainControllerTest {
                 .statusCode(200)
                 .and()
                 .body("title", hasItems("Tournament 1", "Tournament 2"));
+    }
+
+    @Test
+    void whenRequestingTournamentById_thenReturnTournamentById() {
+        TournamentDTO tournamentDTO = getTestTournament();
+        tournamentService.addTournament(tournamentDTO);
+        given()
+                .port(port)
+                .contentType("application/json")
+                .when()
+                .get("/tournaments/1")
+                .then()
+                .statusCode(200)
+                .and()
+                .body("title", equalTo("Test Tournament"));
+    }
+
+    @Test
+    void whenRequestingTournamentByInvalidId_thenReturnError() {
+        given()
+                .port(port)
+                .contentType("application/json")
+                .when()
+                .get("tournaments/1")
+                .then()
+                .statusCode(400)
+                .and()
+                .body("message", equalTo("Tournament with id 1 does not exist."));
     }
 }
