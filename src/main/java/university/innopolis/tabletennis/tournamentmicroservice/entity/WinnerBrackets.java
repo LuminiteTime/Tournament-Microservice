@@ -31,9 +31,6 @@ public class WinnerBrackets {
     @OneToMany
     private Set<WinnerBracketsMatch> availableMatches = new HashSet<>();
 
-    @OneToMany
-    private Map<Integer, Player> topThree = new HashMap<>();
-
     private TournamentState state = TournamentState.PLAYING;
 
     public WinnerBrackets(List<Player> players) {
@@ -57,22 +54,7 @@ public class WinnerBrackets {
         }
     }
 
-    // * For now distribution only of two first places is implemented (for single elimination).
     public void finish() {
         this.state = TournamentState.FINISHED;
-        WinnerBracketsMatch finalMatch = firstMatches.get(0);
-        while (finalMatch.getNextMatch() != null) {
-            finalMatch = finalMatch.getNextMatch();
-        }
-        if (!finalMatch.getState().equals(MatchState.COMPLETED)) {
-            return;
-        }
-        if (finalMatch.getFirstPlayerScore() > finalMatch.getSecondPlayerScore()) {
-            this.topThree.put(1, finalMatch.getFirstPlayer());
-            this.topThree.put(2, finalMatch.getSecondPlayer());
-        } else {
-            this.topThree.put(1, finalMatch.getSecondPlayer());
-            this.topThree.put(2, finalMatch.getFirstPlayer());
-        }
     }
 }
