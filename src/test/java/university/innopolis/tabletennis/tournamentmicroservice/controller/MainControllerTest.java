@@ -17,7 +17,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.service.Tournamen
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.hasItems;
 
-import university.innopolis.tabletennis.tournamentmicroservice.testingutils.TestDTOs;
+import static university.innopolis.tabletennis.tournamentmicroservice.testingutils.TestDTOs.getTestTournament;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class MainControllerTest {
@@ -72,7 +72,7 @@ class MainControllerTest {
 
     @Test
     void whenSendingListOfPlayers_thenTournamentIsCreated() {
-        TournamentDTO tournamentDTO = TestDTOs.getTestTournament();
+        TournamentDTO tournamentDTO = getTestTournament();
         given()
                 .port(port)
                 .contentType("application/json")
@@ -85,7 +85,7 @@ class MainControllerTest {
 
     @Test
     void whenSendingInvalidData_thenReturnErrorCode() {
-        TournamentDTO tournamentDTO = TestDTOs.getTestTournament();
+        TournamentDTO tournamentDTO = getTestTournament();
         tournamentService.addTournament(tournamentDTO);
         given()
                 .port(port)
@@ -99,8 +99,8 @@ class MainControllerTest {
 
     @Test
     void whenRequestingTournaments_thenReturnAllTournament() {
-        TournamentDTO tournamentDTO1 = TestDTOs.getTestTournament("Tournament 1");
-        TournamentDTO tournamentDTO2 = TestDTOs.getTestTournament("Tournament 2");
+        TournamentDTO tournamentDTO1 = getTestTournament("Tournament 1");
+        TournamentDTO tournamentDTO2 = getTestTournament("Tournament 2");
         tournamentService.addTournament(tournamentDTO1);
         tournamentService.addTournament(tournamentDTO2);
         given()
