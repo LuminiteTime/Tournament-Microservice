@@ -36,11 +36,8 @@ public class MainController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<TournamentDTO> postTournament(@Valid @RequestBody TournamentDTO tournamentDTO) {
         log.info("Creating a new tournament: {}", tournamentDTO);
-        List<Player> playersToAdd = tournamentDTO.getPlayers().stream()
-                .map(MappingUtils::mapToPlayerEntity)
-                .toList();
-        return ResponseEntity.ok().body(MappingUtils.mapToTournamentDTO(
-                tournamentService.addTournament(tournamentDTO, playersToAdd)));
+        return new ResponseEntity<>(MappingUtils.mapToTournamentDTO(
+                tournamentService.addTournament(tournamentDTO)), HttpStatus.CREATED);
     }
 
     @GetMapping

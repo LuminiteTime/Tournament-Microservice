@@ -8,6 +8,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.entity.*;
 import university.innopolis.tabletennis.tournamentmicroservice.exception.TournamentNotFoundException;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.*;
 import university.innopolis.tabletennis.tournamentmicroservice.states.TournamentState;
+import university.innopolis.tabletennis.tournamentmicroservice.utils.MappingUtils;
 
 import java.util.*;
 
@@ -43,7 +44,10 @@ public class TournamentService {
         return tournament.getTablesOfTournament();
     }
 
-    public Tournament addTournament(TournamentDTO tournamentDTO, List<Player> playersToAdd) {
+    public Tournament addTournament(TournamentDTO tournamentDTO) {
+        List<Player> playersToAdd = tournamentDTO.getPlayers().stream()
+                .map(MappingUtils::mapToPlayerEntity)
+                .toList();
         if (tournamentRepository.findAll().stream()
                 .map(Tournament::getTitle)
                 .toList()
