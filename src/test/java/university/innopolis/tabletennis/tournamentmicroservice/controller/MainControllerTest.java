@@ -16,9 +16,8 @@ import university.innopolis.tabletennis.tournamentmicroservice.service.Tournamen
 import university.innopolis.tabletennis.tournamentmicroservice.states.TournamentState;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
 
+import static org.hamcrest.Matchers.*;
 import static university.innopolis.tabletennis.tournamentmicroservice.testingutils.TestDTOs.getTestTournament;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -86,7 +85,22 @@ class MainControllerTest {
     }
 
     @Test
-    void whenSendingInvalidData_thenReturnErrorCode() {
+    void whenAmountOfTablesIsBiggerThanPlayersAmount_thenReturnErrorMessage() {
+        TournamentDTO tournamentDTO = getTestTournament();
+        tournamentDTO.setAmountOfTables(100);
+        given()
+                .port(port)
+                .contentType("application/json")
+                .body(tournamentDTO)
+                .when()
+                .post("/tournaments")
+                .then()
+                .statusCode(400)
+                .body("message", equalTo("Desired number of tables must be less than the number of players minus 1"));
+    }
+
+    @Test
+    void whenSendingInvalidTournamentData_thenReturnErrorCode() {
         TournamentDTO tournamentDTO = getTestTournament();
         tournamentService.addTournament(tournamentDTO);
         given()
@@ -112,7 +126,6 @@ class MainControllerTest {
                 .get("/tournaments")
                 .then()
                 .statusCode(200)
-                .and()
                 .body("title", hasItems("Tournament 1", "Tournament 2"));
     }
 
@@ -127,7 +140,6 @@ class MainControllerTest {
                 .get("/tournaments/1")
                 .then()
                 .statusCode(200)
-                .and()
                 .body("title", equalTo("Test Tournament"));
     }
 
@@ -140,7 +152,6 @@ class MainControllerTest {
                 .get("tournaments/1")
                 .then()
                 .statusCode(400)
-                .and()
                 .body("message", equalTo("Tournament with id 1 does not exist."));
     }
 
@@ -155,7 +166,6 @@ class MainControllerTest {
                 .patch("/tournaments/1")
                 .then()
                 .statusCode(200)
-                .and()
                 .body("state", equalTo("FINISHED"));
     }
 
@@ -171,7 +181,43 @@ class MainControllerTest {
                 .patch("/tournaments/1")
                 .then()
                 .statusCode(200)
-                .and()
                 .body("state", equalTo("FINISHED"));
+    }
+
+    @Test
+    void whenFinishingTournamentByInvalidId_thenReturnError() {
+        given()
+                .port(port)
+                .contentType("application/json")
+                .when()
+                .patch("tournaments/1")
+                .then()
+                .statusCode(400)
+                .body("message", equalTo("Tournament with id 1 does not exist."));
+    }
+
+    @Test
+    void whenRequestingGameTablesOfTournamentById_thenReturnListOfGameTables() {
+        tournamentService.addTournament(getTestTournament());
+        given()
+                .port(port)
+                .contentType("application/json")
+                .when()
+                .get("tournaments/1/tables")
+                .then()
+                .statusCode(200)
+                .body("size()", equalTo(2));
+    }
+
+    @Test
+    void whenRequestingGameTablesOfInvalidTournamentId_thenReturnError() {
+        given()
+                .port(port)
+                .contentType("application/json")
+                .when()
+                .get("/tournaments/999/tables")
+                .then()
+                .statusCode(400)
+                .body("message", equalTo("Tournament with id 999 does not exist."));
     }
 }
