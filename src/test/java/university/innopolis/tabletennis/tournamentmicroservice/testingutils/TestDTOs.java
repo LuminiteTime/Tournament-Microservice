@@ -13,11 +13,17 @@ public class TestDTOs {
     public static TournamentDTO getTestTournament(String title) {
         return TournamentDTO.builder()
                 .title(title)
-                .amountOfTables(1)
+                .amountOfTables(2)
                 .players(
                         List.of(
                                 new PlayerDTO(101L),
-                                new PlayerDTO(102L)
+                                new PlayerDTO(102L),
+                                new PlayerDTO(103L),
+                                new PlayerDTO(104L),
+                                new PlayerDTO(105L),
+                                new PlayerDTO(106L),
+                                new PlayerDTO(107L),
+                                new PlayerDTO(108L)
                         )
                 )
                 .build();
