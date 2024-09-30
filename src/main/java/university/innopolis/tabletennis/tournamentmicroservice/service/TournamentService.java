@@ -77,7 +77,7 @@ public class TournamentService {
         return tournament;
     }
 
-    public Tournament patchTournamentState(Long tournamentId) {
+    public Tournament finishTournament(Long tournamentId) {
         Tournament tournament = tournamentRepository
                 .findById(tournamentId)
                 .orElseThrow(() ->
@@ -88,7 +88,7 @@ public class TournamentService {
         return tournament;
     }
 
-    public List<TablesMatch> retrieveALlMatches(Long tournamentId) {
+    public List<TablesMatch> retrieveAllMatches(Long tournamentId) {
         Tournament tournament = tournamentRepository
                 .findById(tournamentId)
                 .orElseThrow(() ->

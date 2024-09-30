@@ -1,5 +1,6 @@
 package university.innopolis.tabletennis.tournamentmicroservice.service;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -7,6 +8,7 @@ import university.innopolis.tabletennis.tournamentmicroservice.dto.MatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.GameTable;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.TablesMatch;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Player;
+import university.innopolis.tabletennis.tournamentmicroservice.exception.GameTableNotFoundException;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.GameTableRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.TablesMatchRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO;
@@ -36,18 +38,15 @@ public class MatchService {
                 );
 
         MatchInfoValidationResult validationResult = ValidationUtils.validateMatchInfo(tablesMatch, matchInfo, matchId);
+
         switch (validationResult) {
-            case ALREADY_COMPLETED:
-                return MappingUtils.mapToMatchDTO(tablesMatch);
-            case READY_TO_START:
-                setMatchIsBeingPlayed(tablesMatch);
-                break;
-            case READY_TO_COMPLETE:
-                setMatchIsCompleted(tablesMatch, matchInfo.get());
-                break;
-            default:
+            case ALREADY_COMPLETED -> MappingUtils.mapToMatchDTO(tablesMatch);
+            case READY_TO_START -> setMatchIsBeingPlayed(tablesMatch);
+            case READY_TO_COMPLETE -> setMatchIsCompleted(tablesMatch, matchInfo.get());
+            default -> {
                 log.error("Unknown error occurred while patching the match");
                 throw new IllegalArgumentException("Unknown error occurred while patching the match.");
+            }
         }
 
         tablesMatchRepository.save(tablesMatch);
@@ -67,12 +66,13 @@ public class MatchService {
         log.info("Match with id {} has been started", tablesMatch.getId());
     }
 
+    @Transactional
     public List<MatchDTO> retrieveAvailableMatches(Long tableId) {
         GameTable gameTable = gameTableRepository
                 .findById(tableId)
                 .orElseThrow(() -> {
                             log.warn("Game table with id {} does not exist", tableId);
-                            return new IllegalArgumentException("Game table with id " + tableId + " does not exist.");
+                            return new GameTableNotFoundException(tableId);
                         }
                 );
 
