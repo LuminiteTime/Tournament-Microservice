@@ -55,7 +55,6 @@ public class MainController {
         return ResponseEntity.ok().body(mapToTournamentDTO(tournamentService.retrieveTournament(tournamentId)));
     }
 
-    // TODO: Test playing full match.
     @PatchMapping("/{tournamentId}")
     public ResponseEntity<TournamentDTO> finishTournament(@PathVariable Long tournamentId) {
         log.info("Patching state of the tournament with id: {}", tournamentId);
