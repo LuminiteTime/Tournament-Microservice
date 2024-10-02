@@ -35,6 +35,20 @@ public class TestData {
                 .build();
     }
 
+    public static TournamentDTO getSmallestTestTournament() {
+        return TournamentDTO.builder()
+                .title("Smallest Test Tournament")
+                .amountOfTables(1)
+                .players(
+                        List.of(
+                                new PlayerDTO(101L),
+                                new PlayerDTO(102L),
+                                new PlayerDTO(103L)
+                        )
+                )
+                .build();
+    }
+
     public static PatchMatchDTO getTestPatchMatchData() {
         return PatchMatchDTO.builder()
                 .firstPlayerScore(11)

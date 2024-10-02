@@ -13,7 +13,6 @@ import university.innopolis.tabletennis.tournamentmicroservice.dto.GameTableDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.MatchDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.TournamentDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.GameTable;
-import university.innopolis.tabletennis.tournamentmicroservice.entity.TablesMatch;
 import university.innopolis.tabletennis.tournamentmicroservice.entity.Tournament;
 import university.innopolis.tabletennis.tournamentmicroservice.exception.*;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.GameTableRepository;
@@ -21,10 +20,10 @@ import university.innopolis.tabletennis.tournamentmicroservice.repository.Player
 import university.innopolis.tabletennis.tournamentmicroservice.repository.TablesMatchRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.repository.TournamentRepository;
 import university.innopolis.tabletennis.tournamentmicroservice.service.MatchService;
-import university.innopolis.tabletennis.tournamentmicroservice.service.TournamentService;
 import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
 import university.innopolis.tabletennis.tournamentmicroservice.states.TournamentState;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -32,16 +31,12 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static university.innopolis.tabletennis.tournamentmicroservice.testingutils.TestData.*;
-import static university.innopolis.tabletennis.tournamentmicroservice.utils.MappingUtils.mapToMatchDTO;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class MainControllerTest {
 
     @LocalServerPort
     private Integer port;
-
-    @Autowired
-    private TournamentService tournamentService;
 
     @Autowired
     private MatchService matchService;
@@ -92,14 +87,7 @@ class MainControllerTest {
     @Test
     void whenSendingListOfPlayers_thenTournamentIsCreated() {
         TournamentDTO tournamentDTO = getTestTournament();
-        given()
-                .port(port)
-                .contentType("application/json")
-                .body(tournamentDTO)
-                .when()
-                .post("/tournaments")
-                .then()
-                .statusCode(201);
+        postTournament(tournamentDTO);
         assertEquals(1, tournamentRepository.findAll().size());
 
         Tournament tournament = tournamentRepository.findAll().get(0);
@@ -117,6 +105,20 @@ class MainControllerTest {
 
         assertEquals(MATCHES_AMOUNT, tournament.getTablesOfTournament().stream()
                 .mapToInt(gameTable -> gameTable.getTablesMatches().size()).sum());
+    }
+
+    private TournamentDTO postTournament(TournamentDTO tournamentDTO) {
+        return given()
+                .port(port)
+                .contentType("application/json")
+                .body(tournamentDTO)
+                .when()
+                .post("/tournaments")
+                .then()
+                .statusCode(201)
+                .extract()
+                .body()
+                .as(TournamentDTO.class);
     }
 
     @Test
@@ -158,8 +160,8 @@ class MainControllerTest {
     void whenRequestingTournaments_thenReturnAllTournaments() {
         TournamentDTO tournamentDTO1 = getTestTournament("Tournament 1");
         TournamentDTO tournamentDTO2 = getTestTournament("Tournament 2");
-        tournamentService.addTournament(tournamentDTO1);
-        tournamentService.addTournament(tournamentDTO2);
+        postTournament(tournamentDTO1);
+        postTournament(tournamentDTO2);
         List<TournamentDTO> listOfTournamentsDTOsResponseBody = given()
                 .port(port)
                 .contentType("application/json")
@@ -181,7 +183,7 @@ class MainControllerTest {
     @Test
     void whenRequestingTournamentById_thenReturnTournamentById() {
         TournamentDTO tournamentDTO = getTestTournament();
-        Tournament tournament = tournamentService.addTournament(tournamentDTO);
+        TournamentDTO tournament = postTournament(tournamentDTO);
         TournamentDTO tournamentDTOResponseBody = given()
                 .port(port)
                 .contentType("application/json")
@@ -215,40 +217,23 @@ class MainControllerTest {
     @Test
     void whenFinishingTournamentByIdWithNoAvailableMatchesLeft_thenChangeStatusToFinished() {
         TournamentDTO tournamentDTO = getTestTournament();
-        Tournament tournament = tournamentService.addTournament(tournamentDTO);
-        Long tournamentId = tournament.getId();
-
+        TournamentDTO tournament = postTournament(tournamentDTO);
         playAllAvailableMatches(tournament);
-
-        TournamentDTO tournamentDTOResponseBody = given()
-                .port(port)
-                .contentType("application/json")
-                .when()
-                .patch(String.format("/tournaments/%d", tournamentId))
-                .then()
-                .statusCode(200)
-                .extract()
-                .body()
-                .as(TournamentDTO.class);
+        TournamentDTO tournamentDTOResponseBody = patchTournament(tournament.getId());
         assertEquals(TournamentState.FINISHED, tournamentDTOResponseBody.getState());
     }
 
     @Test
     void whenFinishingFinishedTournamentById_thenNothingChanges() {
         TournamentDTO tournamentDTO = getTestTournament();
-        Tournament tournament = tournamentService.addTournament(tournamentDTO);
+        TournamentDTO tournament = postTournament(tournamentDTO);
         playAllAvailableMatches(tournament);
-        tournament.setState(TournamentState.FINISHED);
-        TournamentDTO tournamentDTOResponseBody = given()
+        given()
                 .port(port)
                 .contentType("application/json")
                 .when()
-                .patch(String.format("/tournaments/%d", tournament.getId()))
-                .then()
-                .statusCode(200)
-                .extract()
-                .body()
-                .as(TournamentDTO.class);
+                .patch(String.format("/tournaments/%d", tournament.getId()));
+        TournamentDTO tournamentDTOResponseBody = patchTournament(tournament.getId());
         assertEquals(TournamentState.FINISHED, tournamentDTOResponseBody.getState());
     }
 
@@ -270,7 +255,7 @@ class MainControllerTest {
 
     @Test
     void whenFinishingTournamentWithAvailableMatchesLeft_thenReturnError() {
-        Tournament tournament = tournamentService.addTournament(getTestTournament());
+        TournamentDTO tournament = postTournament(getTestTournament());
         ErrorResponse errorResponseBody = given()
                 .port(port)
                 .contentType("application/json")
@@ -287,7 +272,7 @@ class MainControllerTest {
 
     @Test
     void whenRequestingGameTablesOfTournamentById_thenReturnListOfGameTables() {
-        Tournament tournament = tournamentService.addTournament(getTestTournament());
+        TournamentDTO tournament = postTournament(getTestTournament());
         List<GameTableDTO> listOfGameTablesResponseBody = given()
                 .port(port)
                 .contentType("application/json")
@@ -321,8 +306,8 @@ class MainControllerTest {
     @Test
     void whenPatchingMatchToStart_thenChangeMatchStateToPLAYING() {
         TournamentDTO tournamentDTO = getTestTournament();
-        Tournament tournament = tournamentService.addTournament(tournamentDTO);
-        Long matchId = matchService.retrieveAvailableMatches(tournament.getTablesOfTournament().get(0).getId()).get(0).getId();
+        TournamentDTO tournament = postTournament(tournamentDTO);
+        Long matchId = matchService.retrieveAvailableMatches(getTableDTOsOfTournament(tournament.getId()).get(0).getId()).get(0).getId();
         MatchDTO matchDTOResponseBody = given()
                 .port(port)
                 .contentType("application/json")
@@ -342,8 +327,8 @@ class MainControllerTest {
     @Test
     void whenPatchingPlayingMatchToComplete_thenChangeMatchStateToCOMPLETED() {
         TournamentDTO tournamentDTO = getTestTournament();
-        Tournament tournament = tournamentService.addTournament(tournamentDTO);
-        Long matchId = matchService.retrieveAvailableMatches(tournament.getTablesOfTournament().get(0).getId()).get(0).getId();
+        TournamentDTO tournament = postTournament(tournamentDTO);
+        Long matchId = matchService.retrieveAvailableMatches(getTableDTOsOfTournament(tournament.getId()).get(0).getId()).get(0).getId();
         given()
                 .port(port)
                 .contentType("application/json")
@@ -365,7 +350,7 @@ class MainControllerTest {
 
     @Test
     void whenPatchingMatchWithInvalidId_thenReturnError() {
-        Tournament tournament = tournamentService.addTournament(getTestTournament());
+        TournamentDTO tournament = postTournament(getTestTournament());
         ErrorResponse errorResponseBody = given()
                 .port(port)
                 .contentType("application/json")
@@ -382,18 +367,8 @@ class MainControllerTest {
 
     @Test
     void whenRequestingMatchesOfTournamentById_thenReturnListOfMatches() {
-        Tournament tournament = tournamentService.addTournament(getTestTournament());
-        List<MatchDTO> listOfMatchDTOsResponseBody = given()
-                .port(port)
-                .contentType("application/type")
-                .when()
-                .get(String.format("tournaments/%d/matches", tournament.getId()))
-                .then()
-                .statusCode(200)
-                .extract()
-                .body()
-                .as(new TypeRef<>() {
-                });
+        TournamentDTO tournament = postTournament(getTestTournament());
+        List<MatchDTO> listOfMatchDTOsResponseBody = getAllMatches(tournament.getId());
         assertEquals(MATCHES_AMOUNT, listOfMatchDTOsResponseBody.size());
     }
 
@@ -415,20 +390,9 @@ class MainControllerTest {
 
     @Test
     void whenRequestingAvailableMatchesOfTournamentById_thenReturnListOfMatches() {
-        Tournament tournament = tournamentService.addTournament(getTestTournament());
-        List<MatchDTO> listOfMatchDTOsResponseBody = given()
-                .port(port)
-                .contentType("application/json")
-                .when()
-                .get(String.format("tournaments/%d/tables/%d/matches_available",
-                        tournament.getId(),
-                        tournament.getTablesOfTournament().get(0).getId()))
-                .then()
-                .statusCode(200)
-                .extract()
-                .body()
-                .as(new TypeRef<>() {
-                });
+        TournamentDTO tournament = postTournament(getTestTournament());
+        List<MatchDTO> listOfMatchDTOsResponseBody = getAvailableMatches(tournament.getId(),
+                getTableDTOsOfTournament(tournament.getId()).get(0).getId());
         assertEquals(AVAILABLE_MATCHES_AMOUNT_FOR_ONE_TABLE, listOfMatchDTOsResponseBody.size());
     }
 
@@ -452,7 +416,7 @@ class MainControllerTest {
 
     @Test
     void whenRequestingAvailableMatchesOfTournamentByInvalidTableId_thenReturnError() {
-        Tournament tournament = tournamentService.addTournament(getTestTournament());
+        TournamentDTO tournament = postTournament(getTestTournament());
         ErrorResponse errorResponseBody = given()
                 .port(port)
                 .contentType("application/json")
@@ -471,38 +435,293 @@ class MainControllerTest {
 
     @Test
     void whenMatchStarted_thenAmountOfAvailableMatchesIsReducedByOne() {
-        Tournament tournament = tournamentService.addTournament(getTestTournament());
+        TournamentDTO tournament = postTournament(getTestTournament());
+        Long gameTableId = getTableDTOsOfTournament(tournament.getId()).get(0).getId();
         given()
                 .port(port)
                 .contentType("application/json")
                 .patch(String.format("tournaments/%d/match/%d",
                         tournament.getId(),
-                        matchService.retrieveAvailableMatches(tournament.getTablesOfTournament().get(0).getId()).get(0).getId()));
-        List<MatchDTO> listOfMatchDTOsResponseBody = given()
-                .port(port)
-                .contentType("application/json")
-                .when()
-                .get(String.format("tournaments/%d/tables/%d/matches_available",
-                        tournament.getId(),
-                        tournament.getTablesOfTournament().get(0).getId()))
-                .then()
-                .extract()
-                .body()
-                .as(new TypeRef<>() {
-                });
+                        matchService.retrieveAvailableMatches(gameTableId).get(0).getId()));
+        List<MatchDTO> listOfMatchDTOsResponseBody = getAvailableMatches(tournament.getId(), gameTableId);
         assertEquals(AVAILABLE_MATCHES_AMOUNT_FOR_ONE_TABLE - 1,
                 listOfMatchDTOsResponseBody.size());
     }
 
     @Test
     void whenMatchStartedAndCompleted_thenAmountOfAvailableMatchesIsReducedByOne() {
-        Tournament tournament = tournamentService.addTournament(getTestTournament());
-        Long matchId = matchService.retrieveAvailableMatches(tournament.getTablesOfTournament().get(0).getId()).get(0).getId();
+        TournamentDTO tournament = postTournament(getTestTournament());
+        Long gameTableId = getTableDTOsOfTournament(tournament.getId()).get(0).getId();
+        List<MatchDTO> oldListOfMatchDTOsResponseBody = getAvailableMatches(tournament.getId(), gameTableId);
+        MatchDTO match = oldListOfMatchDTOsResponseBody.get(0);
+        playAndCompleteMatch(tournament.getId(), match.getId());
+        List<MatchDTO> newListOfMatchDTOsResponseBody = getAvailableMatches(tournament.getId(), gameTableId);
+        assertEquals(AVAILABLE_MATCHES_AMOUNT_FOR_ONE_TABLE - 1,
+                newListOfMatchDTOsResponseBody.size());
+        assertFalse(newListOfMatchDTOsResponseBody.contains(match));
+    }
+
+    @Test
+    void whenCompletedTwoAvailableMatchesInTableOfFourPlayers_thenAvailableMatchesAreAllNewMatches() {
+        TournamentDTO tournament = postTournament(getTestTournament());
+        Long tableId = getTableDTOsOfTournament(tournament.getId()).get(0).getId();
+        List<MatchDTO> oldAvailableMatches = matchService.retrieveAvailableMatches(tableId);
+        for (MatchDTO match : oldAvailableMatches) {
+            Long matchId = match.getId();
+            playAndCompleteMatch(tournament.getId(), matchId);
+        }
+        List<MatchDTO> newAvailableMatches = matchService.retrieveAvailableMatches(tableId);
+        assertEquals(AVAILABLE_MATCHES_AMOUNT_FOR_ONE_TABLE, newAvailableMatches.size());
+        assertNotEquals(oldAvailableMatches, newAvailableMatches);
+    }
+
+    @Test
+    void whenPlayingThreePlayersSmallestPossibleTournament_thenFinishesSuccessfully() {
+        TournamentDTO tournament = postTournament(getSmallestTestTournament());
+        Long onlyGameTableId = getTableDTOsOfTournament(tournament.getId()).get(0).getId();
+        assertEquals(TournamentState.PLAYING, tournament.getState());
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+        }
+
+        List<MatchDTO> availableMatches1 = getAvailableMatches(tournament.getId(), onlyGameTableId);
+        assertEquals(1, availableMatches1.size());
+        MatchDTO match1 = availableMatches1.get(0);
+        playAndCompleteMatch(tournament.getId(), match1.getId());
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            if (matchDTO.equals(match1)) {
+                assertEquals(MatchState.COMPLETED, matchDTO.getState());
+            } else {
+                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+            }
+        }
+
+        List<MatchDTO> availableMatches2 = getAvailableMatches(tournament.getId(), onlyGameTableId);
+        assertEquals(1, availableMatches2.size());
+        assertNotEquals(availableMatches1, availableMatches2);
+        MatchDTO match2 = availableMatches2.get(0);
+        playAndCompleteMatch(tournament.getId(), match2.getId());
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            if (matchDTO.equals(match2) || matchDTO.equals(match1)) {
+                assertEquals(MatchState.COMPLETED, matchDTO.getState());
+            } else {
+                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+            }
+        }
+
+        List<MatchDTO> availableMatches3 = getAvailableMatches(tournament.getId(), onlyGameTableId);
+        assertEquals(1, availableMatches3.size());
+        assertNotEquals(availableMatches2, availableMatches3);
+        MatchDTO match3 = availableMatches3.get(0);
+        playAndCompleteMatch(tournament.getId(), match3.getId());
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            assertEquals(MatchState.COMPLETED, matchDTO.getState());
+        }
+
+        assertEquals(0, getAvailableMatches(tournament.getId(), onlyGameTableId).size());
+        tournament = patchTournament(tournament.getId());
+        assertEquals(TournamentState.FINISHED, tournament.getState());
+    }
+
+    @Test
+    void whenPlayedAllAvailableMatches_thenAvailableMatchesOfTournamentIsEmpty() {
+        TournamentDTO tournament = postTournament(getTestTournament());
+        List<MatchDTO> playedMatches = new ArrayList<>();
+        Long gameTableId1 = getTableDTOsOfTournament(tournament.getId()).get(0).getId();
+        Long gameTableId2 = getTableDTOsOfTournament(tournament.getId()).get(1).getId();
+
+        /* First round */
+        List<MatchDTO> availableMatches = getAvailableMatches(tournament.getId(), gameTableId1);
+        assertEquals(2, availableMatches.size());
+        MatchDTO match = availableMatches.get(0);
+        playAndCompleteMatch(tournament.getId(), match.getId());
+        playedMatches.add(match);
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            if (playedMatches.contains(matchDTO)) {
+                assertEquals(MatchState.COMPLETED, matchDTO.getState());
+            } else {
+                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+            }
+        }
+        availableMatches = getAvailableMatches(tournament.getId(), gameTableId1);
+        assertEquals(1, availableMatches.size());
+        assertFalse(availableMatches.contains(match));
+        match = availableMatches.get(0);
+        playAndCompleteMatch(tournament.getId(), match.getId());
+        playedMatches.add(match);
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            if (playedMatches.contains(matchDTO)) {
+                assertEquals(MatchState.COMPLETED, matchDTO.getState());
+            } else {
+                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+            }
+        }
+
+        /* Second round */
+        availableMatches = getAvailableMatches(tournament.getId(), gameTableId1);
+        assertEquals(2, availableMatches.size());
+        match = availableMatches.get(0);
+        playAndCompleteMatch(tournament.getId(), match.getId());
+        playedMatches.add(match);
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            if (playedMatches.contains(matchDTO)) {
+                assertEquals(MatchState.COMPLETED, matchDTO.getState());
+            } else {
+                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+            }
+        }
+        availableMatches = getAvailableMatches(tournament.getId(), gameTableId1);
+        assertEquals(1, availableMatches.size());
+        assertFalse(availableMatches.contains(match));
+        match = availableMatches.get(0);
+        playAndCompleteMatch(tournament.getId(), match.getId());
+        playedMatches.add(match);
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            if (playedMatches.contains(matchDTO)) {
+                assertEquals(MatchState.COMPLETED, matchDTO.getState());
+            } else {
+                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+            }
+        }
+
+        /* Third round */
+        availableMatches = getAvailableMatches(tournament.getId(), gameTableId1);
+        assertEquals(2, availableMatches.size());
+        match = availableMatches.get(0);
+        playAndCompleteMatch(tournament.getId(), match.getId());
+        playedMatches.add(match);
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            if (playedMatches.contains(matchDTO)) {
+                assertEquals(MatchState.COMPLETED, matchDTO.getState());
+            } else {
+                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+            }
+        }
+        availableMatches = getAvailableMatches(tournament.getId(), gameTableId1);
+        assertEquals(1, availableMatches.size());
+        assertFalse(availableMatches.contains(match));
+        match = availableMatches.get(0);
+        playAndCompleteMatch(tournament.getId(), match.getId());
+        playedMatches.add(match);
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            if (playedMatches.contains(matchDTO)) {
+                assertEquals(MatchState.COMPLETED, matchDTO.getState());
+            } else {
+                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+            }
+        }
+
+        assertEquals(0, getAvailableMatches(tournament.getId(), gameTableId1).size());
+
+        /* First round */
+        availableMatches = getAvailableMatches(tournament.getId(), gameTableId2);
+        assertEquals(2, availableMatches.size());
+        match = availableMatches.get(0);
+        playAndCompleteMatch(tournament.getId(), match.getId());
+        playedMatches.add(match);
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            if (playedMatches.contains(matchDTO)) {
+                assertEquals(MatchState.COMPLETED, matchDTO.getState());
+            } else {
+                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+            }
+        }
+        availableMatches = getAvailableMatches(tournament.getId(), gameTableId2);
+        assertEquals(1, availableMatches.size());
+        assertFalse(availableMatches.contains(match));
+        match = availableMatches.get(0);
+        playAndCompleteMatch(tournament.getId(), match.getId());
+        playedMatches.add(match);
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            if (playedMatches.contains(matchDTO)) {
+                assertEquals(MatchState.COMPLETED, matchDTO.getState());
+            } else {
+                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+            }
+        }
+
+        /* Second round */
+        availableMatches = getAvailableMatches(tournament.getId(), gameTableId2);
+        assertEquals(2, availableMatches.size());
+        match = availableMatches.get(0);
+        playAndCompleteMatch(tournament.getId(), match.getId());
+        playedMatches.add(match);
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            if (playedMatches.contains(matchDTO)) {
+                assertEquals(MatchState.COMPLETED, matchDTO.getState());
+            } else {
+                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+            }
+        }
+        availableMatches = getAvailableMatches(tournament.getId(), gameTableId2);
+        assertEquals(1, availableMatches.size());
+        assertFalse(availableMatches.contains(match));
+        match = availableMatches.get(0);
+        playAndCompleteMatch(tournament.getId(), match.getId());
+        playedMatches.add(match);
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            if (playedMatches.contains(matchDTO)) {
+                assertEquals(MatchState.COMPLETED, matchDTO.getState());
+            } else {
+                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+            }
+        }
+
+        /* Third round */
+        availableMatches = getAvailableMatches(tournament.getId(), gameTableId2);
+        assertEquals(2, availableMatches.size());
+        match = availableMatches.get(0);
+        playAndCompleteMatch(tournament.getId(), match.getId());
+        playedMatches.add(match);
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            if (playedMatches.contains(matchDTO)) {
+                assertEquals(MatchState.COMPLETED, matchDTO.getState());
+            } else {
+                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+            }
+        }
+        availableMatches = getAvailableMatches(tournament.getId(), gameTableId2);
+        assertEquals(1, availableMatches.size());
+        assertFalse(availableMatches.contains(match));
+        match = availableMatches.get(0);
+        playAndCompleteMatch(tournament.getId(), match.getId());
+        playedMatches.add(match);
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            if (playedMatches.contains(matchDTO)) {
+                assertEquals(MatchState.COMPLETED, matchDTO.getState());
+            } else {
+                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+            }
+        }
+
+        assertEquals(0, getAvailableMatches(tournament.getId(), gameTableId2).size());
+
+        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+            assertEquals(MatchState.COMPLETED, matchDTO.getState());
+        }
+
+        tournament = patchTournament(tournament.getId());
+        assertEquals(TournamentState.FINISHED, tournament.getState());
+    }
+
+    void playAllAvailableMatches(TournamentDTO tournament) {
+        Long tournamentId = tournament.getId();
+        for (GameTableDTO table : getTableDTOsOfTournament(tournamentId)) {
+            List<MatchDTO> availableMatches = getAvailableMatches(tournamentId, table.getId());
+            while (!availableMatches.isEmpty()) {
+                Long matchId = availableMatches.get(0).getId();
+                playAndCompleteMatch(tournamentId, matchId);
+                availableMatches = matchService.retrieveAvailableMatches(table.getId());
+            }
+        }
+    }
+
+    void playAndCompleteMatch(Long tournamentId, Long matchId) {
         given()
                 .port(port)
                 .contentType("application/json")
                 .patch(String.format("tournaments/%d/match/%d",
-                        tournament.getId(),
+                        tournamentId,
                         matchId));
         given()
                 .port(port)
@@ -510,88 +729,61 @@ class MainControllerTest {
                 .body(getTestPatchMatchData())
                 .when()
                 .patch(String.format("tournaments/%d/match/%d",
-                        tournament.getId(),
+                        tournamentId,
                         matchId));
-        List<MatchDTO> listOfMatchDTOsResponseBody = given()
+    }
+
+    List<GameTableDTO> getTableDTOsOfTournament(Long tournamentId) {
+        return given()
                 .port(port)
                 .contentType("application/json")
                 .when()
-                .get(String.format("tournaments/%d/tables/%d/matches_available",
-                        tournament.getId(),
-                        tournament.getTablesOfTournament().get(0).getId()))
+                .get(String.format("tournaments/%d/tables", tournamentId))
                 .then()
                 .extract()
                 .body()
                 .as(new TypeRef<>() {
                 });
-        assertEquals(AVAILABLE_MATCHES_AMOUNT_FOR_ONE_TABLE - 1,
-                listOfMatchDTOsResponseBody.size());
-        TablesMatch match = tablesMatchRepository.findById(matchId)
-                .orElseThrow(() -> new MatchNotFoundException(matchId));
-        assertFalse(listOfMatchDTOsResponseBody.contains(mapToMatchDTO(match)));
     }
 
-    @Test
-    void whenCompletedTwoAvailableMatchesInTableOfFourPlayers_thenAvailableMatchesAreAllNewMatches() {
-        Tournament tournament = tournamentService.addTournament(getTestTournament());
-        Long tableId = tournament.getTablesOfTournament().get(0).getId();
-        List<MatchDTO> oldAvailableMatches = matchService.retrieveAvailableMatches(tableId);
-        for (MatchDTO match : oldAvailableMatches) {
-            Long matchId = match.getId();
-            given()
-                    .port(port)
-                    .contentType("application/json")
-                    .patch(String.format("tournaments/%d/match/%d",
-                            tournament.getId(),
-                            matchId));
-            given()
-                    .port(port)
-                    .contentType("application/json")
-                    .body(getTestPatchMatchData())
-                    .when()
-                    .patch(String.format("tournaments/%d/match/%d",
-                            tournament.getId(),
-                            matchId));
-        }
-        List<MatchDTO> newAvailableMatches = matchService.retrieveAvailableMatches(tableId);
-        assertEquals(AVAILABLE_MATCHES_AMOUNT_FOR_ONE_TABLE, newAvailableMatches.size());
-        assertNotEquals(oldAvailableMatches, newAvailableMatches);
+    List<MatchDTO> getAvailableMatches(Long tournamentId, long tableId) {
+        return given().port(port)
+                .contentType("application/json")
+                .when()
+                .get(String.format("tournaments/%d/tables/%d/matches_available",
+                        tournamentId,
+                        tableId))
+                .then()
+                .extract()
+                .body()
+                .as(new TypeRef<>() {
+                });
     }
 
-    public void playAllAvailableMatches(Tournament tournament) {
-        Long tournamentId = tournament.getId();
-        for (GameTable table : tournament.getTablesOfTournament()) {
-            List<MatchDTO> availableMatches = given()
-                    .port(port)
-                    .contentType("application/json")
-                    .when()
-                    .get(String.format("tournaments/%d/tables/%d/matches_available",
-                            tournamentId,
-                            table.getId()))
-                    .then()
-                    .extract()
-                    .body()
-                    .as(new TypeRef<>() {
-                    });
-            while (!availableMatches.isEmpty()) {
-                Long matchId = availableMatches.get(0).getId();
-                given()
-                        .port(port)
-                        .contentType("application/json")
-                        .patch(String.format("tournaments/%d/match/%d",
-                                tournamentId,
-                                matchId));
-                given()
-                        .port(port)
-                        .contentType("application/json")
-                        .body(getTestPatchMatchData())
-                        .when()
-                        .patch(String.format("tournaments/%d/match/%d",
-                                tournamentId,
-                                matchId));
-                availableMatches = matchService.retrieveAvailableMatches(table.getId());
-            }
-        }
+    List<MatchDTO> getAllMatches(Long tournamentId) {
+        return given()
+                .port(port)
+                .contentType("application/type")
+                .when()
+                .get(String.format("tournaments/%d/matches", tournamentId))
+                .then()
+                .statusCode(200)
+                .extract()
+                .body()
+                .as(new TypeRef<>() {
+                });
     }
 
+    TournamentDTO patchTournament(Long tournamentId) {
+        return given()
+                .port(port)
+                .contentType("application/json")
+                .when()
+                .patch(String.format("/tournaments/%d", tournamentId))
+                .then()
+                .statusCode(200)
+                .extract()
+                .body()
+                .as(TournamentDTO.class);
+    }
 }
