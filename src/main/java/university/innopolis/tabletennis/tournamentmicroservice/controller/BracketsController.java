@@ -40,7 +40,6 @@ public class BracketsController {
                 .toList());
     }
 
-    // ! FIX FIX FIX FIX FIX FIX FIX FIX FIX
     @PatchMapping("/{bracketsId}")
     public ResponseEntity<WinnerBrackets> finishBrackets(@PathVariable Long bracketsId) {
         log.info("Completing brackets with id: {}", bracketsId);

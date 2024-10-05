@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
 
+import java.util.Objects;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -46,5 +48,20 @@ public class MatchDTO {
                 ", secondPlayerScore=" + secondPlayerScore +
                 ", state=" + state +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MatchDTO matchDTO = (MatchDTO) o;
+        return Objects.equals(getId(), matchDTO.getId()) &&
+                Objects.equals(getFirstPlayerId(), matchDTO.getFirstPlayerId()) &&
+                Objects.equals(getSecondPlayerId(), matchDTO.getSecondPlayerId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getFirstPlayerId(), getSecondPlayerId());
     }
 }
