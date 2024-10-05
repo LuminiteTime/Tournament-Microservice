@@ -484,41 +484,27 @@ class MainControllerTest {
             assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
         }
 
-        List<MatchDTO> availableMatches1 = getAvailableMatches(tournament.getId(), onlyGameTableId);
-        assertEquals(1, availableMatches1.size());
-        MatchDTO match1 = availableMatches1.get(0);
-        playAndCompleteMatch(tournament.getId(), match1.getId());
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            if (matchDTO.equals(match1)) {
-                assertEquals(MatchState.COMPLETED, matchDTO.getState());
-            } else {
-                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+        List<MatchDTO> oldAvailableMatches = new ArrayList<>();
+        List<MatchDTO> newAvailableMatches;
+        List<MatchDTO> playedMatches = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            newAvailableMatches = getAvailableMatches(tournament.getId(), onlyGameTableId);
+            assertEquals(1, newAvailableMatches.size());
+            assertNotEquals(oldAvailableMatches, newAvailableMatches);
+            MatchDTO match = newAvailableMatches.get(0);
+            playAndCompleteMatch(tournament.getId(), match.getId());
+            playedMatches.add(match);
+            for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+                if (playedMatches.contains(matchDTO)) {
+                    assertEquals(MatchState.COMPLETED, matchDTO.getState());
+                } else {
+                    assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+                }
             }
+            oldAvailableMatches = newAvailableMatches;
         }
 
-        List<MatchDTO> availableMatches2 = getAvailableMatches(tournament.getId(), onlyGameTableId);
-        assertEquals(1, availableMatches2.size());
-        assertNotEquals(availableMatches1, availableMatches2);
-        MatchDTO match2 = availableMatches2.get(0);
-        playAndCompleteMatch(tournament.getId(), match2.getId());
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            if (matchDTO.equals(match2) || matchDTO.equals(match1)) {
-                assertEquals(MatchState.COMPLETED, matchDTO.getState());
-            } else {
-                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
-            }
-        }
-
-        List<MatchDTO> availableMatches3 = getAvailableMatches(tournament.getId(), onlyGameTableId);
-        assertEquals(1, availableMatches3.size());
-        assertNotEquals(availableMatches2, availableMatches3);
-        MatchDTO match3 = availableMatches3.get(0);
-        playAndCompleteMatch(tournament.getId(), match3.getId());
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            assertEquals(MatchState.COMPLETED, matchDTO.getState());
-        }
-
-        assertEquals(0, getAvailableMatches(tournament.getId(), onlyGameTableId).size());
+        assertTrue(getAvailableMatches(tournament.getId(), onlyGameTableId).isEmpty(), "Should be no available matches.");
         tournament = patchTournament(tournament.getId());
         assertEquals(TournamentState.FINISHED, tournament.getState());
     }
@@ -527,179 +513,40 @@ class MainControllerTest {
     void whenPlayedAllAvailableMatches_thenAvailableMatchesOfTournamentIsEmpty() {
         TournamentDTO tournament = postTournament(getTestTournament());
         List<MatchDTO> playedMatches = new ArrayList<>();
-        Long gameTableId1 = getTableDTOsOfTournament(tournament.getId()).get(0).getId();
-        Long gameTableId2 = getTableDTOsOfTournament(tournament.getId()).get(1).getId();
-
-        /* First round */
-        List<MatchDTO> availableMatches = getAvailableMatches(tournament.getId(), gameTableId1);
-        assertEquals(2, availableMatches.size());
-        MatchDTO match = availableMatches.get(0);
-        playAndCompleteMatch(tournament.getId(), match.getId());
-        playedMatches.add(match);
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            if (playedMatches.contains(matchDTO)) {
-                assertEquals(MatchState.COMPLETED, matchDTO.getState());
-            } else {
-                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+        for (GameTableDTO gameTable : getTableDTOsOfTournament(tournament.getId())) {
+            List<MatchDTO> availableMatches;
+            for (int i = 0; i < 3; i++) {
+                availableMatches = getAvailableMatches(tournament.getId(), gameTable.getId());
+                assertEquals(2, availableMatches.size());
+                MatchDTO match = availableMatches.get(0);
+                playAndCompleteMatch(tournament.getId(), match.getId());
+                playedMatches.add(match);
+                for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+                    if (playedMatches.contains(matchDTO)) {
+                        assertEquals(MatchState.COMPLETED, matchDTO.getState());
+                    } else {
+                        assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+                    }
+                }
+                availableMatches = getAvailableMatches(tournament.getId(), gameTable.getId());
+                assertEquals(1, availableMatches.size());
+                assertFalse(availableMatches.contains(match));
+                match = availableMatches.get(0);
+                playAndCompleteMatch(tournament.getId(), match.getId());
+                playedMatches.add(match);
+                for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
+                    if (playedMatches.contains(matchDTO)) {
+                        assertEquals(MatchState.COMPLETED, matchDTO.getState());
+                    } else {
+                        assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
+                    }
+                }
             }
+            assertTrue(getAvailableMatches(tournament.getId(), gameTable.getId()).isEmpty(), "Should be no available matches.");
         }
-        availableMatches = getAvailableMatches(tournament.getId(), gameTableId1);
-        assertEquals(1, availableMatches.size());
-        assertFalse(availableMatches.contains(match));
-        match = availableMatches.get(0);
-        playAndCompleteMatch(tournament.getId(), match.getId());
-        playedMatches.add(match);
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            if (playedMatches.contains(matchDTO)) {
-                assertEquals(MatchState.COMPLETED, matchDTO.getState());
-            } else {
-                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
-            }
-        }
-
-        /* Second round */
-        availableMatches = getAvailableMatches(tournament.getId(), gameTableId1);
-        assertEquals(2, availableMatches.size());
-        match = availableMatches.get(0);
-        playAndCompleteMatch(tournament.getId(), match.getId());
-        playedMatches.add(match);
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            if (playedMatches.contains(matchDTO)) {
-                assertEquals(MatchState.COMPLETED, matchDTO.getState());
-            } else {
-                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
-            }
-        }
-        availableMatches = getAvailableMatches(tournament.getId(), gameTableId1);
-        assertEquals(1, availableMatches.size());
-        assertFalse(availableMatches.contains(match));
-        match = availableMatches.get(0);
-        playAndCompleteMatch(tournament.getId(), match.getId());
-        playedMatches.add(match);
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            if (playedMatches.contains(matchDTO)) {
-                assertEquals(MatchState.COMPLETED, matchDTO.getState());
-            } else {
-                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
-            }
-        }
-
-        /* Third round */
-        availableMatches = getAvailableMatches(tournament.getId(), gameTableId1);
-        assertEquals(2, availableMatches.size());
-        match = availableMatches.get(0);
-        playAndCompleteMatch(tournament.getId(), match.getId());
-        playedMatches.add(match);
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            if (playedMatches.contains(matchDTO)) {
-                assertEquals(MatchState.COMPLETED, matchDTO.getState());
-            } else {
-                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
-            }
-        }
-        availableMatches = getAvailableMatches(tournament.getId(), gameTableId1);
-        assertEquals(1, availableMatches.size());
-        assertFalse(availableMatches.contains(match));
-        match = availableMatches.get(0);
-        playAndCompleteMatch(tournament.getId(), match.getId());
-        playedMatches.add(match);
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            if (playedMatches.contains(matchDTO)) {
-                assertEquals(MatchState.COMPLETED, matchDTO.getState());
-            } else {
-                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
-            }
-        }
-
-        assertEquals(0, getAvailableMatches(tournament.getId(), gameTableId1).size());
-
-        /* First round */
-        availableMatches = getAvailableMatches(tournament.getId(), gameTableId2);
-        assertEquals(2, availableMatches.size());
-        match = availableMatches.get(0);
-        playAndCompleteMatch(tournament.getId(), match.getId());
-        playedMatches.add(match);
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            if (playedMatches.contains(matchDTO)) {
-                assertEquals(MatchState.COMPLETED, matchDTO.getState());
-            } else {
-                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
-            }
-        }
-        availableMatches = getAvailableMatches(tournament.getId(), gameTableId2);
-        assertEquals(1, availableMatches.size());
-        assertFalse(availableMatches.contains(match));
-        match = availableMatches.get(0);
-        playAndCompleteMatch(tournament.getId(), match.getId());
-        playedMatches.add(match);
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            if (playedMatches.contains(matchDTO)) {
-                assertEquals(MatchState.COMPLETED, matchDTO.getState());
-            } else {
-                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
-            }
-        }
-
-        /* Second round */
-        availableMatches = getAvailableMatches(tournament.getId(), gameTableId2);
-        assertEquals(2, availableMatches.size());
-        match = availableMatches.get(0);
-        playAndCompleteMatch(tournament.getId(), match.getId());
-        playedMatches.add(match);
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            if (playedMatches.contains(matchDTO)) {
-                assertEquals(MatchState.COMPLETED, matchDTO.getState());
-            } else {
-                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
-            }
-        }
-        availableMatches = getAvailableMatches(tournament.getId(), gameTableId2);
-        assertEquals(1, availableMatches.size());
-        assertFalse(availableMatches.contains(match));
-        match = availableMatches.get(0);
-        playAndCompleteMatch(tournament.getId(), match.getId());
-        playedMatches.add(match);
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            if (playedMatches.contains(matchDTO)) {
-                assertEquals(MatchState.COMPLETED, matchDTO.getState());
-            } else {
-                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
-            }
-        }
-
-        /* Third round */
-        availableMatches = getAvailableMatches(tournament.getId(), gameTableId2);
-        assertEquals(2, availableMatches.size());
-        match = availableMatches.get(0);
-        playAndCompleteMatch(tournament.getId(), match.getId());
-        playedMatches.add(match);
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            if (playedMatches.contains(matchDTO)) {
-                assertEquals(MatchState.COMPLETED, matchDTO.getState());
-            } else {
-                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
-            }
-        }
-        availableMatches = getAvailableMatches(tournament.getId(), gameTableId2);
-        assertEquals(1, availableMatches.size());
-        assertFalse(availableMatches.contains(match));
-        match = availableMatches.get(0);
-        playAndCompleteMatch(tournament.getId(), match.getId());
-        playedMatches.add(match);
-        for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
-            if (playedMatches.contains(matchDTO)) {
-                assertEquals(MatchState.COMPLETED, matchDTO.getState());
-            } else {
-                assertEquals(MatchState.NOT_PLAYING, matchDTO.getState());
-            }
-        }
-
-        assertEquals(0, getAvailableMatches(tournament.getId(), gameTableId2).size());
-
         for (MatchDTO matchDTO : getAllMatches(tournament.getId())) {
             assertEquals(MatchState.COMPLETED, matchDTO.getState());
         }
-
         tournament = patchTournament(tournament.getId());
         assertEquals(TournamentState.FINISHED, tournament.getState());
     }
