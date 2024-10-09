@@ -1,13 +1,11 @@
 package university.innopolis.tabletennis.tournamentmicroservice.entity;
 
 import jakarta.persistence.*;
-import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import university.innopolis.tabletennis.tournamentmicroservice.builderinterface.ITournamentBuilder;
-import university.innopolis.tabletennis.tournamentmicroservice.dto.PlayerDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.states.TournamentState;
 import university.innopolis.tabletennis.tournamentmicroservice.utils.RoundsCreator;
 

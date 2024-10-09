@@ -4,7 +4,6 @@ import university.innopolis.tabletennis.tournamentmicroservice.dto.PatchMatchDTO
 import university.innopolis.tabletennis.tournamentmicroservice.dto.PlayerDTO;
 import university.innopolis.tabletennis.tournamentmicroservice.dto.TournamentDTO;
 
-import javax.sound.midi.Patch;
 import java.util.List;
 import java.util.Map;
 
