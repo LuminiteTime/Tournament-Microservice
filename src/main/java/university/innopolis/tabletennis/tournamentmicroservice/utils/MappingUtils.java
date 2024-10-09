@@ -22,6 +22,10 @@ public class MappingUtils {
                         .toList())
                 .amountOfTables(entity.getTablesOfTournament().size())
                 .state(entity.getState())
+                .sortedBracketsPlayers(
+                        entity.getSortedBracketsPlayers() == null ?
+                        null :
+                        entity.getSortedBracketsPlayers().stream().map(MappingUtils::mapToPlayerDTO).toList())
                 .build();
     }
 

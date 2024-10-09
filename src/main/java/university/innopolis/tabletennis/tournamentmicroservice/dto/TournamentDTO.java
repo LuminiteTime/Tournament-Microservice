@@ -31,6 +31,8 @@ public class TournamentDTO {
 
     private TournamentState state;
 
+    private List<PlayerDTO> sortedBracketsPlayers;
+
     @Override
     public String toString() {
         return "TournamentDTO{" +
