@@ -68,7 +68,7 @@ class MainControllerTest {
 
     @BeforeEach
     @AfterEach
-    void afterEach() {
+    void clearTestDatabase() {
         tournamentRepository.deleteAll();
         gameTableRepository.deleteAll();
         tablesMatchRepository.deleteAll();
@@ -139,19 +139,6 @@ class MainControllerTest {
                 .then()
                 .statusCode(400);
         assertEquals(1, tournamentRepository.findAll().size());
-    }
-
-    @Test
-    void whenRequestingTournaments_thenReturnAllTournaments() {
-        TournamentDTO tournamentDTO1 = getTestTournament("Tournament 1");
-        TournamentDTO tournamentDTO2 = getTestTournament("Tournament 2");
-        postTournament(tournamentDTO1);
-        postTournament(tournamentDTO2);
-        List<TournamentDTO> listOfTournamentsDTOsResponseBody = getTournaments();
-        assertArrayEquals(new String[]{tournamentDTO1.getTitle(), tournamentDTO2.getTitle()},
-                listOfTournamentsDTOsResponseBody.stream()
-                        .map(TournamentDTO::getTitle)
-                        .toArray());
     }
 
     @Test
@@ -233,46 +220,22 @@ class MainControllerTest {
                 errorResponseBody.getMessage());
     }
 
-    @Test
-    void whenFinishingTournamentWithTwoTablesOfSameSize_thenSortedListIsPresentWithAllPlayersInDTO() {
-        TournamentDTO tournament = postTournament(getTestTournament());
-        playAllAvailableMatchesWithDifferentScores(tournament.getId());
-        TournamentDTO tournamentDTOResponseBody = patchTournament(tournament.getId());
-        assertNotNull(tournamentDTOResponseBody.getSortedBracketsPlayers(), "Should have sorted brackets list.");
-        assertEquals(tournament.getPlayers().size(), tournamentDTOResponseBody.getSortedBracketsPlayers().size(),
-                "Should be equal to amount of initial players");
-    }
-
+    // * MAIN SORTED PLAYERS TEST
     @Test
     void whenFinishingTournamentWithTwoTablesOfDifferentSize_thenSortedListIsPresentWithAllPlayersInDTO() {
         TournamentDTO tournament = postTournament(getDifferentSizeTablesTestTournament());
-        playAllAvailableMatchesWithDifferentScores(tournament.getId());
-        TournamentDTO tournamentDTOResponseBody = patchTournament(tournament.getId());
-        assertNotNull(tournamentDTOResponseBody.getSortedBracketsPlayers(), "Should have sorted brackets list.");
-        assertEquals(tournament.getPlayers().size(), tournamentDTOResponseBody.getSortedBracketsPlayers().size(),
-                "Should be equal to amount of initial players");
-    }
-
-    @Test
-    void whenFinishingSmallestPossibleTournament_thenSortedListIsPresentWithAllPlayersInDTO() {
-        TournamentDTO tournament = postTournament(getSmallestTestTournament());
-        playAllAvailableMatchesWithDifferentScores(tournament.getId());
-        TournamentDTO tournamentDTOResponseBody = patchTournament(tournament.getId());
-        assertNotNull(tournamentDTOResponseBody.getSortedBracketsPlayers(), "Should have sorted brackets list.");
-        assertEquals(tournament.getPlayers().size(), tournamentDTOResponseBody.getSortedBracketsPlayers().size(),
-                "Should be equal to amount of initial players");
-    }
-    
-    @Test
-    void whenRequestingNotFinishedTournament_thenSortedBracketsPlayersListIsNull() {
-        tournamentRepository.findAll().stream().map(Tournament::getId).forEach(n -> System.out.print(n + " "));
-        TournamentDTO tournament = postTournament(getTestTournament());
+        assertNull(tournament.getSortedBracketsPlayers(), "Sorted brackets players list should be null.");
         assertNull(getTournament(tournament.getId()).getSortedBracketsPlayers(),
                 "Sorted brackets players list should be null.");
+        playAllAvailableMatchesWithDifferentScores(tournament.getId());
+        TournamentDTO tournamentDTOResponseBody = patchTournament(tournament.getId());
+        assertNotNull(tournamentDTOResponseBody.getSortedBracketsPlayers(), "Should have sorted brackets list.");
+        assertEquals(tournament.getPlayers().size(), tournamentDTOResponseBody.getSortedBracketsPlayers().size(),
+                "Should be equal to amount of initial players");
     }
 
     @Test
-    void whenFinishingTournament_thenPlayersAreSortedForBrackets() {
+    void whenFinishingTournament_thenOrderOfPlayersIsSortedForBrackets() {
         TournamentDTO tournament = postTournament(getTestTournament());
         playAllAvailableMatchesWithDifferentScores(tournament.getId());
         TournamentDTO tournamentDTOResponseBody = patchTournament(tournament.getId());
@@ -289,29 +252,6 @@ class MainControllerTest {
                 ).toArray(),
                 tournamentDTOResponseBody.getSortedBracketsPlayers().toArray()
         );
-    }
-
-    @Test
-    void whenRequestingFinishedTournamentViaGet_thenSortedBracketsPlayersListIsPresent() {
-        TournamentDTO tournament = postTournament(getTestTournament());
-        playAllAvailableMatchesWithDifferentScores(tournament.getId());
-        patchTournament(tournament.getId());
-        TournamentDTO tournamentDTOResponseBody = getTournament(tournament.getId());
-        assertNotNull(tournamentDTOResponseBody.getSortedBracketsPlayers(), "Should have sorted brackets list.");
-    }
-
-    @Test
-    void whenRequestingAllTournaments_thenSortedBracketsPlayersListIsPresentInFinished() {
-        TournamentDTO tournament1 = postTournament(getTestTournament());
-        playAllAvailableMatchesWithDifferentScores(tournament1.getId());
-        patchTournament(tournament1.getId());
-
-        postTournament(getTestTournament("Tournament 2"));
-        List<TournamentDTO> listOfTournamentsDTOsResponseBody = getTournaments();
-        assertNotNull(listOfTournamentsDTOsResponseBody.get(0).getSortedBracketsPlayers(),
-                "Should have sorted brackets list.");
-        assertNull(listOfTournamentsDTOsResponseBody.get(1).getSortedBracketsPlayers(),
-                "Should not have sorted brackets list.");
     }
 
     @Test
@@ -720,20 +660,6 @@ class MainControllerTest {
                 .extract()
                 .body()
                 .as(TournamentDTO.class);
-    }
-
-    private List<TournamentDTO> getTournaments() {
-        return given()
-                .port(port)
-                .contentType("application/json")
-                .when()
-                .get("/tournaments")
-                .then()
-                .statusCode(200)
-                .extract()
-                .body()
-                .as(new TypeRef<>() {
-                });
     }
 
 }

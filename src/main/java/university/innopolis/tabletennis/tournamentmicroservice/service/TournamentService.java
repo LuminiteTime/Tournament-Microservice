@@ -26,15 +26,6 @@ public class TournamentService {
 
     private final TournamentRepository tournamentRepository;
 
-    public List<Tournament> retrieveAllTournaments() {
-        List<Tournament> tournaments = tournamentRepository.findAll();
-        for (Tournament tournament : tournaments) {
-            if (tournament.getState().equals(TournamentState.FINISHED))
-                tournament.setSortedBracketsPlayers(computeSortedPlayersForBrackets(tournament));
-        }
-        return tournaments;
-    }
-
     public Tournament retrieveTournament(Long tournamentId) {
         Tournament tournament = tournamentRepository.findById(tournamentId).orElseThrow(() ->
                 new TournamentNotFoundException(tournamentId));
@@ -111,13 +102,12 @@ public class TournamentService {
                 .toList();
     }
 
-    // TODO: Add comparing by score if players have the same amount of points.
     private List<Player> computeSortedPlayersForBrackets(Tournament tournament) {
-        log.info("Computing sorted list of players for brackets.");
+        log.debug("Computing sorted list of players for brackets.");
 
         List<List<Player>> sortedPlayersByGameTables = new ArrayList<>();
         for (GameTable gameTable : tournament.getTablesOfTournament()) {
-            log.info("Sorting players of game table with id: {}", gameTable.getId());
+            log.debug("Sorting players of game table with id: {}", gameTable.getId());
             sortedPlayersByGameTables.add(sortPlayersOfGameTableByPlayedGames(gameTable));
         }
 
@@ -127,12 +117,9 @@ public class TournamentService {
         for (int i = 0; i < tournament.getPlayers().size(); i++) {
             List<Player> sortedGameTablePlayers = sortedPlayersByGameTables.get(gameTableIndex);
             sortedPlayers.add(sortedGameTablePlayers.get(playerIndex));
-            if (gameTableIndex + 1 >= tournament.getTablesOfTournament().size()) {
-                gameTableIndex = 0;
-                playerIndex++;
-            } else {
-                gameTableIndex++;
-            }
+
+            playerIndex += (gameTableIndex + 1) >= tournament.getTablesOfTournament().size() ? 1 : 0;
+            gameTableIndex = (gameTableIndex + 1) % tournament.getTablesOfTournament().size();
         }
         return  sortedPlayers;
     }
@@ -152,7 +139,6 @@ public class TournamentService {
         for (Map.Entry<Player, Integer> entry : playerGamesScoreMap.entrySet()) {
             log.info("Player with id {} has score {}", entry.getKey().getId(), entry.getValue());
         }
-        log.info("===========================");
 
         Map<Integer, List<Player>> scorePlayersMap = playerGamesScoreMap.entrySet().stream()
                 .collect(Collectors.groupingBy(Map.Entry::getValue,
@@ -177,27 +163,7 @@ public class TournamentService {
                 Map<Player, Double> playersRatio = new HashMap<>();
                 for (int i = 0; i < playersWithTheScore.size(); i++) {
                     Player player = playersWithTheScore.get(i);
-                    int wins = 0;
-                    int loses = 0;
-                    for (int j = 0; j < playersWithTheScore.size(); j++) {
-                        if (i != j) {
-                            TablesMatch match = findMatchByTwoPlayers(gameTable, player, playersWithTheScore.get(j));
-                            if (match.getFirstPlayer().equals(player)) {
-                                if (match.getFirstPlayerScore() > match.getSecondPlayerScore()) {
-                                    wins++;
-                                } else {
-                                    loses++;
-                                }
-                            } else {
-                                if (match.getFirstPlayerScore() < match.getSecondPlayerScore()) {
-                                    wins++;
-                                } else {
-                                    loses++;
-                                }
-                            }
-                        }
-                    }
-                    playersRatio.put(player, (double) wins / loses);
+                    playersRatio.put(player, calculatePlayerRatio(player, playersWithTheScore, gameTable, i));
                 }
                 List<Player> sortedPlayersWithTheScore = playersRatio.entrySet().stream()
                         .sorted(Comparator.comparingDouble(Map.Entry::getValue))
@@ -208,6 +174,33 @@ public class TournamentService {
         }
 
         return sortedPlayers;
+    }
+
+    private static double calculatePlayerRatio(Player player,
+                                               List<Player> playersWithTheScore,
+                                               GameTable gameTable,
+                                               int playerIndex) {
+        int wins = 0;
+        int loses = 0;
+        for (int j = 0; j < playersWithTheScore.size(); j++) {
+            if (playerIndex != j) {
+                TablesMatch match = findMatchByTwoPlayers(gameTable, player, playersWithTheScore.get(j));
+                if (match.getFirstPlayer().equals(player)) {
+                    if (match.getFirstPlayerScore() > match.getSecondPlayerScore()) {
+                        wins++;
+                    } else {
+                        loses++;
+                    }
+                } else {
+                    if (match.getFirstPlayerScore() < match.getSecondPlayerScore()) {
+                        wins++;
+                    } else {
+                        loses++;
+                    }
+                }
+            }
+        }
+        return (double) wins / loses;
     }
 
     private static Map<Player, Integer> getPlayerGamesScoreMap(GameTable gameTable) {

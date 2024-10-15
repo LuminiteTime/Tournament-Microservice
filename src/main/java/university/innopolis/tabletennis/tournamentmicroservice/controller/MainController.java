@@ -41,14 +41,6 @@ public class MainController {
                 tournamentService.addTournament(tournamentDTO)), HttpStatus.CREATED);
     }
 
-    @GetMapping
-    public ResponseEntity<List<TournamentDTO>> getTournaments() {
-        log.info("Retrieving all tournaments");
-        return ResponseEntity.ok().body(tournamentService.retrieveAllTournaments().stream()
-                .map(MappingUtils::mapToTournamentDTO)
-                .toList());
-    }
-
     @GetMapping("/{tournamentId}")
     public ResponseEntity<TournamentDTO> getTournament(@PathVariable Long tournamentId) {
         log.info("Retrieving tournament with id: {}", tournamentId);
