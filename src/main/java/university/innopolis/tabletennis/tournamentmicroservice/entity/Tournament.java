@@ -35,6 +35,9 @@ public class Tournament {
 
     private LocalDate date;
 
+    @Transient
+    private List<Player> sortedBracketsPlayers;
+
     private Tournament(TournamentBuilder builder) {
         if (builder.desiredNumberOfTables > (builder.players.size() / 2)) {
             throw new IllegalArgumentException("Desired number of tables must be less than the number of players minus 1");

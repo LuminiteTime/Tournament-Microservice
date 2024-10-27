@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Entity
 @Getter
 @Setter
@@ -17,4 +19,16 @@ public class Player {
 
     private Long externalId;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Player player = (Player) o;
+        return Objects.equals(getId(), player.getId()) && Objects.equals(getExternalId(), player.getExternalId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getExternalId());
+    }
 }

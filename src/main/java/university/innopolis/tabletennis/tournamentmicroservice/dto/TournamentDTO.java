@@ -3,16 +3,14 @@ package university.innopolis.tabletennis.tournamentmicroservice.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import university.innopolis.tabletennis.tournamentmicroservice.states.TournamentState;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,6 +30,8 @@ public class TournamentDTO {
     private Integer amountOfTables;
 
     private TournamentState state;
+
+    private List<PlayerDTO> sortedBracketsPlayers;
 
     @Override
     public String toString() {

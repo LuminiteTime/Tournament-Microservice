@@ -3,11 +3,10 @@ package university.innopolis.tabletennis.tournamentmicroservice.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import university.innopolis.tabletennis.tournamentmicroservice.states.MatchState;
+
+import java.util.Objects;
 
 @Getter
 @Builder
@@ -46,5 +45,20 @@ public class MatchDTO {
                 ", secondPlayerScore=" + secondPlayerScore +
                 ", state=" + state +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MatchDTO matchDTO = (MatchDTO) o;
+        return Objects.equals(getId(), matchDTO.getId()) &&
+                Objects.equals(getFirstPlayerId(), matchDTO.getFirstPlayerId()) &&
+                Objects.equals(getSecondPlayerId(), matchDTO.getSecondPlayerId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getFirstPlayerId(), getSecondPlayerId());
     }
 }
