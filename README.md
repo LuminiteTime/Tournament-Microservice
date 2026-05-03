@@ -1,52 +1,22 @@
-# Table Tennis Tournament Microservice
+# Tournament Microservice
 
-This is a Java Spring Boot application that manages table tennis tournaments. It allows you to create tournaments, add players, manage matches, and retrieve tournament information.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Java](https://img.shields.io/badge/Java-17-437291?logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.3-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 
-## Features
-
-- Create a new tournament
-- Add players to a tournament
-- Retrieve all tournaments
-- Retrieve a specific tournament by ID
-- Retrieve all game tables of a specific tournament
-- Retrieve all matches of a specific tournament
-- Update the state of a tournament
-
-- Brackets (single elimination)
-  - Generate brackets for a tournament
-  - Retrieve a specific bracket by ID
-  - Retrieve all matches of a specific bracket
-  - Update the state of a bracket
+REST API for managing **table tennis tournaments**: players, matches, tournament lifecycle, and **single-elimination brackets**. Persistence uses **PostgreSQL** via Spring Data JPA. Interactive API docs are served with **springdoc-openapi** (Swagger UI).
 
 ## Prerequisites
 
-- Java 11 or higher
-- Maven
-- PostgreSQL
+- **JDK 17**
+- **Maven 3.8+**
+- **PostgreSQL** (local install or Docker)
 
-## How to Build
+Alternatively, run the stack with Docker Compose (PostgreSQL + application container); see [docker-compose.yaml](docker-compose.yaml).
 
-1. Clone the repository:
+## Configuration
 
-```bash
-git clone https://github.com/LuminiteTime/Tournament-Microservice.git
-```
-
-2. Navigate to the project directory:
-
-```bash
-cd Tournament-Microservice
-```
-
-3. Build the project using Maven:
-
-```bash
-mvn clean install
-```
-
-## How to Run
-
-1. Configure your PostgreSQL database detailes according to the `src/main/resources/application.properties` file.
+Default datasource settings live in `src/main/resources/application.properties`:
 
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/tournaments
@@ -54,16 +24,52 @@ spring.datasource.username=postgres
 spring.datasource.password=postgres
 ```
 
-2. Run the application:
+Adjust URLs and credentials for your environment before starting.
+
+## Build
+
+```bash
+git clone https://github.com/LuminiteTime/Tournament-Microservice.git
+cd Tournament-Microservice
+mvn clean verify
+```
+
+## Run (Maven)
+
+Ensure PostgreSQL is running and the database exists, then:
 
 ```bash
 mvn spring-boot:run
 ```
 
-## API Documentation
+The application listens on port **8080** by default.
 
-The API documentation is available at `/swagger` endpoint when the application is running.
+## Run (Docker Compose)
+
+From the repository root:
+
+```bash
+docker compose up -d --build
+```
+
+This starts PostgreSQL and the service with `spring.datasource.url` pointing at the `db` service.
+
+## API documentation
+
+With the app running, open **Swagger UI** at:
+
+```text
+http://localhost:8080/swagger
+```
+
+OpenAPI is backed by `src/main/resources/static/docs/swagger.yaml`.
+
+## Features (summary)
+
+- Create and list tournaments; fetch by ID; update tournament state  
+- Register players and query tournament game tables and matches  
+- Brackets: generate single-elimination brackets, fetch by ID, list matches, update bracket state  
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
